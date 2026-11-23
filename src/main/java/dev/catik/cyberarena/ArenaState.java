@@ -35,7 +35,7 @@ public final class ArenaState extends PersistentState {
     public ProfileView view(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         return new ProfileView(p.credits, p.reputation, p.dataShards, p.firewall, p.automation,
-            p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size());
+            p.stealth, p.extractor, p.miningRig, p.cpu, p.storage, p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size());
     }
 
     public boolean discoverNode(ServerPlayerEntity player, String nodeId) {
@@ -88,27 +88,59 @@ public final class ArenaState extends PersistentState {
             + " §7| §bFirewall " + d.firewall + " §7| §cYour trace was exposed.";
     }
 
+    public String breachSite(ServerPlayerEntity player, String site) {
+        PlayerProfile p = profile(player);
+        int difficulty = switch (site) { case "shop.arena" -> 1; case "news.arena" -> 2; case "grid.arena" -> 3; case "vault.arena" -> 4; case "labs.arena" -> 5; default -> -1; };
+        if (difficulty < 0) return "§cUnknown .arena target. Use SEEK first.";
+        if (p.completedContracts.contains("breach:" + site)) return "§eThis virtual data vault is already cleared.";
+        long now = player.getWorld().getTime();
+        if (now - p.lastSiteRaidTick < 400) return "§eNEX cooldown: " + ((400 - (now - p.lastSiteRaidTick) + 19) / 20) + "s.";
+        p.lastSiteRaidTick = now;
+        int chance = Math.max(10, Math.min(95, 78 + p.automation * 4 + p.stealth * 5 + p.extractor * 4 - difficulty * 12));
+        if (ThreadLocalRandom.current().nextInt(100) >= chance) { p.alertLevel = Math.min(5, p.alertLevel + 1); markDirty(); return "§cACCESS REJECTED | ALERT " + p.alertLevel + "/5. Upgrade STEALTH or AUTOM."; }
+        int shards = 1 + p.extractor / 2 + (difficulty >= 4 ? 1 : 0);
+        int credits = 12 + difficulty * 7;
+        if (p.dataShards + shards > 10 + p.storage * 10) return "§cDATA VAULT FULL. Sell shards with SELR or upgrade STORAGE.";
+        p.dataShards += shards; p.credits += credits; p.reputation += difficulty; p.completedContracts.add("breach:" + site); markDirty();
+        return "§aDATA EXTRACTED | §f" + site + " §b+" + shards + " shards §6+" + credits + " credits §d+" + difficulty + " reputation";
+    }
+
+    public String mine(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player); long now = player.getWorld().getTime();
+        if (now - p.lastMineTick < 1200) return "§eMINER BUSY. " + ((1200 - (now - p.lastMineTick) + 19) / 20) + "s remain.";
+        int capacity = 10 + p.storage * 10;
+        if (p.dataShards >= capacity) return "§cDATA VAULT FULL. Sell shards or upgrade STORAGE.";
+        p.lastMineTick = now; int made = Math.min(capacity - p.dataShards, 2 + p.miningRig * 2 + p.cpu);
+        p.dataShards += made; p.credits += made * (2 + p.miningRig); markDirty();
+        return "§aMINING CYCLE §b+" + made + " shards §6+" + (made * (2 + p.miningRig)) + " credits";
+    }
+
+    public String sellData(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player); if (p.dataShards == 0) return "§eNo data shards to sell.";
+        int amount = p.dataShards, payout = amount * 8; p.dataShards = 0; p.credits += payout; markDirty();
+        return "§aDATA EXCHANGE §b-" + amount + " shards §6+" + payout + " credits";
+    }
+
     public String upgrade(ServerPlayerEntity player, String type) {
         PlayerProfile p = profile(player);
+        int level = switch (type) {
+            case "firewall" -> p.firewall; case "autom", "automation" -> p.automation;
+            case "stealth" -> p.stealth; case "extract", "extractor" -> p.extractor;
+            case "miner", "mining" -> p.miningRig; case "cpu" -> p.cpu; case "storage" -> p.storage;
+            default -> -1;
+        };
+        if (level < 0) return "§cUPGR types: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE.";
+        if (level >= 5) return "§eModule already at maximum level 5.";
+        int cost = 35 + level * 45 + (type.equals("firewall") ? 15 : 0);
+        if (p.credits < cost) return "§cINSUFFICIENT CREDITS. Required: " + cost + ".";
+        p.credits -= cost;
         switch (type) {
-            case "firewall" -> {
-                int cost = 50 + p.firewall * 45;
-                if (p.firewall >= 5) return "§eFirewall is already at maximum level 5.";
-                if (p.credits < cost) return "§cNot enough credits. Required: " + cost + ". Earn credits from /arena contracts.";
-                p.credits -= cost; p.firewall++;
-                markDirty();
-                return "§aFirewall upgraded to level " + p.firewall + ".";
-            }
-            case "automation" -> {
-                int cost = 65 + p.automation * 55;
-                if (p.automation >= 5) return "§eAutomation is already at maximum level 5.";
-                if (p.credits < cost) return "§cNot enough credits. Required: " + cost + ".";
-                p.credits -= cost; p.automation++;
-                markDirty();
-                return "§aAttack automation upgraded to level " + p.automation + ". Raid success chance improves.";
-            }
-            default -> { return "§cUnknown upgrade. Use firewall or automation."; }
+            case "firewall" -> p.firewall++; case "autom", "automation" -> p.automation++;
+            case "stealth" -> p.stealth++; case "extract", "extractor" -> p.extractor++;
+            case "miner", "mining" -> p.miningRig++; case "cpu" -> p.cpu++; case "storage" -> p.storage++;
         }
+        markDirty();
+        return "§aMODULE INSTALLED §f" + type.toUpperCase() + " §eLEVEL " + (level + 1) + "/5 §6-" + cost + " credits";
     }
 
     public String siteEvent(ServerPlayerEntity player, String site) {
@@ -139,8 +171,8 @@ public final class ArenaState extends PersistentState {
             e.putUuid("uuid", uuid); e.putString("name", p.name);
             e.putInt("credits", p.credits); e.putInt("reputation", p.reputation);
             e.putInt("data_shards", p.dataShards); e.putInt("firewall", p.firewall);
-            e.putInt("automation", p.automation); e.putInt("alert", p.alertLevel);
-            e.putLong("last_raid", p.lastRaidTick);
+            e.putInt("automation", p.automation); e.putInt("stealth", p.stealth); e.putInt("extractor", p.extractor); e.putInt("miner", p.miningRig); e.putInt("cpu", p.cpu); e.putInt("storage", p.storage); e.putInt("alert", p.alertLevel);
+            e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             NbtList nodes = new NbtList();
             p.discoveredNodes.forEach(v -> { NbtCompound n = new NbtCompound(); n.putString("id", v); nodes.add(n); });
             e.put("nodes", nodes);
@@ -149,14 +181,14 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
-        nbt.putInt("schema_version", 2);
+        nbt.putInt("schema_version", 3);
         nbt.put("profiles", entries);
         return nbt;
     }
 
     private static ArenaState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         ArenaState state = new ArenaState();
-        if (nbt.getInt("schema_version") < 2) return state;
+        if (nbt.getInt("schema_version") < 3) return state;
         NbtList entries = nbt.getList("profiles", NbtCompound.COMPOUND_TYPE);
         for (int i = 0; i < entries.size(); i++) {
             NbtCompound e = entries.getCompound(i);
@@ -164,7 +196,7 @@ public final class ArenaState extends PersistentState {
             PlayerProfile p = new PlayerProfile(e.getString("name"));
             p.credits = Math.max(0, e.getInt("credits")); p.reputation = Math.max(0, e.getInt("reputation"));
             p.dataShards = Math.max(0, e.getInt("data_shards")); p.firewall = clamp(e.getInt("firewall"), 0, 5);
-            p.automation = clamp(e.getInt("automation"), 0, 5); p.alertLevel = clamp(e.getInt("alert"), 0, 5);
+            p.automation = clamp(e.getInt("automation"), 0, 5); p.stealth = clamp(e.getInt("stealth"), 0, 5); p.extractor = clamp(e.getInt("extractor"), 0, 5); p.miningRig = clamp(e.getInt("miner"), 0, 5); p.cpu = clamp(e.getInt("cpu"), 0, 5); p.storage = clamp(e.getInt("storage"), 0, 5); p.alertLevel = clamp(e.getInt("alert"), 0, 5); p.lastSiteRaidTick = e.getLong("last_site_raid"); p.lastMineTick = e.getLong("last_mine");
             p.lastRaidTick = e.getLong("last_raid");
             readSet(e.getList("nodes", NbtCompound.COMPOUND_TYPE), p.discoveredNodes);
             readSet(e.getList("jobs", NbtCompound.COMPOUND_TYPE), p.completedContracts);
@@ -183,8 +215,8 @@ public final class ArenaState extends PersistentState {
 
     private static final class PlayerProfile {
         private final String name;
-        private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, alertLevel = 0;
-        private long lastRaidTick = Long.MIN_VALUE / 2;
+        private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
+        private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000;
         private final Set<String> discoveredNodes = new HashSet<>();
         private final Set<String> completedContracts = new HashSet<>();
         private PlayerProfile(String name) { this.name = name; }
