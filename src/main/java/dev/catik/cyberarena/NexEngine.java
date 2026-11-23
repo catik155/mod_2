@@ -7,137 +7,250 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** NEX is a closed, fictional command language. It never performs external I/O. */
 public final class NexEngine {
-    private static final Map<String, String> NODES = Map.of(
-        "relay-01.arena", "PUBLIC RELAY",
-        "market-02.arena", "EXCHANGE TERMINAL",
-        "archive-03.arena", "DATA ARCHIVE"
+    private static final Map<String, String> NODES = Map.ofEntries(
+        Map.entry("relay-01.arena", "PUBLIC RELAY"), Map.entry("market-02.arena", "EXCHANGE TERMINAL"),
+        Map.entry("archive-03.arena", "DATA ARCHIVE"), Map.entry("north-04.arena", "NORTH DATA HUB"),
+        Map.entry("south-05.arena", "SOUTH DATA HUB"), Map.entry("civic-06.arena", "CIVIC SERVICES"),
+        Map.entry("orbit-07.arena", "ORBITAL SIMULATOR"), Map.entry("forge-08.arena", "INDUSTRIAL FORGE"),
+        Map.entry("med-09.arena", "MEDICAL RESEARCH"), Map.entry("ghost-10.arena", "ANONYMOUS RELAY")
     );
-    private static final Map<String, String> SITES = Map.of(
-        "shop.arena", "SHOP / EASY",
-        "news.arena", "NEWS / PUBLIC",
-        "grid.arena", "GRID / MEDIUM",
-        "vault.arena", "VAULT / HARD",
-        "labs.arena", "LABS / EXPERT"
+    private static final Map<String, String> SITES = Map.ofEntries(
+        Map.entry("shop.arena", "MARKET / TRADE / EASY"),
+        Map.entry("news.arena", "DAILY / MEDIA / PUBLIC"),
+        Map.entry("grid.arena", "GRID / ENERGY / MEDIUM"),
+        Map.entry("vault.arena", "VAULT / ARCHIVE / HARD"),
+        Map.entry("labs.arena", "LABS / RESEARCH / EXPERT"),
+        Map.entry("forum.arena", "FORUM / COMMUNITY / EASY"),
+        Map.entry("bank.arena", "BANK / FINANCE / HARD"),
+        Map.entry("metro.arena", "METRO / TRANSIT / MEDIUM"),
+        Map.entry("weather.arena", "SKYCAST / WEATHER / EASY"),
+        Map.entry("clinic.arena", "CLINIC / HEALTH DATA / MEDIUM"),
+        Map.entry("factory.arena", "FACTORIUM / INDUSTRY / HARD"),
+        Map.entry("museum.arena", "MUSEUM / CULTURE / EASY"),
+        Map.entry("uni.arena", "CAMPUS / EDUCATION / MEDIUM"),
+        Map.entry("port.arena", "HARBOR / LOGISTICS / MEDIUM"),
+        Map.entry("security.arena", "SENTINEL / DEFENSE / EXPERT"),
+        Map.entry("casino.arena", "LUCKY BYTE / ENTERTAINMENT / HARD"),
+        Map.entry("farm.arena", "GREENFIELD / AGRICULTURE / EASY"),
+        Map.entry("media.arena", "PIXEL PRESS / MEDIA / MEDIUM"),
+        Map.entry("space.arena", "STARLAB / SPACE / EXPERT"),
+        Map.entry("auction.arena", "BIDNET / AUCTIONS / HARD")
     );
-    private static final Map<String, List<String>> FILES = Map.of(
-        "shop.arena", List.of("catalog.idx", "offers.dat", "ledger.log"),
-        "news.arena", List.of("bulletins.txt", "dispatch.log", "public.key"),
-        "grid.arena", List.of("load.map", "relay.cfg", "grid.log"),
-        "vault.arena", List.of("records.enc", "ledger.bak", "access.log"),
-        "labs.arena", List.of("research.dat", "prototype.idx", "lab-notes.txt")
+    private static final Map<String, Integer> DIFFICULTY = Map.ofEntries(
+        Map.entry("shop.arena",1), Map.entry("news.arena",2), Map.entry("grid.arena",3),
+        Map.entry("vault.arena",4), Map.entry("labs.arena",5), Map.entry("forum.arena",1),
+        Map.entry("bank.arena",4), Map.entry("metro.arena",3), Map.entry("weather.arena",1),
+        Map.entry("clinic.arena",3), Map.entry("factory.arena",4), Map.entry("museum.arena",1),
+        Map.entry("uni.arena",2), Map.entry("port.arena",3), Map.entry("security.arena",5),
+        Map.entry("casino.arena",4), Map.entry("farm.arena",1), Map.entry("media.arena",2),
+        Map.entry("space.arena",5), Map.entry("auction.arena",4)
+    );
+    private static final Map<String, List<String>> FILES = Map.ofEntries(
+        Map.entry("shop.arena", List.of("catalog.idx","offers.dat","ledger.log")),
+        Map.entry("news.arena", List.of("bulletins.txt","dispatch.log","public.key")),
+        Map.entry("grid.arena", List.of("load.map","relay.cfg","grid.log")),
+        Map.entry("vault.arena", List.of("records.enc","ledger.bak","access.log")),
+        Map.entry("labs.arena", List.of("research.dat","prototype.idx","lab-notes.txt")),
+        Map.entry("forum.arena", List.of("threads.idx","members.db","rules.txt")),
+        Map.entry("bank.arena", List.of("rates.dat","accounts.enc","audit.log")),
+        Map.entry("metro.arena", List.of("timetable.dat","stations.map","signals.log")),
+        Map.entry("weather.arena", List.of("forecast.dat","climate.map","alerts.log")),
+        Map.entry("clinic.arena", List.of("research.idx","supply.dat","patient.enc")),
+        Map.entry("factory.arena", List.of("assembly.cfg","robotics.dat","shift.log")),
+        Map.entry("museum.arena", List.of("exhibits.idx","archive.dat","visitors.log")),
+        Map.entry("uni.arena", List.of("courses.idx","library.db","campus.map")),
+        Map.entry("port.arena", List.of("cargo.idx","berths.map","manifest.enc")),
+        Map.entry("security.arena", List.of("rules.cfg","sensors.map","incident.log")),
+        Map.entry("casino.arena", List.of("games.idx","payouts.dat","vault.enc")),
+        Map.entry("farm.arena", List.of("harvest.map","silos.dat","weather.log")),
+        Map.entry("media.arena", List.of("stories.idx","studio.cfg","broadcast.log")),
+        Map.entry("space.arena", List.of("telemetry.dat","orbit.map","mission.enc")),
+        Map.entry("auction.arena", List.of("lots.idx","bids.dat","settlement.log"))
+    );
+    private static final Map<String, List<String>> PORTS = Map.ofEntries(
+        Map.entry("shop.arena", List.of("021|WEB-GATE|OPEN|Public storefront","044|TRADE-VAULT|GUARDED|Offer records","071|OWNER-CORE|LOCKED|Owner controls","088|CACHE-NODE|OPEN|Public cache")),
+        Map.entry("news.arena", List.of("021|WEB-GATE|OPEN|News pages","032|FEED-CAST|OPEN|Bulletin feed","044|ARCHIVE|GUARDED|Dispatch archive","071|EDITOR-CORE|LOCKED|Editorial controls")),
+        Map.entry("grid.arena", List.of("021|GRID-VIEW|OPEN|Public grid status","044|RELAY-DATA|GUARDED|Relay telemetry","071|CONTROL-CORE|LOCKED|Grid control simulation","093|BACKUP-STORE|GUARDED|Backup snapshots")),
+        Map.entry("vault.arena", List.of("021|ENTRY-GATE|OPEN|Vault landing page","044|DATA-VAULT|GUARDED|Encrypted archive","071|ADMIN-CORE|LOCKED|Administrator console","099|COLD-STORE|LOCKED|Cold backup storage")),
+        Map.entry("labs.arena", List.of("021|LAB-PORTAL|OPEN|Research index","044|PROTOTYPE|GUARDED|Prototype manifests","071|DIRECTOR-CORE|LOCKED|Research control","099|SPECIMEN-VAULT|LOCKED|Protected research data")),
+        Map.entry("forum.arena", List.of("021|THREAD-GATE|OPEN|Public threads","032|CHAT-RELAY|OPEN|Community relay","044|MEMBER-DB|GUARDED|Member index")),
+        Map.entry("bank.arena", List.of("021|BANK-FRONT|OPEN|Public rates","044|LEDGER|GUARDED|Simulated ledger","071|TREASURY|LOCKED|Treasury console","099|COLD-VAULT|LOCKED|Backup vault")),
+        Map.entry("metro.arena", List.of("021|ROUTE-MAP|OPEN|Public route map","032|TIMETABLE|OPEN|Transit schedule","044|SIGNAL-BOX|GUARDED|Signal telemetry","071|TRAFFIC-CORE|LOCKED|Transit control")),
+        Map.entry("weather.arena", List.of("021|SKY-FEED|OPEN|Forecast feed","032|CLIMATE-MAP|OPEN|Climate map","044|ALERT-STORE|GUARDED|Weather alerts")),
+        Map.entry("clinic.arena", List.of("021|CARE-PORTAL|OPEN|Public clinic portal","044|SUPPLY-DB|GUARDED|Supply records","071|RESEARCH-CORE|LOCKED|Research console")),
+        Map.entry("factory.arena", List.of("021|FACTORY-VIEW|OPEN|Factory status","044|ROBOTICS|GUARDED|Robot telemetry","071|ASSEMBLY-CORE|LOCKED|Production control","099|BLUEPRINT-VAULT|LOCKED|Blueprint storage")),
+        Map.entry("museum.arena", List.of("021|EXHIBIT-GATE|OPEN|Exhibit catalog","032|AUDIO-GUIDE|OPEN|Public guide","044|ARCHIVE-BOX|GUARDED|Archive index")),
+        Map.entry("uni.arena", List.of("021|CAMPUS-WEB|OPEN|Campus portal","032|LIBRARY|OPEN|Library catalog","044|COURSE-DB|GUARDED|Course records","071|REGISTRAR|LOCKED|Registrar console")),
+        Map.entry("port.arena", List.of("021|HARBOR-MAP|OPEN|Public harbor map","044|CARGO-DB|GUARDED|Cargo manifests","071|BERTH-CORE|LOCKED|Berth control")),
+        Map.entry("security.arena", List.of("021|SENTINEL-INFO|OPEN|Public status","044|SENSOR-MESH|GUARDED|Sensor simulation","071|DEFENSE-CORE|LOCKED|Defense controls","099|HONEY-NODE|LOCKED|Decoy service")),
+        Map.entry("casino.arena", List.of("021|GAME-LOBBY|OPEN|Public game lobby","044|PAYOUT-BOX|GUARDED|Payout records","071|HOUSE-CORE|LOCKED|House controls")),
+        Map.entry("farm.arena", List.of("021|FIELD-REPORT|OPEN|Farm status","032|WEATHER-FEED|OPEN|Weather feed","044|SILO-DB|GUARDED|Storage records")),
+        Map.entry("media.arena", List.of("021|PRESS-ROOM|OPEN|Public stories","032|BROADCAST|OPEN|Broadcast feed","044|STUDIO-DB|GUARDED|Studio schedule")),
+        Map.entry("space.arena", List.of("021|MISSION-BOARD|OPEN|Mission board","044|TELEMETRY|GUARDED|Flight telemetry","071|FLIGHT-CORE|LOCKED|Mission control","099|ORBIT-VAULT|LOCKED|Mission archive")),
+        Map.entry("auction.arena", List.of("021|BID-BOARD|OPEN|Auction lots","044|BID-LEDGER|GUARDED|Bid records","071|SETTLEMENT|LOCKED|Settlement control"))
     );
 
     private NexEngine() {}
     public static String execute(String raw) { return execute(raw, null); }
 
     public static String execute(String raw, ServerPlayerEntity player) {
-        if (raw == null || raw.isBlank()) return "§cNEX: empty instruction. Type MANU.";
+        if (raw == null || raw.isBlank()) return error("EMPTY", "Enter an instruction. Type MANU.");
         String[] parts = raw.trim().split("\\s+", 2);
         String cmd = parts[0].toUpperCase(Locale.ROOT);
-        String arg = parts.length > 1 ? parts[1].trim().toLowerCase(Locale.ROOT) : "";
+        String arg = parts.length > 1 ? unquote(parts[1].trim().toLowerCase(Locale.ROOT)) : "";
         return switch (cmd) {
-            case "MANU", "HELP" -> "§bNEX // MANUAL\n§fSEEK <word> §7- search fictional web index\n§fPORTA <site.arena> §7- inspect simulated services\n§fFILES <site.arena> §7- list fictional records\n§fREAD <site.arena> <file> §7- inspect a public record\n§fCRACK <site.arena> §7- extract virtual data\n§fMINE §7- run a virtual mining cycle\n§fUPGR <module> §7- buy an upgrade\n§fSELR §7- exchange data shards\n§fFLOW <a; b; c> §7- run up to 6 safe NEX instructions\n§fNODR / SCAN / STAT / CONTRACTS / RUN";
-            case "STAT", "STATUS" -> "§aNEX CORE ONLINE §7| §fFictional .arena network §7| §fExternal I/O: disabled";
-            case "NODR", "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
+            case "MANU", "HELP", "?" -> manual();
+            case "STAT", "STATUS" -> "§aNEX CORE 2.1 ONLINE §7| §fARENA-SIM isolated §7| §fExternal I/O: DISABLED";
+            case "NODR", "NODES", "MAPA" -> nodes();
             case "SEEK" -> seek(arg);
-            case "PORTA" -> ports(arg);
-            case "FILES" -> files(arg);
-            case "READ" -> readFile(arg);
-            case "CRACK" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).breachSite(player, arg);
-            case "MINE" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).mine(player);
-            case "UPGR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).upgrade(player, arg);
-            case "SELR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).sellData(player);
+            case "WHO", "WHOIS" -> who(arg);
+            case "PING" -> ping(arg);
+            case "PORTA", "PORTS" -> ports(arg);
+            case "FILES", "LS" -> files(arg);
+            case "READ", "VIEW" -> readFile(arg);
+            case "CRACK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).breachSite(player, arg);
+            case "MINE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).mine(player);
+            case "UPGR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).upgrade(player, arg);
+            case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
-            case "CONTRACTS" -> "§bSTARTER CONTRACTS: §fsite-audit (40c), patch-rush (55c), data-recovery (70c)";
-            case "RUN" -> player == null ? "§cPlayer context required." : ArenaState.get(player.getServer()).completeContract(player, arg);
-            case "SITE" -> player == null ? "§cPlayer context required." : ArenaState.get(player.getServer()).siteEvent(player, arg);
-            default -> "§cNEX ERROR: unknown instruction '" + parts[0] + "'. Type MANU.";
+            case "CONTRACTS", "JOBS" -> "§bNEX JOB BOARD\n§fsite-audit (40c) §7| patch-rush (55c) §7| data-recovery (70c)";
+            case "RUN" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).completeContract(player, arg);
+            case "SITE" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).siteEvent(player, arg);
+            default -> error("UNKNOWN_OPCODE", "Unknown instruction '" + parts[0] + "'. Type MANU.");
         };
     }
 
+    private static String manual() {
+        return "§bNEX // OPERATOR MANUAL 2.1\n"
+            + "§fSEEK <word> §7search directory | WHO <site> §7host profile | PING <site> §7simulated response\n"
+            + "§fPORTA <site> [slot] §7service slots | FILES <site> §7file index | READ <site> <file> §7record info\n"
+            + "§fCRACK <site> §7game data extraction | SCAN <node> §7map node | NODR §7node map\n"
+            + "§fMINE §7virtual mining | SELR §7exchange shards | UPGR <module> §7buy module\n"
+            + "§fCONTRACTS §7job board | RUN <id> §7complete job | FLOW <a; b> §7safe routine (6 steps max)\n"
+            + "§7Aliases: HELP=?, PORTS=PORTA, LS=FILES, VIEW=READ, JOBS=CONTRACTS.\n"
+            + "§7Syntax: OPCODE argument. Quotes are optional. Everything is fictional game data.";
+    }
+
+    private static String error(String code, String message) { return "§cNEX/" + code + " §7| §f" + message; }
+    private static String unquote(String value) {
+        if (value.length() >= 2 && ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))))
+            return value.substring(1, value.length() - 1);
+        return value;
+    }
+
     private static String flow(String script, ServerPlayerEntity player) {
-        if (player == null) return "§cFLOW requires an operator session.";
-        if (script.isBlank()) return "§cFLOW requires instructions separated by semicolons.";
-        if (script.length() > 240) return "§cFLOW limit: 240 characters.";
+        if (player == null) return error("NO_OPERATOR", "FLOW requires an operator session.");
+        if (script.isBlank()) return error("FLOW_SYNTAX", "Use FLOW opcode; opcode; opcode.");
+        if (script.length() > 240) return error("FLOW_LIMIT", "Routine limit is 240 characters.");
         String[] steps = script.split(";", -1);
-        if (steps.length > 6) return "§cFLOW limit: 6 instructions per routine.";
+        if (steps.length > 6) return error("FLOW_LIMIT", "Maximum 6 instructions per routine.");
         StringBuilder result = new StringBuilder("§bNEX FLOW // ").append(steps.length).append(" STEPS");
-        Set<String> allowed = Set.of("SEEK", "PORTA", "FILES", "READ", "CRACK", "MINE", "UPGR", "SELR", "SCAN", "STAT", "NODR", "CONTRACTS");
+        Set<String> allowed = Set.of("SEEK","WHO","PING","PORTA","PORTS","FILES","LS","READ","VIEW","CRACK","MINE","UPGR","SELR","SCAN","STAT","NODR","MAPA","CONTRACTS","JOBS");
         for (int i = 0; i < steps.length; i++) {
             String step = steps[i].trim();
-            if (step.isEmpty()) return "§cFLOW stopped: step " + (i + 1) + " is empty.";
+            if (step.isEmpty()) return error("FLOW_SYNTAX", "Step " + (i + 1) + " is empty.");
             String opcode = step.split("\\s+", 2)[0].toUpperCase(Locale.ROOT);
-            if (!allowed.contains(opcode)) return "§cFLOW stopped: " + opcode + " is not permitted in routines.";
+            if (!allowed.contains(opcode)) return error("FLOW_BLOCKED", opcode + " is not permitted in routines.");
             String output = execute(step, player);
             result.append("\n§7[").append(i + 1).append("] §f").append(output);
-            if (output.startsWith("§c") || output.startsWith("§e")) {
-                result.append("\n§eFLOW halted after step ").append(i + 1).append(".");
+            if (output.startsWith("§c")) {
+                result.append("\n§eFLOW HALTED at step ").append(i + 1).append(".");
                 break;
             }
         }
         return result.toString();
     }
 
-    private static String seek(String query) {
-        if (query.isBlank()) return "§cSEEK requires a search word.";
-        String result = SITES.entrySet().stream()
-            .filter(e -> e.getKey().contains(query) || e.getValue().toLowerCase(Locale.ROOT).contains(query))
-            .map(e -> e.getKey() + " §7- " + e.getValue())
-            .collect(Collectors.joining("\n§f"));
-        return result.isEmpty() ? "§eNo .arena sites found." : "§bNEX WEB INDEX\n§f" + result;
+    private static String nodes() {
+        return "§bARENA NODE MAP §7| §f" + NODES.size() + " virtual nodes\n§f"
+            + NODES.entrySet().stream().map(e -> e.getKey() + " §7- " + e.getValue()).collect(Collectors.joining("\n§f"));
     }
 
-    private static String ports(String site) {
-        if (!SITES.containsKey(site)) return "§cUnknown fictional host. Use SEEK first.";
-        return "§bPORTA REPORT §7| §f" + site
-            + "\n§aPORT 021 §7- WEB-GATE / OPEN"
-            + "\n§ePORT 044 §7- DATA-VAULT / GUARDED"
-            + "\n§cPORT 071 §7- ADMIN-CORE / LOCKED"
-            + "\n§7Fictional game service slots only; no real network access.";
+    private static String seek(String query) {
+        if (query.isBlank()) return error("SEEK_SYNTAX", "Enter a search word.");
+        String result = SITES.entrySet().stream()
+            .filter(e -> e.getKey().contains(query) || e.getValue().toLowerCase(Locale.ROOT).contains(query))
+            .sorted(Map.Entry.comparingByKey())
+            .map(e -> e.getKey() + " §7- " + e.getValue())
+            .collect(Collectors.joining("\n§f"));
+        return result.isEmpty() ? "§eNEX/NO_MATCH §7| No .arena entries found." : "§bNEX WEB INDEX §7| §f" + SITES.size() + " total sites\n§f" + result;
+    }
+
+    private static String who(String site) {
+        if (!SITES.containsKey(site)) return error("NO_HOST", "Unknown host. Use SEEK.");
+        return "§bHOST PROFILE §7| §f" + site + "\n§fCLASS: " + SITES.get(site)
+            + "\n§fSIMULATED SLOTS: " + PORTS.get(site).size() + "\n§fRECORDS: " + FILES.get(site).size()
+            + "\n§7Host identity exists only in the Cyber Arena simulation.";
+    }
+
+    private static String ping(String site) {
+        if (!SITES.containsKey(site)) return error("NO_HOST", "Unknown host. Use SEEK.");
+        int latency = 18 + Math.floorMod(site.hashCode(), 83);
+        return "§aARENA PING §7| §f" + site + " §7| §f" + latency + " ms §7| §aSIMULATED RESPONSE";
+    }
+
+    private static String ports(String args) {
+        String[] parts = args.split("\\s+", 2);
+        String site = parts[0];
+        List<String> entries = PORTS.get(site);
+        if (entries == null) return error("NO_HOST", "Unknown host. Use SEEK.");
+        if (parts.length == 2) {
+            String wanted = parts[1];
+            return entries.stream().filter(p -> p.startsWith(wanted + "|") || p.startsWith(String.format("%03d|", parsePort(wanted))))
+                .findFirst().map(p -> "§bSERVICE SLOT §7| §f" + formatPort(p))
+                .orElseGet(() -> error("NO_SLOT", "This fictional slot is not registered on that host."));
+        }
+        return "§bPORTA REPORT §7| §f" + site + " §7| §f" + entries.size() + " service slots\n§f"
+            + entries.stream().map(NexEngine::formatPort).collect(Collectors.joining("\n§f"))
+            + "\n§7Slot numbers are fictional Minecraft services, not real TCP/UDP ports.";
+    }
+
+    private static int parsePort(String value) {
+        try { return Integer.parseInt(value); } catch (NumberFormatException ignored) { return -1; }
+    }
+    private static String formatPort(String entry) {
+        String[] p = entry.split("\\|", 4);
+        return "§e" + p[0] + " §f" + p[1] + " §7/ §f" + p[2] + " §8- " + p[3];
     }
 
     private static String files(String site) {
         List<String> entries = FILES.get(site);
-        if (entries == null) return "§cUnknown fictional host. Use SEEK first.";
-        return "§bNEX FILE INDEX §7| §f" + site + "\n§f" + String.join("\n§f", entries)
-            + "\n§7Use READ " + site + " <file> to inspect a record.";
+        if (entries == null) return error("NO_HOST", "Unknown host. Use SEEK.");
+        return "§bNEX FILE INDEX §7| §f" + site + " §7| §f" + entries.size() + " records\n§f"
+            + String.join("\n§f", entries) + "\n§7Use READ " + site + " <file>.";
     }
 
     private static String readFile(String args) {
         String[] parts = args.split("\\s+", 2);
-        if (parts.length != 2) return "§cREAD syntax: READ <site.arena> <file>";
+        if (parts.length != 2) return error("READ_SYNTAX", "Use READ <site.arena> <file>.");
         List<String> entries = FILES.get(parts[0]);
-        if (entries == null || !entries.contains(parts[1])) return "§cRecord not found in the fictional file index.";
-        String description = switch (parts[1]) {
+        if (entries == null || !entries.contains(parts[1])) return error("NO_RECORD", "Record is not listed on this host.");
+        String file = parts[1];
+        String description = switch (file) {
             case "catalog.idx" -> "Public catalog index: 24 virtual product entries.";
-            case "offers.dat" -> "Public offers: rotating in-game contract hints and market values.";
-            case "ledger.log" -> "Public ledger snapshot: simulated exchange activity.";
-            case "bulletins.txt" -> "Public bulletin archive: three recent fictional network notices.";
-            case "dispatch.log" -> "Relay dispatch log: simulated message routing events.";
-            case "public.key" -> "Public verification key fingerprint for the Arena Daily service.";
-            case "load.map" -> "Grid load map: fictional district demand and supply values.";
-            case "relay.cfg" -> "Relay configuration summary: three simulated service endpoints.";
-            case "grid.log" -> "Grid event log: recent virtual load-balancing events.";
-            case "records.enc" -> "Encrypted archive manifest. Payload requires a successful CRACK operation.";
-            case "ledger.bak" -> "Protected backup ledger. Payload requires a successful CRACK operation.";
-            case "access.log" -> "Vault access log: fictional authentication events.";
-            case "research.dat" -> "Research manifest: experimental modules and lab contracts.";
-            case "prototype.idx" -> "Prototype index: three fictional device blueprints.";
-            case "lab-notes.txt" -> "Research notes: hints for advanced in-game contracts.";
-            default -> "Fictional record metadata.";
+            case "offers.dat" -> "Public offers and rotating game contract hints.";
+            case "ledger.log" -> "Public simulated exchange activity.";
+            case "bulletins.txt" -> "Public bulletin archive and fictional network notices.";
+            case "dispatch.log" -> "Simulated message routing events.";
+            case "public.key" -> "Public verification fingerprint for the service.";
+            case "load.map" -> "Fictional district demand and supply values.";
+            case "relay.cfg" -> "Three simulated relay service endpoints.";
+            case "grid.log" -> "Virtual load-balancing events.";
+            case "records.enc", "ledger.bak", "patient.enc", "manifest.enc", "accounts.enc", "prototype.idx", "specimen.enc", "mission.enc", "orbit.map", "vault.enc" -> "Protected record manifest. Payload requires an appropriate in-game contract or progression unlock.";
+            default -> "Fictional public metadata record. No real personal data is stored.";
         };
-        return "§bNEX RECORD §7| §f" + parts[0] + "/" + parts[1] + "\n§f" + description
-            + "\n§7Read-only metadata. Protected payloads are only obtained through game progression.";
+        return "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
     }
 
     private static String scan(String id, ServerPlayerEntity player) {
         String type = NODES.get(id);
-        if (type == null) return "§cNode not found in the fictional .arena network.";
+        if (type == null) return error("NO_NODE", "Node not found. Use NODR.");
         if (player == null) return "§aSCAN COMPLETE §7| §f" + id + " §7| §f" + type;
         boolean fresh = ArenaState.get(player.getServer()).discoverNode(player, id);
         return "§aSCAN COMPLETE §7| §f" + id + " §7| §f" + type
-            + (fresh ? "\n§d+1 reputation for mapping the simulated network." : "\n§7Already mapped.");
+            + (fresh ? "\n§d+1 reputation for mapping this simulated node." : "\n§7Already mapped.");
     }
 }
