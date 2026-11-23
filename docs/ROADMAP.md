@@ -8,17 +8,18 @@
 ## NEX workstation
 - [x] NEX pseudo-language commands and manual
 - [x] Client workstation screen, opened with K
-- [x] NEX command field and quick-action buttons
-- [x] Fictional .arena search index (SEEK)
-- [x] Simulated service-port directory (PORTA)
-- [x] Virtual data extraction, mining and data exchange
-- [ ] Full multi-page browser with navigation, bookmarks, history and target detail pages
-- [ ] In-game file manager and visual port/service panels
+- [x] Separate Browser, NEX Terminal and Automation tabs
+- [x] Searchable fictional .arena site directory with per-site actions
+- [x] Simulated service-port reports and virtual data extraction
+- [x] NEX FLOW routines with semicolon-separated, server-validated steps
+- [ ] Full multi-page site pages with navigation, bookmarks and history
+- [ ] In-game file manager and visual service detail panels
 
 ## Progression and automation
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
 - [x] Credits, data shards, extraction rewards and cooldowns
-- [ ] NEX script editor with saved routines, triggers and repeat schedules
+- [x] Safe NEX routine runner (up to 6 whitelisted instructions per run)
+- [ ] Saved routines, triggers and repeat schedules
 - [ ] Automation presets and defensive response policies
 - [ ] Expanded skill tree and module prerequisites
 
