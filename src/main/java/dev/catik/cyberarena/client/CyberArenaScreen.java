@@ -120,7 +120,7 @@ public final class CyberArenaScreen extends Screen {
         for (int i = 0; i < Math.min(5, sites.size()); i++) {
             String site = sites.get(i);
             int idx = siteIndex(site);
-            int y = rowY + i * 35;
+            int y = rowY + (i - offset) * 35;
             contextlessSiteRow(left, panelWidth, y, site, idx);
         }
         if (sites.isEmpty()) {
