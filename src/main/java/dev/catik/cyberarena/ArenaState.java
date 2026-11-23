@@ -68,7 +68,7 @@ public final class ArenaState extends PersistentState {
         PlayerProfile d = profile(target);
         if (now - a.lastRaidTick < 1200) return "§eAttack automation is cooling down. Wait " + ((1200 - (now - a.lastRaidTick) + 19) / 20) + "s.";
         a.lastRaidTick = now;
-        int chance = Math.max(10, Math.min(90, 65 + a.automation * 8 - d.firewall * 12));
+        int chance = Math.max(8, Math.min(92, 60 + a.automation * 5 + a.stealth * 4 + a.extractor * 3 - d.firewall * 12));
         boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
         if (success) {
             int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
@@ -160,8 +160,7 @@ public final class ArenaState extends PersistentState {
         return "§aSITE INCIDENT RESOLVED §7| §f" + site + " §7| §6+" + reward + " credits";
     }
 
-    public record ProfileView(int credits, int reputation, int dataShards, int firewall,
-                              int automation, int alertLevel, int completedContracts, int discoveredNodes) {}
+    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes) {}
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
