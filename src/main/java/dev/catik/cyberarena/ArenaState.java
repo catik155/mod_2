@@ -35,7 +35,7 @@ public final class ArenaState extends PersistentState {
     public ProfileView view(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         return new ProfileView(p.credits, p.reputation, p.dataShards, p.firewall, p.automation,
-            p.completedContracts.size(), p.discoveredNodes.size());
+            p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size());
     }
 
     public boolean discoverNode(ServerPlayerEntity player, String nodeId) {
@@ -129,7 +129,7 @@ public final class ArenaState extends PersistentState {
     }
 
     public record ProfileView(int credits, int reputation, int dataShards, int firewall,
-                              int automation, int completedContracts, int discoveredNodes) {}
+                              int automation, int alertLevel, int completedContracts, int discoveredNodes) {}
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
