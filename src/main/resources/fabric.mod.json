@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "cyber_arena",
+  "version": "${version}",
+  "name": "Cyber Arena",
+  "description": "A fictional multiplayer cyber-security competition inside Minecraft.",
+  "authors": ["Catik"],
+  "contact": {
+    "sources": "https://github.com/catik155/mod_2"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.catik.cyberarena.CyberArena"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
