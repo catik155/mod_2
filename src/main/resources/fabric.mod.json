@@ -4,7 +4,9 @@
   "version": "${version}",
   "name": "Cyber Arena",
   "description": "A fictional multiplayer cyber-security competition inside Minecraft.",
-  "authors": ["Catik"],
+  "authors": [
+    "Catik"
+  ],
   "contact": {
     "sources": "https://github.com/catik155/mod_2"
   },
@@ -13,6 +15,9 @@
   "entrypoints": {
     "main": [
       "dev.catik.cyberarena.CyberArena"
+    ],
+    "client": [
+      "dev.catik.cyberarena.CyberArenaClient"
     ]
   },
   "depends": {
