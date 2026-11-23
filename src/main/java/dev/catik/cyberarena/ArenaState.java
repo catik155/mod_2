@@ -149,12 +149,14 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
+        nbt.putInt("schema_version", 2);
         nbt.put("profiles", entries);
         return nbt;
     }
 
     private static ArenaState fromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         ArenaState state = new ArenaState();
+        if (nbt.getInt("schema_version") < 2) return state;
         NbtList entries = nbt.getList("profiles", NbtCompound.COMPOUND_TYPE);
         for (int i = 0; i < entries.size(); i++) {
             NbtCompound e = entries.getCompound(i);
