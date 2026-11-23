@@ -1,7 +1,6 @@
 package dev.catik.cyberarena;
 
 import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.util.Locale;
 import java.util.Map;
 
@@ -11,56 +10,32 @@ public final class NexEngine {
         "market-02.arena", "EXCHANGE TERMINAL",
         "archive-03.arena", "DATA ARCHIVE"
     );
+    private NexEngine() {}
+    public static String execute(String raw) { return execute(raw, null); }
 
-    private NexEngine() {
-    }
-
-    public static String execute(String rawInstruction) {
-        return execute(rawInstruction, null);
-    }
-
-    public static String execute(String rawInstruction, ServerPlayerEntity player) {
-        if (rawInstruction == null || rawInstruction.isBlank()) {
-            return "§cNEX: empty instruction. Type HELP.";
-        }
-
-        String[] parts = rawInstruction.trim().split("\\s+", 2);
-        String command = parts[0].toUpperCase(Locale.ROOT);
-        String argument = parts.length > 1 ? parts[1].trim().toLowerCase(Locale.ROOT) : "";
-
-        return switch (command) {
-            case "HELP" -> "§bNEX instruction set:\n§fHELP §7- show commands\n§fSTATUS §7- runtime status\n§fNODES §7- list virtual nodes\n§fSCAN <node.arena> §7- inspect and discover a simulated node\n§fCONNECT <node.arena> §7- open a simulated session";
-            case "STATUS" -> "§aNEX RUNTIME READY §7| §fSandbox: active §7| §fExternal I/O: blocked";
-            case "NODES" -> "§bKNOWN NODES: §f" + String.join(", ", NODES.keySet());
-            case "SCAN" -> scan(argument, player);
-            case "CONNECT" -> connect(argument);
-            default -> "§cNEX ERROR: unknown instruction '" + parts[0] + "'. Type HELP.";
+    public static String execute(String raw, ServerPlayerEntity player) {
+        if (raw == null || raw.isBlank()) return "§cNEX: empty instruction. Type HELP.";
+        String[] parts = raw.trim().split("\\s+", 2);
+        String cmd = parts[0].toUpperCase(Locale.ROOT);
+        String arg = parts.length > 1 ? parts[1].trim().toLowerCase(Locale.ROOT) : "";
+        return switch (cmd) {
+            case "HELP" -> "§bNEX COMMANDS\n§fHELP §7| STATUS | NODES\n§fSCAN <node.arena> §7- inspect a simulated node\n§fCONTRACTS §7- list starter jobs\n§fRUN <contract> §7- complete a simulated site task\n§fSITE <site.arena> §7- resolve a fictional site incident";
+            case "STATUS" -> "§aNEX CORE ONLINE §7| §fSandbox: active §7| §fExternal I/O: disabled";
+            case "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
+            case "SCAN" -> scan(arg, player);
+            case "CONTRACTS" -> "§bSTARTER CONTRACTS: §fsite-audit (40c), patch-rush (55c), data-recovery (70c)";
+            case "RUN" -> player == null ? "§cPlayer context required." : ArenaState.get(player.getServer()).completeContract(player, arg);
+            case "SITE" -> player == null ? "§cPlayer context required." : ArenaState.get(player.getServer()).siteEvent(player, arg);
+            default -> "§cNEX ERROR: unknown command '" + parts[0] + "'. Type HELP.";
         };
     }
 
-    private static String scan(String nodeId, ServerPlayerEntity player) {
-        String nodeType = NODES.get(nodeId);
-        if (nodeType == null) {
-            return "§cSCAN FAILED: node not found in the fictional .arena network.";
-        }
-
-        String result = "§aSCAN COMPLETE §7| §f" + nodeId + " §7| §fTYPE: " + nodeType + " §7| §fRISK: LOW";
-        if (player == null) {
-            return result;
-        }
-
-        boolean firstDiscovery = ArenaState.get(player.getServer()).discoverNode(player, nodeId);
-        if (firstDiscovery) {
-            return result + "\n§6FIRST DISCOVERY: +25 credits, +5 reputation.";
-        }
-        return result + "\n§7Node already recorded in your profile. No repeat reward.";
-    }
-
-    private static String connect(String nodeId) {
-        String nodeType = NODES.get(nodeId);
-        if (nodeType == null) {
-            return "§cCONNECT FAILED: unknown virtual node.";
-        }
-        return "§aSIMULATED SESSION OPEN §7| §f" + nodeId + " §7| §f" + nodeType + "\n§7No real network connection was made.";
+    private static String scan(String id, ServerPlayerEntity player) {
+        String type = NODES.get(id);
+        if (type == null) return "§cNode not found in the fictional .arena network.";
+        if (player == null) return "§aSCAN COMPLETE §7| §f" + id + " §7| §f" + type;
+        boolean fresh = ArenaState.get(player.getServer()).discoverNode(player, id);
+        return "§aSCAN COMPLETE §7| §f" + id + " §7| §f" + type
+            + (fresh ? "\n§d+1 reputation for mapping the simulated network." : "\n§7Already mapped.");
     }
 }
