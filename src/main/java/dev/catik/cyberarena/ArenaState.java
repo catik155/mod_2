@@ -90,7 +90,7 @@ public final class ArenaState extends PersistentState {
 
     public String breachSite(ServerPlayerEntity player, String site) {
         PlayerProfile p = profile(player);
-        int difficulty = switch (site) { case "shop.arena" -> 1; case "news.arena" -> 2; case "grid.arena" -> 3; case "vault.arena" -> 4; case "labs.arena" -> 5; default -> -1; };
+        int difficulty = switch (site) { case "shop.arena", "forum.arena", "weather.arena", "museum.arena", "farm.arena" -> 1; case "news.arena", "uni.arena", "media.arena" -> 2; case "grid.arena", "metro.arena", "clinic.arena", "port.arena" -> 3; case "vault.arena", "bank.arena", "factory.arena", "casino.arena", "auction.arena" -> 4; case "labs.arena", "security.arena", "space.arena" -> 5; default -> -1; };
         if (difficulty < 0) return "§cUnknown .arena target. Use SEEK first.";
         if (p.completedContracts.contains("breach:" + site)) return "§eThis virtual data vault is already cleared.";
         long now = player.getWorld().getTime();
