@@ -1,5 +1,7 @@
 package dev.catik.cyberarena;
 
+import net.minecraft.server.network.ServerPlayerEntity;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -14,6 +16,10 @@ public final class NexEngine {
     }
 
     public static String execute(String rawInstruction) {
+        return execute(rawInstruction, null);
+    }
+
+    public static String execute(String rawInstruction, ServerPlayerEntity player) {
         if (rawInstruction == null || rawInstruction.isBlank()) {
             return "§cNEX: empty instruction. Type HELP.";
         }
@@ -23,21 +29,31 @@ public final class NexEngine {
         String argument = parts.length > 1 ? parts[1].trim().toLowerCase(Locale.ROOT) : "";
 
         return switch (command) {
-            case "HELP" -> "§bNEX instruction set:\n§fHELP §7- show commands\n§fSTATUS §7- runtime status\n§fNODES §7- list virtual nodes\n§fSCAN <node.arena> §7- inspect a simulated node\n§fCONNECT <node.arena> §7- open a simulated session";
+            case "HELP" -> "§bNEX instruction set:\n§fHELP §7- show commands\n§fSTATUS §7- runtime status\n§fNODES §7- list virtual nodes\n§fSCAN <node.arena> §7- inspect and discover a simulated node\n§fCONNECT <node.arena> §7- open a simulated session";
             case "STATUS" -> "§aNEX RUNTIME READY §7| §fSandbox: active §7| §fExternal I/O: blocked";
             case "NODES" -> "§bKNOWN NODES: §f" + String.join(", ", NODES.keySet());
-            case "SCAN" -> scan(argument);
+            case "SCAN" -> scan(argument, player);
             case "CONNECT" -> connect(argument);
             default -> "§cNEX ERROR: unknown instruction '" + parts[0] + "'. Type HELP.";
         };
     }
 
-    private static String scan(String nodeId) {
+    private static String scan(String nodeId, ServerPlayerEntity player) {
         String nodeType = NODES.get(nodeId);
         if (nodeType == null) {
             return "§cSCAN FAILED: node not found in the fictional .arena network.";
         }
-        return "§aSCAN COMPLETE §7| §f" + nodeId + " §7| §fTYPE: " + nodeType + " §7| §fRISK: LOW";
+
+        String result = "§aSCAN COMPLETE §7| §f" + nodeId + " §7| §fTYPE: " + nodeType + " §7| §fRISK: LOW";
+        if (player == null) {
+            return result;
+        }
+
+        boolean firstDiscovery = ArenaState.get(player.getServer()).discoverNode(player, nodeId);
+        if (firstDiscovery) {
+            return result + "\n§6FIRST DISCOVERY: +25 credits, +5 reputation.";
+        }
+        return result + "\n§7Node already recorded in your profile. No repeat reward.";
     }
 
     private static String connect(String nodeId) {
