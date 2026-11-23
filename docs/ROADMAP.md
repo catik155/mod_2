@@ -12,8 +12,10 @@
 - [x] Searchable fictional .arena site directory with per-site actions
 - [x] Simulated service-port reports and virtual data extraction
 - [x] NEX FLOW routines with semicolon-separated, server-validated steps
-- [ ] Full multi-page site pages with navigation, bookmarks and history
-- [ ] In-game file manager and visual service detail panels
+- [x] Individual fictional site pages with descriptions and simulated security classes
+- [x] Browser navigation between directory, site pages, bookmarks and recent history
+- [x] Site actions for simulated service inspection and data extraction
+- [ ] In-game file manager and interactive file detail panels
 
 ## Progression and automation
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
