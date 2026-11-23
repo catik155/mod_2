@@ -83,7 +83,7 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("AUTOMATION"), b -> navigate(2))
             .dimensions(left + 24 + tabWidth * 2, top + 48, tabWidth, 20).build());
 
-        if (page == 0 || page == 3 || page == 4 || page == 5) initBrowser(left, top, panelWidth);
+        if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 1) initTerminal(left, top, panelWidth);
         else initAutomation(left, top, panelWidth);
     }
