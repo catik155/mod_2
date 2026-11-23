@@ -1,31 +1,45 @@
 # Cyber Arena
 
-A fictional multiplayer cybersecurity competition mod for Minecraft 1.21.1 (Fabric), built with Java 21.
+A fictional multiplayer cyber-competition mod for Minecraft 1.21.1 (Fabric), built with Java 21.
 
-## Simulation-only design
+## Workstation
 
-Every computer, address, network node, service, command, attack, defense, and data object is fictional and exists only inside the Minecraft game. The mod never connects to real networks, scans real hosts, visits external targets, executes operating-system commands, or launches external payloads.
+Press **K** in-game to open the Cyber Arena workstation. It combines a NEX command terminal with quick actions for the fictional .arena web index, service-port reports, virtual data extraction, mining and upgrades. The workstation sends NEX instructions to the server; the server validates and applies every game action.
 
-## Current prototype
+## NEX quick reference
 
-- Fabric mod entrypoint and server command registration.
-- `/arena help`, `/arena status`, and `/arena nodes` commands.
-- `/arena nex <instruction>` with a small allow-listed NEX command interpreter.
-- NEX instructions: `HELP`, `STATUS`, `NODES`, `SCAN <node.arena>`, `CONNECT <node.arena>`.
-- Three fictional nodes: `relay-01.arena`, `market-02.arena`, and `archive-03.arena`.
-- Persistent per-world player profiles: starting credits, reputation, and discovered-node records.
-- `/arena profile` displays saved player progression.
-- First successful scan of each virtual node grants 25 credits and 5 reputation; repeat scans do not pay again.
-- GitHub Actions workflow builds the remapped mod JAR with Java 21 and publishes it as a workflow artifact.
+| Instruction | Function |
+|---|---|
+| `MANU` | Show the NEX language manual |
+| `SEEK <word>` | Search fictional .arena sites |
+| `PORTA <site.arena>` | Inspect simulated service slots |
+| `CRACK <site.arena>` | Attempt virtual data extraction |
+| `MINE` | Run a virtual mining cycle |
+| `UPGR <module>` | Buy a module with credits |
+| `SELR` | Exchange stored data shards for credits |
+| `NODR` | List mapped virtual nodes |
+| `SCAN <node.arena>` | Discover a fictional network node |
+
+Use `/arena nex MANU` or open the workstation with **K**. The server command form is `/arena nex <instruction>`.
+
+## Progression
+
+New operators begin with zero credits, zero reputation and no installed modules. Earn credits through starter contracts, simulated site jobs, data extraction and mining. Upgrade seven branches, each with five levels:
+
+- **FIREWALL** — defend against other players.
+- **AUTOM** — improve simulated attack automation.
+- **STEALTH** — improve concealment.
+- **EXTRACT** — increase virtual data yield.
+- **MINER** — improve mining output.
+- **CPU** — increase mining capacity/output.
+- **STORAGE** — increase data vault capacity.
+
+Use `/arena profile` to inspect progression. Player raids are available with `/arena raid <player>` when both players are online.
+
+## Simulation-only boundary
+
+All computers, websites, service ports, files, mining, attacks, defenses and data are fictional Minecraft game-state objects. The mod does not connect to real networks, scan external hosts, execute operating-system commands, or access real data.
 
 ## Build
 
-The project uses Fabric Loom and Gradle. Run `gradle build` with Java 21 installed. The distributable remapped JAR is written to `build/libs/` (the `-dev.jar` file is for development only).
-
-## Roadmap
-
-1. Persistent server-side player profiles and virtual computer UI.
-2. NEX parser expansion, terminal history, and tutorial.
-3. Simulated node discovery, contracts, and virtual browser.
-4. Credits, progression, alert/trace/risk systems, and defensive tools.
-5. Multiplayer competition, validation, leaderboards, groups, and tournaments.
+Requires Java 21. Run `gradle build`. The distributable remapped JAR is written to `build/libs/`; the `-dev.jar` is for development only. GitHub Actions builds the project and uploads the remapped JAR as an artifact when a workflow succeeds.
