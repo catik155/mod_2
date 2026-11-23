@@ -36,6 +36,33 @@ public final class NexEngine {
         };
     }
 
+    private static String seek(String query) {
+        Map<String, String> sites = Map.of(
+            "shop.arena", "SHOP / EASY",
+            "news.arena", "NEWS / PUBLIC",
+            "grid.arena", "GRID / MEDIUM",
+            "vault.arena", "VAULT / HARD",
+            "labs.arena", "LABS / EXPERT"
+        );
+        if (query.isBlank()) return "§cSEEK requires a search word.";
+        String result = sites.entrySet().stream()
+            .filter(e -> e.getKey().contains(query) || e.getValue().toLowerCase(Locale.ROOT).contains(query))
+            .map(e -> e.getKey() + " §7- " + e.getValue())
+            .collect(java.util.stream.Collectors.joining("\\n§f"));
+        return result.isEmpty() ? "§eNo .arena sites found." : "§bNEX WEB INDEX\\n§f" + result;
+    }
+
+    private static String ports(String site) {
+        if (!java.util.Set.of("shop.arena", "news.arena", "grid.arena", "vault.arena", "labs.arena").contains(site)) {
+            return "§cUnknown fictional host. Use SEEK first.";
+        }
+        return "§bPORTA REPORT §7| §f" + site
+            + "\\n§aPORT 021 §7- WEB-GATE / OPEN"
+            + "\\n§ePORT 044 §7- DATA-VAULT / GUARDED"
+            + "\\n§cPORT 071 §7- ADMIN-CORE / LOCKED"
+            + "\\n§7These are fictional game service slots, not real network ports.";
+    }
+
     private static String scan(String id, ServerPlayerEntity player) {
         String type = NODES.get(id);
         if (type == null) return "§cNode not found in the fictional .arena network.";
