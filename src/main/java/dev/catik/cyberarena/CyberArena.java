@@ -18,7 +18,7 @@ public final class CyberArena implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             dispatcher.register(CommandManager.literal("arena")
                 .then(CommandManager.literal("help").executes(c -> reply(c.getSource(),
-                    "§bCyber Arena\n§f/arena profile §7- profile and upgrades\n§f/arena contracts §7- starter contracts\n§f/arena contract <id> §7- complete a starter job\n§f/arena raid <player> §7- simulated PvP breach\n§f/arena upgrade <firewall|automation> §7- improve your system\n§f/arena site <shop.arena|news.arena|vault.arena> §7- resolve a fictional site incident\n§f/arena nex <instruction> §7- NEX terminal")))
+                    "§bCyber Arena\n§f/arena profile §7- profile and upgrades\n§f/arena contracts §7- starter contracts\n§f/arena contract <id> §7- complete a starter job\n§f/arena raid <player> §7- simulated PvP breach\n§f/arena upgrade <firewall|automation> §7- improve your system\n§f/arena site <shop.arena|news.arena|vault.arena> §7- resolve a fictional site incident\n§f/arena nex MANU §7- NEX pseudo-language manual")))
                 .then(CommandManager.literal("profile").executes(c -> {
                     ServerPlayerEntity p = c.getSource().getPlayerOrThrow();
                     ArenaState.ProfileView v = ArenaState.get(c.getSource().getServer()).view(p);
