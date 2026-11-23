@@ -1,30 +1,36 @@
 # Cyber Arena roadmap
 
 ## Core
-- [x] Fabric 1.21.1 / Java 21, persistent server-authoritative profiles
-- [x] Zero-start economy and simulated PvP raid
+- [x] Fabric 1.21.1 / Java 21 project
+- [x] Server-authoritative persistent profiles and zero-start economy
+- [x] Simulated player-vs-player raids and alerts
 
-## NEX virtual web
-- [x] Fictional web search (SEEK) and .arena site directory
-- [x] Fictional service-port reports (PORTA), not real network scanning
-- [x] Virtual data extraction (CRACK), difficulty, rewards, cooldown and alert
-- [ ] Browser GUI, bookmarks, history, target pages and virtual file system
+## NEX workstation
+- [x] NEX pseudo-language commands and manual
+- [x] Client workstation screen, opened with K
+- [x] NEX command field and quick-action buttons
+- [x] Fictional .arena search index (SEEK)
+- [x] Simulated service-port directory (PORTA)
+- [x] Virtual data extraction, mining and data exchange
+- [ ] Full multi-page browser with navigation, bookmarks, history and target detail pages
+- [ ] In-game file manager and visual port/service panels
 
-## Economy and progression
-- [x] Virtual mining cycles and data-shard exchange
-- [x] Seven upgrade branches: firewall, automation, stealth, extractor, miner, CPU, storage
-- [ ] Automated scripts with configurable in-game routines and logs
-- [ ] Full skill tree, module prerequisites and workstation UI
+## Progression and automation
+- [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
+- [x] Credits, data shards, extraction rewards and cooldowns
+- [ ] NEX script editor with saved routines, triggers and repeat schedules
+- [ ] Automation presets and defensive response policies
+- [ ] Expanded skill tree and module prerequisites
 
 ## Defense and multiplayer
-- [x] Player raid chance uses attacker upgrades and target firewall
-- [ ] Honeypots, auto-response, backups, recovery and intrusion notifications
-- [ ] NPC rivals, rotating targets, safe PvP rules, groups and tournaments
+- [x] Player raid chance affected by attacker modules and target firewall
+- [ ] Defensive dashboard, honeypots, backup/recovery and intrusion notifications
+- [ ] NPC rivals, dynamic contracts, teams and tournaments
 
 ## Release
-- [ ] Computer block, terminal and browser screens
-- [ ] Balance, persistence, multiplayer and exploit-resistance tests
-- [ ] Release remapped JAR after CI passes
+- [ ] Balance and multiplayer testing
+- [ ] Verify world save/load and client/server compatibility
+- [ ] Publish remapped JAR after CI passes
 
 ## Simulation boundary
-All computers, websites, service ports, files, mining, attacks and data are fictional Minecraft game-state systems. No real network access, external target scanning, OS commands or real data theft.
+All computers, websites, service ports, files, mining, attacks and data are fictional Minecraft game-state systems. No real network access, external target scanning, operating-system commands or real data theft.
