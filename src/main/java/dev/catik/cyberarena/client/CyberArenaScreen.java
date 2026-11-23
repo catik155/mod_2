@@ -23,7 +23,14 @@ public final class CyberArenaScreen extends Screen {
         "Research laboratory. Experimental data and expert-level security."
     };
     private static final String[] RISKS = {"LOW", "LOW", "MEDIUM", "HIGH", "EXPERT"};
-    private static final String[][] FILE_NAMES = {\n        {"catalog.idx", "offers.dat", "ledger.log"},\n        {"bulletins.txt", "dispatch.log", "public.key"},\n        {"load.map", "relay.cfg", "grid.log"},\n        {"records.enc", "ledger.bak", "access.log"},\n        {"research.dat", "prototype.idx", "lab-notes.txt"}\n    };\n    private static final String[] SERVICES = {
+    private static final String[][] FILE_NAMES = {
+        {"catalog.idx", "offers.dat", "ledger.log"},
+        {"bulletins.txt", "dispatch.log", "public.key"},
+        {"load.map", "relay.cfg", "grid.log"},
+        {"records.enc", "ledger.bak", "access.log"},
+        {"research.dat", "prototype.idx", "lab-notes.txt"}
+    };
+    private static final String[] SERVICES = {
         "021 WEB-GATE / OPEN", "044 DATA-VAULT / GUARDED", "071 ADMIN-CORE / LOCKED"
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
@@ -91,6 +98,10 @@ public final class CyberArenaScreen extends Screen {
 
         if (page == 3) {
             initSitePage(left, top, panelWidth);
+            return;
+        }
+        if (page == 6) {
+            initFilePage(left, top, panelWidth);
             return;
         }
         if (page == 0) {
@@ -210,7 +221,16 @@ public final class CyberArenaScreen extends Screen {
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // OPERATOR WORKSTATION"), left + 14, top + 13, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("NEX SANDBOX / OFFLINE FICTIONAL WEB"), left + 14, top + 29, 0xFFB8C8D8);
 
-        if (page == 3) {
+        if (page == 6) {
+            int idx = siteIndex(selectedSite);
+            context.drawTextWithShadow(textRenderer, Text.literal("ARENA:// " + selectedSite + " / FILE INDEX"), left + 14, top + 108, 0xFF70D8FF);
+            for (int i = 0; i < FILE_NAMES[idx].length; i++) {
+                int y = top + 143 + i * 43;
+                context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
+                context.drawTextWithShadow(textRenderer, Text.literal(FILE_NAMES[idx][i]), left + 22, y + 5, 0xFFBDEBFF);
+                context.drawTextWithShadow(textRenderer, Text.literal("FICTIONAL RECORD / READ-ONLY METADATA"), left + 22, y + 16, 0xFF8295A8);
+            }
+        } else if (page == 3) {
             int idx = siteIndex(selectedSite);
             context.drawTextWithShadow(textRenderer, Text.literal("ARENA:// " + selectedSite), left + 14, top + 116, 0xFF70D8FF);
             context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 14, top + 139, 0xFFBDEBFF);
