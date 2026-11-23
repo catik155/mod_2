@@ -15,7 +15,9 @@
 - [x] Individual fictional site pages with descriptions and simulated security classes
 - [x] Browser navigation between directory, site pages, bookmarks and recent history
 - [x] Site actions for simulated service inspection and data extraction
-- [ ] In-game file manager and interactive file detail panels
+- [x] In-browser fictional file manager with per-site record lists
+- [x] NEX FILES and READ commands for read-only fictional metadata
+- [ ] Unlockable protected record payloads and file recovery missions
 
 ## Progression and automation
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
