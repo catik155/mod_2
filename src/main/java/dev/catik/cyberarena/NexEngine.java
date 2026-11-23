@@ -22,8 +22,8 @@ public final class NexEngine {
             case "MANU", "HELP" -> "§bNEX // MANUAL\n§fSEEK <word> §7- search fictional web index\n§fPORTA <site.arena> §7- inspect game service ports\n§fCRACK <site.arena> §7- extract virtual data\n§fMINE §7- run a virtual mining cycle\n§fUPGR <module> §7- buy an upgrade\n§fSELR §7- sell data shards\n§fNODR §7- list nodes";
             case "STAT", "STATUS" -> "§aNEX CORE ONLINE §7| §fFictional .arena network §7| §fExternal I/O: disabled";
             case "NODR", "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
-            case "SEEK" -> seek(argument);
-            case "PORTA" -> ports(argument);
+            case "SEEK" -> seek(arg);
+            case "PORTA" -> ports(arg);
             case "CRACK" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).breachSite(player, arg);
             case "MINE" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).mine(player);
             case "UPGR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).upgrade(player, arg);
