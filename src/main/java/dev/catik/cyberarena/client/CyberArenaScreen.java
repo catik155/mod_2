@@ -23,7 +23,7 @@ public final class CyberArenaScreen extends Screen {
         "Research laboratory. Experimental data and expert-level security."
     };
     private static final String[] RISKS = {"LOW", "LOW", "MEDIUM", "HIGH", "EXPERT"};
-    private static final String[] SERVICES = {
+    private static final String[][] FILE_NAMES = {\n        {"catalog.idx", "offers.dat", "ledger.log"},\n        {"bulletins.txt", "dispatch.log", "public.key"},\n        {"load.map", "relay.cfg", "grid.log"},\n        {"records.enc", "ledger.bak", "access.log"},\n        {"research.dat", "prototype.idx", "lab-notes.txt"}\n    };\n    private static final String[] SERVICES = {
         "021 WEB-GATE / OPEN", "044 DATA-VAULT / GUARDED", "071 ADMIN-CORE / LOCKED"
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
@@ -126,7 +126,6 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initSitePage(int left, int top, int panelWidth) {
-        int idx = siteIndex(selectedSite);
         addDrawableChild(ButtonWidget.builder(Text.literal("< BACK"), b -> navigate(0))
             .dimensions(left + 14, top + 78, 90, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "UNBOOKMARK" : "BOOKMARK"), b -> {
@@ -134,10 +133,26 @@ public final class CyberArenaScreen extends Screen {
             else BOOKMARKS.add(selectedSite);
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + panelWidth - 126, top + 78, 112, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("VIEW SERVICES"), b -> runNex("PORTA " + selectedSite))
-            .dimensions(left + 14, top + 292, (panelWidth - 36) / 2, 22).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("EXTRACT DATA"), b -> runNex("CRACK " + selectedSite))
-            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 236, (panelWidth - 36) / 2, 22).build());
+        int third = (panelWidth - 36) / 3;
+        addDrawableChild(ButtonWidget.builder(Text.literal("PORTS"), b -> runNex("PORTA " + selectedSite))
+            .dimensions(left + 14, top + 292, third, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("EXTRACT"), b -> runNex("CRACK " + selectedSite))
+            .dimensions(left + 22 + third, top + 292, third, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("FILES"), b -> {
+            if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
+        }).dimensions(left + 30 + third * 2, top + 292, third, 22).build());
+    }
+
+    private void initFilePage(int left, int top, int panelWidth) {
+        int idx = siteIndex(selectedSite);
+        addDrawableChild(ButtonWidget.builder(Text.literal("< SITE PAGE"), b -> openSite(selectedSite))
+            .dimensions(left + 14, top + 78, 110, 20).build());
+        for (int i = 0; i < FILE_NAMES[idx].length; i++) {
+            final String file = FILE_NAMES[idx][i];
+            int y = top + 143 + i * 43;
+            addDrawableChild(ButtonWidget.builder(Text.literal("READ"), b -> runNex("READ " + selectedSite + " " + file))
+                .dimensions(left + panelWidth - 94, y, 80, 22).build());
+        }
     }
 
     private void initTerminal(int left, int top, int panelWidth) {
