@@ -3,6 +3,7 @@ package dev.catik.cyberarena;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 
@@ -27,7 +28,7 @@ public final class CyberArena implements ModInitializer {
                 .then(CommandManager.literal("help")
                     .executes(context -> {
                         context.getSource().sendFeedback(
-                            () -> Text.literal("§bCyber Arena commands:\n§f/arena status §7- simulation status\n§f/arena nodes §7- known virtual nodes\n§f/arena nex <command> §7- run a NEX instruction"),
+                            () -> Text.literal("§bCyber Arena commands:\n§f/arena status §7- simulation status\n§f/arena profile §7- your saved profile\n§f/arena nodes §7- known virtual nodes\n§f/arena nex <command> §7- run a NEX instruction"),
                             false
                         );
                         return 1;
@@ -37,6 +38,20 @@ public final class CyberArena implements ModInitializer {
                     .executes(context -> {
                         context.getSource().sendFeedback(
                             () -> Text.literal("§aSIMULATION ONLINE §7| §fExternal network access: disabled §7| §fNEX runtime: ready"),
+                            false
+                        );
+                        return 1;
+                    })
+                )
+                .then(CommandManager.literal("profile")
+                    .executes(context -> {
+                        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+                        ArenaState.ProfileView profile = ArenaState.get(context.getSource().getServer()).view(player);
+                        context.getSource().sendFeedback(
+                            () -> Text.literal("§bCYBER ARENA PROFILE §7| §f" + player.getName().getString()
+                                + "\n§6Credits: §f" + profile.credits()
+                                + "\n§dReputation: §f" + profile.reputation()
+                                + "\n§aDiscovered nodes: §f" + profile.discoveredNodes() + "/3"),
                             false
                         );
                         return 1;
@@ -55,7 +70,7 @@ public final class CyberArena implements ModInitializer {
                     .then(CommandManager.argument("instruction", StringArgumentType.greedyString())
                         .executes(context -> {
                             String instruction = StringArgumentType.getString(context, "instruction");
-                            String result = NexEngine.execute(instruction);
+                            String result = NexEngine.execute(instruction, context.getSource().getPlayer());
                             context.getSource().sendFeedback(() -> Text.literal(result), false);
                             return 1;
                         })
