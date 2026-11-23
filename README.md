@@ -8,10 +8,17 @@ Press **K** in-game to open the Cyber Arena workstation. It combines a NEX comma
 
 ## NEX quick reference
 
+The full concise language reference, including syntax, aliases, all instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The virtual directory currently contains 20 sites, 10 nodes, 70 simulated service slots and 60 fictional file records.
+
 | Instruction | Function |
 |---|---|
 | `MANU` | Show the NEX language manual |
 | `SEEK <word>` | Search fictional .arena sites |
+| `WHO <site.arena>` | Show a fictional host profile |
+| `PING <site.arena>` | Show simulated response latency |
+| `FILES <site.arena>` | List fictional site records |
+| `READ <site.arena> <file>` | Read fictional record metadata |
+| `FLOW <a; b; c>` | Run up to six safe NEX instructions |
 | `PORTA <site.arena>` | Inspect simulated service slots |
 | `CRACK <site.arena>` | Attempt virtual data extraction |
 | `MINE` | Run a virtual mining cycle |
