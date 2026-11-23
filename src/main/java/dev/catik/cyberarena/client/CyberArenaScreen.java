@@ -94,7 +94,7 @@ public final class CyberArenaScreen extends Screen {
             return;
         }
         if (page == 0) {
-            input = new TextFieldWidget(textRenderer, left + 14, top + 103, panelWidth - 128, 20, Text.literal("Search"));
+            input = new TextFieldWidget(textRenderer, left + 14, top + 113, panelWidth - 128, 20, Text.literal("Search"));
             input.setMaxLength(48);
             input.setPlaceholder(Text.literal("Search fictional .arena sites..."));
             input.setText(query);
@@ -102,10 +102,10 @@ public final class CyberArenaScreen extends Screen {
             addDrawableChild(ButtonWidget.builder(Text.literal("FIND"), b -> {
                 String q = input.getText().trim();
                 if (client != null) client.setScreen(new CyberArenaScreen(0, "", q));
-            }).dimensions(left + panelWidth - 106, top + 103, 92, 20).build());
+            }).dimensions(left + panelWidth - 106, top + 113, 92, 20).build());
         }
         List<String> sites = visibleSites();
-        int rowY = top + (page == 0 ? 137 : 111);
+        int rowY = top + (page == 0 ? 146 : 111);
         for (int i = 0; i < Math.min(5, sites.size()); i++) {
             String site = sites.get(i);
             int idx = siteIndex(site);
@@ -135,7 +135,7 @@ public final class CyberArenaScreen extends Screen {
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + panelWidth - 126, top + 78, 112, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("VIEW SERVICES"), b -> runNex("PORTA " + selectedSite))
-            .dimensions(left + 14, top + 236, (panelWidth - 36) / 2, 22).build());
+            .dimensions(left + 14, top + 292, (panelWidth - 36) / 2, 22).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("EXTRACT DATA"), b -> runNex("CRACK " + selectedSite))
             .dimensions(left + 22 + (panelWidth - 36) / 2, top + 236, (panelWidth - 36) / 2, 22).build());
     }
