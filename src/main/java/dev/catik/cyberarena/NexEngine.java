@@ -19,9 +19,15 @@ public final class NexEngine {
         String cmd = parts[0].toUpperCase(Locale.ROOT);
         String arg = parts.length > 1 ? parts[1].trim().toLowerCase(Locale.ROOT) : "";
         return switch (cmd) {
-            case "HELP" -> "§bNEX COMMANDS\n§fHELP §7| STATUS | NODES\n§fSCAN <node.arena> §7- inspect a simulated node\n§fCONTRACTS §7- list starter jobs\n§fRUN <contract> §7- complete a simulated site task\n§fSITE <site.arena> §7- resolve a fictional site incident";
-            case "STATUS" -> "§aNEX CORE ONLINE §7| §fSandbox: active §7| §fExternal I/O: disabled";
-            case "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
+            case "MANU", "HELP" -> "§bNEX // MANUAL\n§fSEEK <word> §7- search fictional web index\n§fPORTA <site.arena> §7- inspect game service ports\n§fCRACK <site.arena> §7- extract virtual data\n§fMINE §7- run a virtual mining cycle\n§fUPGR <module> §7- buy an upgrade\n§fSELR §7- sell data shards\n§fNODR §7- list nodes";
+            case "STAT", "STATUS" -> "§aNEX CORE ONLINE §7| §fFictional .arena network §7| §fExternal I/O: disabled";
+            case "NODR", "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
+            case "SEEK" -> seek(argument);
+            case "PORTA" -> ports(argument);
+            case "CRACK" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).breachSite(player, argument);
+            case "MINE" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).mine(player);
+            case "UPGR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).upgrade(player, argument);
+            case "SELR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).sellData(player);
             case "SCAN" -> scan(arg, player);
             case "CONTRACTS" -> "§bSTARTER CONTRACTS: §fsite-audit (40c), patch-rush (55c), data-recovery (70c)";
             case "RUN" -> player == null ? "§cPlayer context required." : ArenaState.get(player.getServer()).completeContract(player, arg);
