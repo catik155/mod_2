@@ -13,6 +13,9 @@ Every computer, address, network node, service, command, attack, defense, and da
 - `/arena nex <instruction>` with a small allow-listed NEX command interpreter.
 - NEX instructions: `HELP`, `STATUS`, `NODES`, `SCAN <node.arena>`, `CONNECT <node.arena>`.
 - Three fictional nodes: `relay-01.arena`, `market-02.arena`, and `archive-03.arena`.
+- Persistent per-world player profiles: starting credits, reputation, and discovered-node records.
+- `/arena profile` displays saved player progression.
+- First successful scan of each virtual node grants 25 credits and 5 reputation; repeat scans do not pay again.
 - GitHub Actions workflow builds the remapped mod JAR with Java 21 and publishes it as a workflow artifact.
 
 ## Build
