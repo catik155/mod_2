@@ -13,28 +13,47 @@ import java.util.Set;
 
 /** Client-only fictional web browser and NEX workstation. */
 public final class CyberArenaScreen extends Screen {
-    private static final String[] SITES = {"shop.arena", "news.arena", "grid.arena", "vault.arena", "labs.arena"};
-    private static final String[] TITLES = {"NEX MARKET", "ARENA DAILY", "GRID CONTROL", "VAULT ARCHIVE", "NEX LABS"};
-    private static final String[] DESCRIPTIONS = {
-        "Public exchange storefront. Basic public records and market bulletins.",
-        "Public news relay. Network notices, contracts and security bulletins.",
-        "Energy grid control. Infrastructure telemetry and protected records.",
-        "Encrypted archive. High-value data packages behind advanced defenses.",
-        "Research laboratory. Experimental data and expert-level security."
+    private static final String[] SITES = {
+        "shop.arena", "news.arena", "grid.arena", "vault.arena", "labs.arena", "forum.arena", "bank.arena", "metro.arena", "weather.arena", "clinic.arena", "factory.arena", "museum.arena", "uni.arena", "port.arena", "security.arena", "casino.arena", "farm.arena", "media.arena", "space.arena", "auction.arena"
     };
-    private static final String[] RISKS = {"LOW", "LOW", "MEDIUM", "HIGH", "EXPERT"};
+    private static final String[] TITLES = {
+        "NEX MARKET", "ARENA DAILY", "GRID CONTROL", "VAULT ARCHIVE", "NEX LABS", "OPEN FORUM", "ARENA BANK", "METRO LINK", "SKYCAST", "CIVIC CLINIC", "FACTORIUM", "DIGITAL MUSEUM", "ARENA CAMPUS", "HARBOR CONTROL", "SENTINEL", "LUCKY BYTE", "GREENFIELD", "PIXEL PRESS", "STARLAB", "BIDNET"
+    };
+    private static final String[] DESCRIPTIONS = {
+        "Public exchange storefront and market bulletins.", "Public news relay, contracts and security bulletins.", "Energy grid control and infrastructure telemetry.", "Encrypted archive with high-value protected data.", "Research laboratory and experimental records.", "Community message board with public threads.", "Fictional finance exchange and protected ledgers.", "Transit network with station maps and timetables.", "Weather simulation with forecasts and alerts.", "Medical research portal and supply manifests.", "Industrial production, robotics and assembly records.", "Public cultural archive and exhibit catalog.", "Education network, courses and library records.", "Logistics hub with cargo manifests and berth schedules.", "Advanced defense simulation with sensors and decoys.", "Entertainment network with games and simulated payouts.", "Agriculture network with harvest and storage reports.", "Media studio with stories and broadcast schedules.", "Space research with orbital telemetry and mission archives.", "Auction exchange with lots, bids and settlements."
+    };
+    private static final String[] RISKS = {
+        "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH"
+    };
     private static final String[][] FILE_NAMES = {
         {"catalog.idx", "offers.dat", "ledger.log"},
         {"bulletins.txt", "dispatch.log", "public.key"},
         {"load.map", "relay.cfg", "grid.log"},
         {"records.enc", "ledger.bak", "access.log"},
-        {"research.dat", "prototype.idx", "lab-notes.txt"}
+        {"research.dat", "prototype.idx", "lab-notes.txt"},
+        {"threads.idx", "members.db", "rules.txt"},
+        {"rates.dat", "accounts.enc", "audit.log"},
+        {"timetable.dat", "stations.map", "signals.log"},
+        {"forecast.dat", "climate.map", "alerts.log"},
+        {"research.idx", "supply.dat", "patient.enc"},
+        {"assembly.cfg", "robotics.dat", "shift.log"},
+        {"exhibits.idx", "archive.dat", "visitors.log"},
+        {"courses.idx", "library.db", "campus.map"},
+        {"cargo.idx", "berths.map", "manifest.enc"},
+        {"rules.cfg", "sensors.map", "incident.log"},
+        {"games.idx", "payouts.dat", "vault.enc"},
+        {"harvest.map", "silos.dat", "weather.log"},
+        {"stories.idx", "studio.cfg", "broadcast.log"},
+        {"telemetry.dat", "orbit.map", "mission.enc"},
+        {"lots.idx", "bids.dat", "settlement.log"}
     };
     private static final String[] SERVICES = {
         "021 WEB-GATE / OPEN", "044 DATA-VAULT / GUARDED", "071 ADMIN-CORE / LOCKED"
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
     private static final List<String> HISTORY = new ArrayList<>();
+    private static int directoryPage = 0;
+    private static final int SITES_PER_PAGE = 5;
 
     private final int page;
     private final String selectedSite;
@@ -116,8 +135,11 @@ public final class CyberArenaScreen extends Screen {
             }).dimensions(left + panelWidth - 106, top + 113, 92, 20).build());
         }
         List<String> sites = visibleSites();
+        int pages = Math.max(1, (sites.size() + SITES_PER_PAGE - 1) / SITES_PER_PAGE);
+        directoryPage = Math.max(0, Math.min(directoryPage, pages - 1));
         int rowY = top + (page == 0 ? 146 : 111);
-        for (int i = 0; i < Math.min(5, sites.size()); i++) {
+        int offset = page == 0 ? directoryPage * SITES_PER_PAGE : 0;
+        for (int i = offset; i < Math.min(offset + SITES_PER_PAGE, sites.size()); i++) {
             String site = sites.get(i);
             int idx = siteIndex(site);
             int y = rowY + (i - offset) * 35;
@@ -126,6 +148,10 @@ public final class CyberArenaScreen extends Screen {
         if (sites.isEmpty()) {
             addDrawableChild(ButtonWidget.builder(Text.literal("CLEAR SEARCH"), b -> navigate(0))
                 .dimensions(left + 14, rowY + 4, 120, 20).build());
+        }
+        if (page == 0 && pages > 1) {
+            addDrawableChild(ButtonWidget.builder(Text.literal("< PREV"), b -> { directoryPage = Math.max(0, directoryPage - 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + 14, top + 318, 72, 16).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal("NEXT >"), b -> { directoryPage = Math.min(pages - 1, directoryPage + 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + panelWidth - 86, top + 318, 72, 16).build());
         }
     }
 
@@ -244,8 +270,11 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, top + 98, 0xFF70D8FF);
             List<String> sites = visibleSites();
             int rowY = top + (page == 0 ? 137 : 111);
-            for (int i = 0; i < Math.min(5, sites.size()); i++) {
-                int idx = siteIndex(sites.get(i)), y = rowY + i * 35;
+            int pages = Math.max(1, (sites.size() + SITES_PER_PAGE - 1) / SITES_PER_PAGE);
+            directoryPage = Math.max(0, Math.min(directoryPage, pages - 1));
+            int offset = page == 0 ? directoryPage * SITES_PER_PAGE : 0;
+            for (int i = offset; i < Math.min(offset + SITES_PER_PAGE, sites.size()); i++) {
+                int idx = siteIndex(sites.get(i)), y = rowY + (i - offset) * 35;
                 context.fill(left + 14, y - 3, left + panelWidth - 14, y + 27, 0xFF172634);
                 context.drawTextWithShadow(textRenderer, Text.literal(sites.get(i) + " / " + RISKS[idx]), left + 22, y + 1, 0xFFBDEBFF);
                 context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, y + 14, 0xFF8295A8);
