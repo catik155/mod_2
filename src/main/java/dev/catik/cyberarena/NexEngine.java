@@ -24,9 +24,9 @@ public final class NexEngine {
             case "NODR", "NODES" -> "§bVIRTUAL NODES: §f" + String.join(", ", NODES.keySet());
             case "SEEK" -> seek(argument);
             case "PORTA" -> ports(argument);
-            case "CRACK" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).breachSite(player, argument);
+            case "CRACK" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).breachSite(player, arg);
             case "MINE" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).mine(player);
-            case "UPGR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).upgrade(player, argument);
+            case "UPGR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).upgrade(player, arg);
             case "SELR" -> player == null ? "§cOperator context required." : ArenaState.get(player.getServer()).sellData(player);
             case "SCAN" -> scan(arg, player);
             case "CONTRACTS" -> "§bSTARTER CONTRACTS: §fsite-audit (40c), patch-rush (55c), data-recovery (70c)";
