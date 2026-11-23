@@ -9,8 +9,9 @@
 - [ ] Verify a successful remapped JAR build in GitHub Actions
 
 ## Phase 2 — Player computer and persistence
-- [ ] Persist per-player profiles on the server
-- [ ] Add credits, reputation, rank, and upgrade state
+- [x] Persist per-player profiles in world save data
+- [x] Add initial credits and reputation fields
+- [ ] Add ranks and upgrade state
 - [ ] Add an interactable virtual computer block or item
 - [ ] Build a terminal screen with command history and clear feedback
 
