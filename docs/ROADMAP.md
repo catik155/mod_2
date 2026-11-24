@@ -14,7 +14,10 @@
 - [x] Simulated player-vs-player raids and alerts
 
 ## Browser / fictional websites
-- [x] Browser workstation opened with K, Browser / Terminal / Automation tabs
+- [x] Browser workstation opened with K; separate Browser, ordinary Console, and Automation tabs
+- [ ] Browser has a dedicated top-right “NX консоль сайта” shortcut on each opened .arena page; it opens a site-context console without replacing the ordinary Console tab
+- [ ] Keep the regular Console independent of the browser site context; the player can switch to it at any time
+- [ ] Site-context NX console: selected site prefilled for site-targeted actions, site-specific quick buttons, and a clear “current site” indicator
 - [x] Searchable, paginated fictional .arena directory (30 sites)
 - [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
 - [x] Fictional service panels and site record index (110 service entries, 90 records)
@@ -68,10 +71,12 @@
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
 - [x] Credits, data shards, extraction rewards and cooldowns
 - [x] Safe routine runner (up to six whitelisted instructions)
-- [ ] Automation module is a purchaseable unlock: first level opens ready-made presets and custom FLOW (planned server gate)
+- [ ] Automation tab is locked until AUTOM is purchased from the Improvements shop on a designated fictional .arena website; show price, unlock status and purchase feedback
+- [ ] Once purchased, unlock ready-made unattended automation presets and custom FLOW scripts (bounded, game-only actions); automation can run without manual command-by-command player input
+- [ ] FLEX is a separate premium language purchase in the Improvements shop, with more capabilities than NX; clearly explain price and unlocked feature tiers
 - [ ] Saved scripts and reusable automation presets
 - [ ] Automation triggers, schedule and bounded repeat behavior
-- [ ] Make FLEX the premium, purchased language with more advanced scripting features than NX
+- [ ] Make FLEX the premium, purchased language with more advanced scripting features than NX (variables, reusable routines and expanded control flow, subject to implementation)
 - [ ] Module prerequisite tree, specialized builds and skill perks
 - [ ] Unique tools/programs that unlock new simulated actions
 - [ ] Balance economy and rewards against risk and time investment
@@ -88,6 +93,7 @@
 - [ ] Show next-command hints while typing, including example arguments
 - [ ] Separate editor/console/output/log panes and resizable layout
 - [ ] Browser themes and unique mini-layouts for each site category
+- [ ] Clear navigation: browser-site NX shortcut at the top-right of site pages, separate ordinary Console tab, and separate purchase-gated Automation tab
 - [ ] Accessibility: keyboard navigation, readable scaling, color-safe statuses
 - [ ] Sound, animations, feedback, loading/error states and tutorial tooltips
 
