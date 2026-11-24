@@ -233,7 +233,7 @@ public final class CyberArenaScreen extends Screen {
                 case "VPN" -> new String[]{"BUY","ON","OFF","STATUS"};
                 case "NET" -> new String[]{"DISCOVER","SCAN","ENUM","EXPLOIT"};
                 case "UPGR" -> new String[]{"FIREWALL","AUTOM","STEALTH","EXTRACT","MINER","CPU","STORAGE","BREAKER","GUARD"};
-                case "SABOTAGE" -> new String[]{"FARM","POWER","SUPPLIES","DATA","ALARM","LOCK","FALSECALL","RAIDERS"};
+                case "SABOTAGE", "NET EXPLOIT" -> new String[]{"FARM","POWER","SUPPLIES","DATA","ALARM","LOCK","FALSECALL","RAIDERS"};
                 default -> new String[0];
             };
             for (String option : args) options.add(option);
@@ -465,6 +465,7 @@ public final class CyberArenaScreen extends Screen {
     private void send(String command) {
         if (client == null || client.player == null || client.getNetworkHandler() == null) return;
         client.getNetworkHandler().sendChatCommand(command);
+        if (page != 1) close();
     }
 
     @Override
