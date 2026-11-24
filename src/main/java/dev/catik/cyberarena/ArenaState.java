@@ -527,7 +527,6 @@ public final class ArenaState extends PersistentState {
                 if (parts.length < 3) return "§eУкажи игровой модуль: FARM, POWER, DATA, SUPPLIES, ALARM, LOCK, FALSECALL или RAIDERS.";
                 if (a.networkStage < 3 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER, SCAN и ENUM.";
                 long now = attacker.getServer().getOverworld().getTime();
-                if (now - a.lastNetworkActionTick < 1200) return "§eNET/COOLDOWN | Операция пока перезаряжается.";
                 a.lastNetworkActionTick = now; a.networkStage = 0;
                 String result = sabotage(attacker, target, parts[2].toLowerCase());
                 markDirty();
