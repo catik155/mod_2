@@ -419,12 +419,19 @@ public final class ArenaState extends PersistentState {
         if (attacker.getUuid().equals(target.getUuid())) return "§cНельзя саботировать собственный дом.";
         PlayerProfile a = profile(attacker), d = profile(target);
         long now = attacker.getServer().getOverworld().getTime();
-        if (now - a.lastRaidTick < 1200) return "§eПодлянки на перезарядке.";
-        a.lastRaidTick = now;
-        d.counterTarget = attacker.getGameProfile().getName(); d.counterUntilTick = now + 200;
-        target.sendMessage(Text.literal("§6[КОНТРАТАКА] §fНа твой дом совершена атака! Введи COUNTER в течение 10 секунд."), false);
+        int attack = attackPower(a), defense = defensePower(d);
+        int blockChance = Math.max(5, Math.min(95, 50 + (defense - attack) * 5));
+        boolean blocked = ThreadLocalRandom.current().nextInt(100) < blockChance;
         boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(15, 65 - a.stealth * 8);
         if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+        if (blocked) {
+            d.alertLevel = Math.min(5, d.alertLevel + 1);
+            openCounterWindow(target, attacker, d, now);
+            markDirty();
+            return "§aАТАКА ОТРАЖЕНА §7| Защита " + defense + " против атаки " + attack
+                + " §7| Шанс блока " + blockChance + "% §7| §6ОКНО КОНТРАТАКИ: 10 секунд. COUNTER."
+                + (traced ? " §cТвой след обнаружен." : "");
+        }
         String result = switch (action.toLowerCase()) {
             case "station" -> {
                 if (d.stationHealth <= 0) yield "§eРабочая станция уже разрушена.";
@@ -469,7 +476,7 @@ public final class ArenaState extends PersistentState {
         markDirty();
         if (traced) attacker.sendMessage(Text.literal("§c[ПОЛИЦИЯ] §fТвой виртуальный след обнаружен. Розыск +" + 1 + "."), false);
         target.sendMessage(Text.literal("§c[ДОМ] §fОбнаружена попытка саботажа: " + action.toUpperCase()), false);
-        return result + (traced ? " §c| След обнаружен, розыск " + a.wantedLevel + "/5." : " §a| След не обнаружен.");
+        return "§cАТАКА ПРОШЛА §7| Сила атаки " + attack + " против защиты " + defense + "\n" + result + (traced ? " §c| След обнаружен, розыск " + a.wantedLevel + "/5." : " §a| След не обнаружен.");
     }
 
     private void recordNetworkActivity(ServerPlayerEntity player, PlayerProfile profile, String action, String targetName) {
@@ -597,35 +604,56 @@ public final class ArenaState extends PersistentState {
         return "§aCONTRACT COMPLETE §7| §6+" + reward + " credits §7| §d+3 reputation";
     }
 
+    private int attackPower(PlayerProfile p) {
+        return p.automation * 2 + p.stealth + p.extractor + p.cpu * 2 + (p.vpnActive ? 1 : 0);
+    }
+
+    private int defensePower(PlayerProfile p) {
+        return p.firewall * 2 + p.guardLevel * 2 + p.cpu * 2 + p.alertLevel;
+    }
+
+    private boolean defendAgainst(PlayerProfile attacker, PlayerProfile defender) {
+        int attack = attackPower(attacker);
+        int defense = defensePower(defender);
+        int blockChance = Math.max(5, Math.min(95, 50 + (defense - attack) * 5));
+        return ThreadLocalRandom.current().nextInt(100) < blockChance;
+    }
+
+    private void openCounterWindow(ServerPlayerEntity defender, ServerPlayerEntity attacker, PlayerProfile profile, long now) {
+        profile.counterTarget = attacker.getGameProfile().getName();
+        profile.counterUntilTick = now + 200; // 10 секунд
+        defender.sendMessage(Text.literal("§a[ЗАЩИТА УСПЕШНА] §fАтака отражена! Защита противника временно ослаблена. У тебя 10 секунд на COUNTER."), false);
+        attacker.sendMessage(Text.literal("§c[СИСТЕМА] §fТвоя атака отражена. Защитный контур перегружен, окно уязвимости открыто."), false);
+    }
+
     public String raid(ServerPlayerEntity attacker, ServerPlayerEntity target, long now) {
-        if (attacker.getUuid().equals(target.getUuid())) return "§cYou cannot raid your own machine.";
+        if (attacker.getUuid().equals(target.getUuid())) return "§cНельзя атаковать собственную сеть.";
         PlayerProfile a = profile(attacker);
         PlayerProfile d = profile(target);
-        if (now - a.lastRaidTick < 1200) return "§eAttack automation is cooling down. Wait " + ((1200 - (now - a.lastRaidTick) + 19) / 20) + "s.";
-        a.lastRaidTick = now;
-        d.counterTarget = attacker.getGameProfile().getName(); d.counterUntilTick = now + 200;
-        target.sendMessage(Text.literal("§6[КОНТРАТАКА] §fНа тебя напали! Введи COUNTER в течение 10 секунд, чтобы ответить."), false);
-        if (!a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(10, 55 - a.stealth * 7)) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
-        int chance = Math.max(8, Math.min(92, 60 + a.automation * 5 + a.stealth * 4 + a.extractor * 3 - d.firewall * 12 + (a.vpnActive ? 8 : 0)));
-        boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
-        if (success) {
-            int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
-            int shardsTaken = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
-            d.credits -= creditsTaken;
-            a.credits += creditsTaken;
-            d.dataShards -= shardsTaken;
-            a.dataShards += shardsTaken + 1;
-            a.reputation += 2;
+        int attack = attackPower(a), defense = defensePower(d);
+        int blockChance = Math.max(5, Math.min(95, 50 + (defense - attack) * 5));
+        boolean blocked = ThreadLocalRandom.current().nextInt(100) < blockChance;
+        if (!a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(10, 55 - a.stealth * 7))
+            a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+        if (blocked) {
             d.alertLevel = Math.min(5, d.alertLevel + 1);
+            a.reputation = Math.max(0, a.reputation - 1);
+            openCounterWindow(target, attacker, d, now);
             markDirty();
-            return "§aSIMULATED BREACH SUCCESS §7| §f" + target.getName().getString()
-                + " §7| §6+" + creditsTaken + " credits §7| §b+" + (shardsTaken + 1) + " data shards §7| §cTarget alert " + d.alertLevel + "/5";
+            return "§aЗАЩИТА УДЕРЖАЛА УЗЕЛ §7| Защита " + defense + " против атаки " + attack
+                + " §7| Шанс блокировки " + blockChance + "% §7| §6ОКНО КОНТРАТАКИ: 10 секунд. Введи COUNTER.";
         }
+        int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
+        int shardsTaken = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
+        d.credits -= creditsTaken;
+        a.credits += creditsTaken;
+        d.dataShards -= shardsTaken;
+        a.dataShards += shardsTaken + 1;
+        a.reputation += 2;
         d.alertLevel = Math.min(5, d.alertLevel + 1);
-        a.reputation = Math.max(0, a.reputation - 1);
         markDirty();
-        return "§cBREACH BLOCKED §7| §f" + target.getName().getString()
-            + " §7| §bFirewall " + d.firewall + " §7| §cYour trace was exposed.";
+        return "§cСЕТЬ ПРОНИКНОВЕНА §7| Атака " + attack + " против защиты " + defense
+            + " §7| Защитный контур пробит §7| §6+" + creditsTaken + " кредитов §7| §b+" + (shardsTaken + 1) + " фрагментов данных.";
     }
 
     public String breachSite(ServerPlayerEntity player, String site) {
