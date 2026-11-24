@@ -201,22 +201,25 @@ public final class CyberArenaScreen extends Screen {
             final int destination = pages[i];
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + 4), 16, tabWidth, 20).build());
         }
-        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, width - 180, 22, Text.literal("NX command"));
+        int inputWidth = width >= 300 ? width - 180 : width - 112;
+        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, inputWidth, 22, Text.literal("NX command"));
         input.setMaxLength(240);
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
         input.setChangedListener(this::refreshCompletions);
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 90, this.height - 42, 76, 22).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "FLEX" : "NX"), b -> {
-            if (flexOwned) {
-                voraSelected = !voraSelected;
-                if (client != null) client.setScreen(new CyberArenaScreen(1));
-            } else {
-                appendOutput("§eFLEX заблокирован. Приобрети язык во вкладке УЛУЧШЕНИЯ за 250 кредитов.");
-                navigate(8);
-            }
-        }).dimensions(left + width - 158, this.height - 42, 60, 22)
-            .tooltip(Tooltip.of(Text.literal(flexOwned ? "Переключить язык терминала NX / FLEX" : "FLEX — премиальный язык. Купить в магазине улучшений за 250 кредитов."))).build());
+        if (width >= 300) {
+            addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "FLEX" : "NX"), b -> {
+                if (flexOwned) {
+                    voraSelected = !voraSelected;
+                    if (client != null) client.setScreen(new CyberArenaScreen(1));
+                } else {
+                    appendOutput("§eFLEX заблокирован. Приобрети язык во вкладке УЛУЧШЕНИЯ за 250 кредитов.");
+                    navigate(8);
+                }
+            }).dimensions(left + width - 158, this.height - 42, 60, 22)
+                .tooltip(Tooltip.of(Text.literal(flexOwned ? "Переключить язык терминала NX / FLEX" : "FLEX — премиальный язык. Купить в магазине улучшений за 250 кредитов."))).build());
+        }
         input.setFocused(true);
         setInitialFocus(input);
         if (TERMINAL_OUTPUT.isEmpty()) {
@@ -243,6 +246,8 @@ public final class CyberArenaScreen extends Screen {
                 case "VPN" -> new String[]{"BUY","ON","OFF","STATUS"};
                 case "NET" -> new String[]{"DISCOVER","SCAN","ENUM","EXPLOIT"};
                 case "DEFEND" -> new String[]{"STATUS","HELP","TYPE","ROUTE","MOVE"};
+                case "FLEX" -> new String[]{"STATUS","BUY","EXEC"};
+                case "FLEX EXEC" -> NX_COMMANDS;
                 case "UPGR" -> new String[]{"FIREWALL","AUTOM","STEALTH","EXTRACT","MINER","CPU","STORAGE","BREAKER","GUARD"};
                 case "SABOTAGE", "NET EXPLOIT" -> new String[]{"FARM","POWER","SUPPLIES","DATA","ALARM","LOCK","FALSECALL","RAIDERS"};
                 default -> new String[0];
