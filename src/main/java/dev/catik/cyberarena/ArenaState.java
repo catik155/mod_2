@@ -606,7 +606,7 @@ public final class ArenaState extends PersistentState {
         d.duelOpponent = attacker.getGameProfile().getName(); d.duelAction = action; d.duelRole = "DEFEND"; d.duelMove = ""; d.duelUntilTick = now + 600;
         startDefenseChallenge(d);
         attacker.sendMessage(Text.literal("§c[КОНСОЛЬНЫЙ ПОЕДИНОК] §fАвтозащита не удержала периметр. Выбери тактику: DUEL BURST / FEINT / OVERRIDE. У тебя 30 секунд."), false);
-        defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАВТОЗАЩИТА ПРОБИТА! В консоли введи DEFEND STATUS, затем точно повтори код командой DEFEND TYPE <код>. Есть 3 попытки и 30 секунд."), false);
+        defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАВТОЗАЩИТА ПРОБИТА! Открой NEX и введи DEFEND STATUS. Пройди консольное испытание KERNEL, ROUTE или GRID. Есть 3 попытки и 30 секунд."), false);
         markDirty();
         return "§cАВТОЗАЩИТА ПРОБИТА §7| Началось консольное противостояние с " + defender.getGameProfile().getName()
             + ". Выбери тактику: DUEL BURST, FEINT или OVERRIDE. Исход операции пока не определён.";
@@ -731,7 +731,7 @@ public final class ArenaState extends PersistentState {
         PlayerProfile p = profile(player);
         long now = player.getServer().getOverworld().getTime();
         if (!p.duelRole.equals("DEFEND") || p.duelOpponent.isBlank()) return "§eНет активной задачи защиты.";
-        if (now > p.duelUntilTick) return duel(player, "PATCH");
+        if (now > p.duelUntilTick) return duelInternal(player, "DECOY", true);
         String[] parts = input.trim().split("\\s+");
         String action = parts.length == 0 ? "STATUS" : parts[0].toUpperCase(Locale.ROOT);
         if (action.equals("STATUS") || action.equals("HELP") || action.isBlank()) return defenseStatus(p, now);
