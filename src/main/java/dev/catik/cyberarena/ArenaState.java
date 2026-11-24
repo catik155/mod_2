@@ -44,7 +44,7 @@ public final class ArenaState extends PersistentState {
     public ProfileView view(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         return new ProfileView(p.credits, p.reputation, p.dataShards, p.firewall, p.automation,
-            p.stealth, p.extractor, p.miningRig, p.cpu, p.storage, p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size(), p.breakerCharges, p.guardCharges, p.powerUntilTick);
+            p.stealth, p.extractor, p.miningRig, p.cpu, p.storage, p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size(), p.breakerCharges, p.guardCharges, p.powerUntilTick, p.farmLevel, p.farmHealth, p.vpnOwned, p.vpnActive, p.wantedLevel, p.virtualIp);
     }
 
     public void ensureHome(ServerPlayerEntity player) {
@@ -119,7 +119,7 @@ public final class ArenaState extends PersistentState {
             if (p.lastPassiveIncomeTick < 0) p.lastPassiveIncomeTick = now;
             if (now - p.lastPassiveIncomeTick >= 1200) {
                 long cycles = Math.min(10, (now - p.lastPassiveIncomeTick) / 1200);
-                int income = (int) cycles * (2 + p.miningRig * 2);
+                int income = (int) cycles * ((2 + p.miningRig * 2) + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0));
                 p.credits += income;
                 p.lastPassiveIncomeTick += cycles * 1200;
                 player.sendMessage(Text.literal("§6[МАЙНИНГ] §fПассивный доход: §a+" + income + " кредитов §7| §eMINER " + p.miningRig + "/5"), true);
@@ -130,6 +130,16 @@ public final class ArenaState extends PersistentState {
                 if (now - p.lastIncidentTick >= 6000 && ThreadLocalRandom.current().nextInt(100) < 35) {
                     p.lastIncidentTick = now;
                     state.triggerHomeIncident(player, p, now);
+                    state.markDirty();
+                }
+            }
+            if (p.wantedLevel >= 4 && now - p.lastPoliceCheckTick >= 1200) {
+                p.lastPoliceCheckTick = now;
+                if (!p.vpnActive) {
+                    int fine = Math.min(p.credits, 10 + p.wantedLevel * 8);
+                    p.credits -= fine;
+                    p.wantedLevel = Math.max(0, p.wantedLevel - 2);
+                    player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fПатруль вычислил твой игровой адрес. Штраф: " + fine + " кредитов."), false);
                     state.markDirty();
                 }
             }
@@ -166,7 +176,7 @@ public final class ArenaState extends PersistentState {
         String power = p.powerUntilTick > now ? "§cПИТАНИЕ ОТКЛЮЧЕНО " + ((p.powerUntilTick - now + 19) / 20) + "с" : "§aПИТАНИЕ: ВКЛ";
         player.sendMessage(Text.literal("§bCYBER §7| §6" + p.credits + " кр. §7| §dREP " + p.reputation
             + " §7| §eMINER +" + (2 + p.miningRig * 2) + "/мин §7| " + power
-            + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges), true);
+            + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel), true);
     }
 
     public boolean isPowerOut(ServerPlayerEntity player) {
