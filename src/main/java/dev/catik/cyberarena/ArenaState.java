@@ -608,7 +608,9 @@ public final class ArenaState extends PersistentState {
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
         private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
         private int farmLevel = 0, farmHealth = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
-        private String networkTarget = "";
+        private String networkTarget = "", lastNetworkEvent = "нет";
+        private int networkHeat = 0;
+        private long lastNetworkActivityTick = 0;
         private boolean vpnOwned = false, vpnActive = false;
         private long lastPoliceCheckTick = 0, lastNetworkActionTick = -100000;
         private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
