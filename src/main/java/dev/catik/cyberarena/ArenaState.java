@@ -589,9 +589,14 @@ public final class ArenaState extends PersistentState {
         attacker.sendMessage(Text.literal("§c[СИСТЕМА] §fТвоя атака отражена. Защитный контур перегружен, окно уязвимости открыто."), false);
     }
 
+    private static void resetDefense(PlayerProfile p) {
+        p.defenseCode = ""; p.defenseGame = ""; p.defenseRoute = ""; p.defenseGrid = "";
+        p.defenseAttempts = 3; p.defenseRouteStep = 0; p.defenseX = 0; p.defenseY = 0;
+    }
+
     private void clearDuel(PlayerProfile a, PlayerProfile d) {
-        a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = ""; a.defenseCode = ""; a.defenseAttempts = 3;
-        d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = ""; d.defenseCode = ""; d.defenseAttempts = 3;
+        a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = ""; resetDefense(a);
+        d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = ""; resetDefense(d);
     }
 
     private String startDuel(ServerPlayerEntity attacker, ServerPlayerEntity defender, String action, long now) {
@@ -599,7 +604,7 @@ public final class ArenaState extends PersistentState {
         if (!a.duelOpponent.isBlank() || !d.duelOpponent.isBlank()) return "§eОдин из игроков уже участвует в сетевом противостоянии.";
         a.duelOpponent = defender.getGameProfile().getName(); a.duelAction = action; a.duelRole = "ATTACK"; a.duelMove = ""; a.duelUntilTick = now + 600;
         d.duelOpponent = attacker.getGameProfile().getName(); d.duelAction = action; d.duelRole = "DEFEND"; d.duelMove = ""; d.duelUntilTick = now + 600;
-        d.defenseCode = "NX-" + randomCode(5); d.defenseAttempts = 3;
+        startDefenseChallenge(d);
         attacker.sendMessage(Text.literal("§c[КОНСОЛЬНЫЙ ПОЕДИНОК] §fАвтозащита не удержала периметр. Выбери тактику: DUEL BURST / FEINT / OVERRIDE. У тебя 30 секунд."), false);
         defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАВТОЗАЩИТА ПРОБИТА! В консоли введи DEFEND STATUS, затем точно повтори код командой DEFEND TYPE <код>. Есть 3 попытки и 30 секунд."), false);
         markDirty();
@@ -614,32 +619,174 @@ public final class ArenaState extends PersistentState {
         return code.toString();
     }
 
+    private static void startDefenseChallenge(PlayerProfile p) {
+        p.defenseAttempts = 3;
+        p.defenseRouteStep = 0;
+        p.defenseX = 0;
+        p.defenseY = 0;
+        p.defenseCode = "";
+        p.defenseRoute = "";
+        p.defenseGrid = "";
+        int mode = ThreadLocalRandom.current().nextInt(3);
+        if (mode == 0) {
+            p.defenseGame = "KERNEL";
+            p.defenseCode = "NX-" + randomCode(5);
+        } else if (mode == 1) {
+            p.defenseGame = "ROUTE";
+            int[] links = new int[9];
+            String[] path = {"RIGHT", "RIGHT", "DOWN", "DOWN"};
+            for (int i = path.length - 1; i > 0; i--) {
+                int j = ThreadLocalRandom.current().nextInt(i + 1);
+                String swap = path[i]; path[i] = path[j]; path[j] = swap;
+            }
+            int x = 0, y = 0;
+            for (String direction : path) {
+                int nx = x + (direction.equals("RIGHT") ? 1 : 0);
+                int ny = y + (direction.equals("DOWN") ? 1 : 0);
+                addRouteLink(links, x, y, nx, ny);
+                x = nx; y = ny;
+            }
+            for (int cy = 0; cy < 3; cy++) for (int cx = 0; cx < 3; cx++) {
+                if (cx < 2 && ThreadLocalRandom.current().nextInt(100) < 22) addRouteLink(links, cx, cy, cx + 1, cy);
+                if (cy < 2 && ThreadLocalRandom.current().nextInt(100) < 22) addRouteLink(links, cx, cy, cx, cy + 1);
+            }
+            StringBuilder encoded = new StringBuilder(9);
+            for (int link : links) encoded.append((char)('0' + link));
+            p.defenseRoute = encoded.toString();
+        } else {
+            p.defenseGame = "GRID";
+            p.defenseGrid = scrambleDefenseGrid();
+        }
+    }
+
+    private static void addRouteLink(int[] links, int x1, int y1, int x2, int y2) {
+        int a = y1 * 3 + x1, b = y2 * 3 + x2;
+        if (x2 == x1 + 1) { links[a] |= 2; links[b] |= 8; }
+        else if (x2 == x1 - 1) { links[a] |= 8; links[b] |= 2; }
+        else if (y2 == y1 + 1) { links[a] |= 4; links[b] |= 1; }
+        else if (y2 == y1 - 1) { links[a] |= 1; links[b] |= 4; }
+    }
+
+    private static String scrambleDefenseGrid() {
+        char[] board = "123456780".toCharArray();
+        int blank = 8, previousBlank = -1;
+        for (int step = 0; step < 12; step++) {
+            int[] candidates = new int[4];
+            int count = 0, x = blank % 3, y = blank / 3;
+            if (x > 0 && blank - 1 != previousBlank) candidates[count++] = blank - 1;
+            if (x < 2 && blank + 1 != previousBlank) candidates[count++] = blank + 1;
+            if (y > 0 && blank - 3 != previousBlank) candidates[count++] = blank - 3;
+            if (y < 2 && blank + 3 != previousBlank) candidates[count++] = blank + 3;
+            int next = candidates[ThreadLocalRandom.current().nextInt(count)];
+            board[blank] = board[next]; board[next] = '0';
+            previousBlank = blank; blank = next;
+        }
+        return new String(board);
+    }
+
+    private String defenseStatus(PlayerProfile p, long now) {
+        String header = "§6ЭКСТРЕННАЯ ЗАЩИТА §7| §f" + p.defenseGame
+            + "\n§fПопытки: §c" + p.defenseAttempts + "/3 §7| Осталось: §e" + Math.max(0, (p.duelUntilTick - now + 19) / 20) + " сек.";
+        return switch (p.defenseGame) {
+            case "KERNEL" -> header + "\n§fВосстанови контрольную последовательность из журнала:"
+                + "\n§e" + p.defenseCode + "\n§7Введи: DEFEND TYPE " + p.defenseCode;
+            case "ROUTE" -> {
+                StringBuilder map = new StringBuilder(header).append("\n§fПроведи сигнал от §aA1 §fдо §aC3§f. Текущий узел: §e")
+                    .append((char)('A' + p.defenseX)).append(p.defenseY + 1).append("\n§7Схема связей (стрелки — доступные переходы):\n");
+                for (int y = 0; y < 3; y++) {
+                    for (int x = 0; x < 3; x++) {
+                        int mask = p.defenseRoute.charAt(y * 3 + x) - '0';
+                        String exits = ((mask & 1) != 0 ? "↑" : "·") + ((mask & 2) != 0 ? "→" : "·")
+                            + ((mask & 4) != 0 ? "↓" : "·") + ((mask & 8) != 0 ? "←" : "·");
+                        String node = (char)('A' + x) + Integer.toString(y + 1);
+                        map.append(p.defenseX == x && p.defenseY == y ? "§a[" + node + " " + exits + "] " : "§f " + node + " " + exits + "  ");
+                    }
+                    map.append("\n");
+                }
+                yield map + "§7Команда: DEFEND ROUTE UP|RIGHT|DOWN|LEFT";
+            }
+            case "GRID" -> {
+                StringBuilder map = new StringBuilder(header).append("\n§fСобери последовательность 1–8, пустая клетка обозначена точкой:\n");
+                for (int i = 0; i < 9; i++) {
+                    map.append(p.defenseGrid.charAt(i) == '0' ? "§e[·] " : "§f[" + p.defenseGrid.charAt(i) + "] ");
+                    if (i % 3 == 2) map.append("\n");
+                }
+                yield map + "§7Перемести соседнюю плитку в пустую клетку: DEFEND MOVE B2 C2";
+            }
+            default -> header + "\n§cОшибка режима. Введи DEFEND HELP.";
+        };
+    }
+
+    private String defenseMistake(ServerPlayerEntity player, PlayerProfile p, String reason) {
+        p.defenseAttempts--;
+        markDirty();
+        if (p.defenseAttempts <= 0) {
+            player.sendMessage(Text.literal("§c[ЗАЩИТА] §fПопытки закончились. Запускается аварийный сценарий."), false);
+            return duelInternal(player, "DECOY", true);
+        }
+        return "§cОШИБКА: " + reason + " §7| Осталось попыток: " + p.defenseAttempts + "/3. Введи DEFEND STATUS.";
+    }
+
     public String defend(ServerPlayerEntity player, String input) {
         PlayerProfile p = profile(player);
         long now = player.getServer().getOverworld().getTime();
-        if (!p.duelRole.equals("DEFEND") || p.duelOpponent.isBlank())
-            return "§eНет активной задачи защиты.";
+        if (!p.duelRole.equals("DEFEND") || p.duelOpponent.isBlank()) return "§eНет активной задачи защиты.";
         if (now > p.duelUntilTick) return duel(player, "PATCH");
-        String[] parts = input.trim().split("\\s+", 2);
-        if (parts.length == 0 || parts[0].isBlank() || parts[0].equalsIgnoreCase("STATUS") || parts[0].equalsIgnoreCase("HELP")) {
-            return "§6ЗАДАЧА: КОДОВЫЙ ПЕРЕХВАТ\n§fПовтори код без изменений: §e" + p.defenseCode
-                + "\n§fПопытки: §c" + p.defenseAttempts + "/3 §7| Осталось: " + Math.max(0, (p.duelUntilTick - now + 19) / 20) + " сек."
-                + "\n§7Команда: DEFEND TYPE " + p.defenseCode;
+        String[] parts = input.trim().split("\\s+");
+        String action = parts.length == 0 ? "STATUS" : parts[0].toUpperCase(Locale.ROOT);
+        if (action.equals("STATUS") || action.equals("HELP") || action.isBlank()) return defenseStatus(p, now);
+        if (action.equals("TYPE") && p.defenseGame.equals("KERNEL")) {
+            String answer = parts.length > 1 ? parts[1] : "";
+            if (!answer.equals(p.defenseCode)) return defenseMistake(player, p, "Последовательность не совпала.");
+            return completeDefense(player, p);
         }
-        if (!parts[0].equalsIgnoreCase("TYPE") || parts.length < 2)
-            return "§eФормат: DEFEND TYPE <код> | DEFEND STATUS | DEFEND HELP";
-        String answer = parts[1].trim();
-        if (!answer.equals(p.defenseCode)) {
-            p.defenseAttempts--;
+        if (action.equals("ROUTE") && p.defenseGame.equals("ROUTE")) {
+            if (parts.length != 2) return "§eФормат: DEFEND ROUTE UP|RIGHT|DOWN|LEFT";
+            String direction = parts[1].toUpperCase(Locale.ROOT);
+            int bit = switch (direction) { case "UP" -> 1; case "RIGHT" -> 2; case "DOWN" -> 4; case "LEFT" -> 8; default -> 0; };
+            if (bit == 0) return "§eДопустимые направления: UP, RIGHT, DOWN, LEFT.";
+            int index = p.defenseY * 3 + p.defenseX;
+            int mask = p.defenseRoute.charAt(index) - '0';
+            if ((mask & bit) == 0) return defenseMistake(player, p, "В этом узле нет такого соединения.");
+            if (direction.equals("UP")) p.defenseY--;
+            if (direction.equals("RIGHT")) p.defenseX++;
+            if (direction.equals("DOWN")) p.defenseY++;
+            if (direction.equals("LEFT")) p.defenseX--;
             markDirty();
-            if (p.defenseAttempts <= 0) {
-                player.sendMessage(Text.literal("§c[ЗАЩИТА] §fПопытки закончились. Защитный модуль переходит в аварийный режим."), false);
-                return duelInternal(player, "DECOY", true);
-            }
-            return "§cКОД НЕВЕРЕН §7| Осталось попыток: " + p.defenseAttempts + "/3. Проверь регистр и символы.";
+            if (p.defenseX == 2 && p.defenseY == 2) return completeDefense(player, p);
+            return "§aПЕРЕХОД ВЫПОЛНЕН §7| Узел " + (char)('A' + p.defenseX) + (p.defenseY + 1) + ". Следующий переход: DEFEND STATUS.";
         }
+        if (action.equals("MOVE") && p.defenseGame.equals("GRID")) {
+            if (parts.length != 3) return "§eФормат: DEFEND MOVE <плитка> <пустая-клетка>, например DEFEND MOVE B2 C2.";
+            int from = gridIndex(parts[1]), to = gridIndex(parts[2]);
+            if (from < 0 || to < 0 || p.defenseGrid.length() != 9 || p.defenseGrid.charAt(from) == '0'
+                || p.defenseGrid.charAt(to) != '0' || Math.abs(from % 3 - to % 3) + Math.abs(from / 3 - to / 3) != 1)
+                return defenseMistake(player, p, "Неверное перемещение. Передвигать можно только соседнюю плитку в пустую клетку.");
+            char[] board = p.defenseGrid.toCharArray();
+            board[to] = board[from]; board[from] = '0'; p.defenseGrid = new String(board);
+            markDirty();
+            if (p.defenseGrid.equals("123456780")) return completeDefense(player, p);
+            return "§aПЕРЕМЕЩЕНИЕ ПРИНЯТО §7| Схема обновлена. Введи DEFEND STATUS.";
+        }
+        return switch (p.defenseGame) {
+            case "KERNEL" -> "§eЭтот режим принимает только DEFEND TYPE <код>.";
+            case "ROUTE" -> "§eЭтот режим принимает только DEFEND ROUTE <направление>.";
+            case "GRID" -> "§eЭтот режим принимает только DEFEND MOVE <откуда> <куда>.";
+            default -> "§eВведи DEFEND STATUS.";
+        };
+    }
+
+    private static int gridIndex(String coordinate) {
+        if (coordinate == null || coordinate.length() != 2) return -1;
+        char column = Character.toUpperCase(coordinate.charAt(0));
+        char row = coordinate.charAt(1);
+        if (column < 'A' || column > 'C' || row < '1' || row > '3') return -1;
+        return (row - '1') * 3 + (column - 'A');
+    }
+
+    private String completeDefense(ServerPlayerEntity player, PlayerProfile p) {
         p.defenseCode = "";
-        player.sendMessage(Text.literal("§a[ЗАЩИТА] §fКод принят. Контур восстановлен частично, результат зависит от тактики противника."), false);
+        player.sendMessage(Text.literal("§a[ЗАЩИТА] §fИспытание пройдено. Консоль восстановила контроль над контуром."), false);
         markDirty();
         return duelInternal(player, "PATCH", true);
     }
@@ -658,7 +805,7 @@ public final class ArenaState extends PersistentState {
             ServerPlayerEntity expiredOpponent = player.getServer().getPlayerManager().getPlayerList().stream()
                 .filter(other -> other.getGameProfile().getName().equalsIgnoreCase(p.duelOpponent)).findFirst().orElse(null);
             if (expiredOpponent == null) {
-                p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; p.defenseCode = ""; p.defenseAttempts = 3; markDirty();
+                p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; resetDefense(p); markDirty();
                 return "§eВремя истекло, противник отключился. Противостояние отменено.";
             }
             ServerPlayerEntity expiredAttacker = p.duelRole.equals("ATTACK") ? player : expiredOpponent;
@@ -857,7 +1004,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
-            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putString("defense_code", p.defenseCode); e.putInt("defense_attempts", p.defenseAttempts); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putString("defense_code", p.defenseCode); e.putInt("defense_attempts", p.defenseAttempts); e.putString("defense_game", p.defenseGame); e.putString("defense_route", p.defenseRoute); e.putInt("defense_route_step", p.defenseRouteStep); e.putInt("defense_x", p.defenseX); e.putInt("defense_y", p.defenseY); e.putString("defense_grid", p.defenseGrid); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
@@ -889,7 +1036,7 @@ public final class ArenaState extends PersistentState {
             p.lastRaidTick = e.getLong("last_raid");
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
-            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.defenseCode = e.getString("defense_code"); p.defenseAttempts = e.contains("defense_attempts") ? clamp(e.getInt("defense_attempts"), 0, 3) : 3; p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.defenseCode = e.getString("defense_code"); p.defenseAttempts = e.contains("defense_attempts") ? clamp(e.getInt("defense_attempts"), 0, 3) : 3; p.defenseGame = e.getString("defense_game"); p.defenseRoute = e.getString("defense_route"); p.defenseRouteStep = clamp(e.getInt("defense_route_step"), 0, 9); p.defenseX = clamp(e.getInt("defense_x"), 0, 2); p.defenseY = clamp(e.getInt("defense_y"), 0, 2); p.defenseGrid = e.getString("defense_grid"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
@@ -920,8 +1067,8 @@ public final class ArenaState extends PersistentState {
         private String counterTarget = "";
         private long counterUntilTick = 0;
         private int counterBonus = 0;
-        private String duelOpponent = "", duelAction = "", duelMove = "", duelRole = "", defenseCode = "";
-        private int defenseAttempts = 3;
+        private String duelOpponent = "", duelAction = "", duelMove = "", duelRole = "", defenseCode = "", defenseGame = "", defenseRoute = "", defenseGrid = "";
+        private int defenseAttempts = 3, defenseRouteStep = 0, defenseX = 0, defenseY = 0;
         private long duelUntilTick = 0;
         private String networkTarget = "", lastNetworkEvent = "нет";
         private int networkHeat = 0;
