@@ -15,9 +15,9 @@
 
 ## Browser / fictional websites
 - [x] Browser workstation opened with K; separate Browser, ordinary Console, and Automation tabs
-- [ ] Browser has a dedicated top-right “NX консоль сайта” shortcut on each opened .arena page; it opens a site-context console without replacing the ordinary Console tab
-- [ ] Keep the regular Console independent of the browser site context; the player can switch to it at any time
-- [ ] Site-context NX console: selected site prefilled for site-targeted actions, site-specific quick buttons, and a clear “current site” indicator
+- [x] Browser has a dedicated top-right “NX консоль сайта” shortcut on each opened .arena page; it opens a site-context console without replacing the ordinary Console tab
+- [x] Keep the regular Console independent of the browser site context; the player can switch to it at any time
+- [x] Site-context NX console: selected site context is applied to targeted commands, has site-specific quick buttons, and a clear “current site” indicator
 - [x] Searchable, paginated fictional .arena directory (30 sites)
 - [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
 - [x] Fictional service panels and site record index (110 service entries, 90 records)
