@@ -109,6 +109,38 @@ public final class CyberArenaScreen extends Screen {
             || DESCRIPTIONS[siteIndex(s)].toLowerCase().contains(q)).toList();
     }
 
+    /** Custom button visuals for Cyber Arena; no vanilla ButtonWidget skin. */
+    private static final class ButtonWidget extends ClickableWidget {
+        private final java.util.function.Consumer<ButtonWidget> action;
+        ButtonWidget(int x, int y, int width, int height, Text label, java.util.function.Consumer<ButtonWidget> action) {
+            super(x, y, width, height, label);
+            this.action = action;
+        }
+        static Builder builder(Text label, java.util.function.Consumer<ButtonWidget> action) { return new Builder(label, action); }
+        @Override protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            boolean hovered = isHovered();
+            int fill = !active ? 0xFF17212B : hovered ? 0xFF213947 : 0xFF182B37;
+            int border = !active ? 0xFF43515B : hovered ? 0xFF55E6D2 : 0xFF287F88;
+            context.fill(getX(), getY(), getX()+width, getY()+height, fill);
+            context.fill(getX(), getY(), getX()+width, getY()+1, border);
+            context.fill(getX(), getY()+height-1, getX()+width, getY()+height, border);
+            context.fill(getX(), getY(), getX()+1, getY()+height, border);
+            context.fill(getX()+width-1, getY(), getX()+width, getY()+height, border);
+            context.drawCenteredTextWithShadow(textRenderer, getMessage(), getX()+width/2, getY()+(height-textRenderer.fontHeight)/2, active ? (hovered ? 0xFF72F7E2 : 0xFFE0F0F5) : 0xFF71808B);
+        }
+        @Override protected void onClick(Click click) { if (active && action != null) action.accept(this); }
+        static final class Builder {
+            private final Text label;
+            private final java.util.function.Consumer<ButtonWidget> action;
+            private int x,y,w,h;
+            private Tooltip tooltip;
+            Builder(Text label, java.util.function.Consumer<ButtonWidget> action) { this.label=label;this.action=action; }
+            Builder dimensions(int x,int y,int w,int h) { this.x=x;this.y=y;this.w=w;this.h=h;return this; }
+            Builder tooltip(Tooltip tooltip) { this.tooltip=tooltip;return this; }
+            ButtonWidget build() { ButtonWidget b=new ButtonWidget(x,y,w,h,label,action);if(tooltip!=null)b.setTooltip(tooltip);return b; }
+        }
+    }
+
     @Override
     protected void init() {
         int panelWidth = Math.min(520, this.width - 24);
@@ -322,6 +354,11 @@ public final class CyberArenaScreen extends Screen {
         if (client == null || client.player == null || client.getNetworkHandler() == null) return;
         client.getNetworkHandler().sendChatCommand(command);
         close();
+    }
+
+    @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        // No vanilla dimming or blur: keep the Minecraft world sharp behind this UI.
     }
 
     @Override
