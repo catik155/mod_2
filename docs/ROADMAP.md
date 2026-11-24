@@ -50,6 +50,7 @@
 
 ## FLEX (formerly VORA) — alternate language
 - [x] Current VORA word mapping exists as a simple UI translator
+- [x] Expanded FLEX aliases for existing command set (including FLOW and SITE); premium purchase gate and advanced scripting are still pending
 - [ ] Rename canonical language to FLEX; keep VORA alias during transition
 - [ ] FLEX command aliases and vocabulary parallel NX without being identical
 - [ ] Add structured FLEX scripts and equivalent variables/branches/loops/functions
