@@ -442,6 +442,14 @@ public final class ArenaState extends PersistentState {
             + (traced ? " §cТвой след обнаружен, розыск " + a.wantedLevel + "/5." : "");
     }
 
+    private void recordNetworkActivity(ServerPlayerEntity player, PlayerProfile profile, String action, String targetName) {
+        long now = player.getServer().getOverworld().getTime();
+        profile.networkHeat = Math.min(10, profile.networkHeat + (action.equalsIgnoreCase("EXPLOIT") ? 2 : 1));
+        profile.lastNetworkActivityTick = now;
+        profile.lastNetworkEvent = action.toUpperCase() + " / " + targetName;
+        markDirty();
+    }
+
     public String network(ServerPlayerEntity attacker, String instruction) {
         PlayerProfile a = profile(attacker);
         String[] parts = instruction.trim().split("\\s+", 3);
@@ -647,7 +655,6 @@ public final class ArenaState extends PersistentState {
                 p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; p.defenseCode = ""; p.defenseAttempts = 3; markDirty();
                 return "§eВремя истекло, противник отключился. Противостояние отменено.";
             }
-            PlayerProfile otherProfile = profile(expiredOpponent);
             ServerPlayerEntity expiredAttacker = p.duelRole.equals("ATTACK") ? player : expiredOpponent;
             ServerPlayerEntity expiredDefender = p.duelRole.equals("DEFEND") ? player : expiredOpponent;
             String expiredAction = profile(expiredAttacker).duelAction;
