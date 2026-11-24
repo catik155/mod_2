@@ -97,6 +97,9 @@ public final class CyberArenaScreen extends Screen {
     private static boolean automationStatusKnown = false;
     private static boolean automationStatusRequested = false;
     private static int automationLevel = 0;
+    private static boolean flexStatusKnown = false;
+    private static boolean flexStatusRequested = false;
+    private static boolean flexOwned = false;
     private static final int SITES_PER_PAGE = 5;
 
     private final int page;
@@ -204,6 +207,16 @@ public final class CyberArenaScreen extends Screen {
         input.setChangedListener(this::refreshCompletions);
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 90, this.height - 42, 76, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "FLEX" : "NX"), b -> {
+            if (flexOwned) {
+                voraSelected = !voraSelected;
+                if (client != null) client.setScreen(new CyberArenaScreen(1));
+            } else {
+                appendOutput("§eFLEX заблокирован. Приобрети язык во вкладке УЛУЧШЕНИЯ за 250 кредитов.");
+                navigate(8);
+            }
+        }).dimensions(left + width - 158, this.height - 42, 60, 22)
+            .tooltip(Tooltip.of(Text.literal(flexOwned ? "Переключить язык терминала NX / FLEX" : "FLEX — премиальный язык. Купить в магазине улучшений за 250 кредитов."))).build());
         input.setFocused(true);
         setInitialFocus(input);
         if (TERMINAL_OUTPUT.isEmpty()) {
@@ -254,6 +267,7 @@ public final class CyberArenaScreen extends Screen {
         String value = input.getText().trim();
         if (value.isEmpty()) return;
         String command = translateVora(value);
+        if (voraSelected) command = "FLEX EXEC " + command;
         TERMINAL_OUTPUT.add("§a" + (voraSelected ? "flex" : "nx") + "@arena:~$ §f" + value);
         COMMAND_HISTORY.add(value);
         if (COMMAND_HISTORY.size() > 100) COMMAND_HISTORY.remove(0);
@@ -273,6 +287,24 @@ public final class CyberArenaScreen extends Screen {
     }
 
     /** Consume the server-authoritative automation level sent by AUTOM STATUS. */
+    public static boolean handleFlexStatus(String message) {
+        if (message == null) return false;
+        int marker = message.indexOf("FLEX_OWNED=");
+        if (marker < 0) return false;
+        int start = marker + "FLEX_OWNED=".length();
+        boolean nextOwned = start < message.length() && message.charAt(start) == '1';
+        boolean refresh = !flexStatusKnown || flexOwned != nextOwned;
+        flexOwned = nextOwned;
+        flexStatusKnown = true;
+        flexStatusRequested = false;
+        if (!flexOwned) voraSelected = false;
+        if (refresh && net.minecraft.client.MinecraftClient.getInstance().currentScreen instanceof CyberArenaScreen screen
+            && (screen.page == 8 || screen.page == 1)) {
+            net.minecraft.client.MinecraftClient.getInstance().setScreen(new CyberArenaScreen(screen.page));
+        }
+        return true;
+    }
+
     public static boolean handleAutomationStatus(String message) {
         if (message == null) return false;
         int marker = message.indexOf("AUTOMATION_LEVEL=");
@@ -442,6 +474,10 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
+        if (!flexStatusKnown && !flexStatusRequested && client != null && client.getNetworkHandler() != null) {
+            flexStatusRequested = true;
+            client.getNetworkHandler().sendChatCommand("arena nex FLEX STATUS");
+        }
         if (!automationStatusKnown && !automationStatusRequested && client != null && client.getNetworkHandler() != null) {
             automationStatusRequested = true;
             client.getNetworkHandler().sendChatCommand("arena nex AUTOM STATUS");
@@ -477,6 +513,10 @@ public final class CyberArenaScreen extends Screen {
             .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы трёх сайтов."))).build());
     }
     private void initUpgrades(int left, int top, int panelWidth) {
+        if (!flexStatusKnown && !flexStatusRequested && client != null && client.getNetworkHandler() != null) {
+            flexStatusRequested = true;
+            client.getNetworkHandler().sendChatCommand("arena nex FLEX STATUS");
+        }
         String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE", "BREAKER", "GUARD"};
         String[] labels = {"ЗАЩИТА", "АВТОМАТИЗАЦИЯ", "СКРЫТНОСТЬ", "ИЗВЛЕЧЕНИЕ", "МАЙНИНГ", "ПРОЦЕССОР", "ХРАНИЛИЩЕ", "ЭЛЕКТРОЩИТОК", "ОХРАНА"};
         int gap = 8, colWidth = (panelWidth - 36) / 2;
@@ -487,6 +527,13 @@ public final class CyberArenaScreen extends Screen {
                 .dimensions(left + 14 + col * (colWidth + gap), top + 110 + row * 29, colWidth, 24)
                 .tooltip(Tooltip.of(Text.literal("Купить следующий уровень " + module + ". Стоимость зависит от текущего уровня; максимум 5."))).build());
         }
+        ButtonWidget flexButton = ButtonWidget.builder(Text.literal(flexOwned ? "FLEX: ПРИОБРЕТЁН" : flexStatusKnown ? "КУПИТЬ FLEX — 250 КРЕДИТОВ" : "ПРОВЕРКА FLEX…"), b -> {
+            runNex("FLEX BUY");
+            if (client != null && client.getNetworkHandler() != null) client.getNetworkHandler().sendChatCommand("arena nex FLEX STATUS");
+        }).dimensions(left + 14 + colWidth + gap, top + 226, colWidth, 24)
+            .tooltip(Tooltip.of(Text.literal("Премиальный альтернативный язык. После покупки разблокируется оболочка FLEX и выполнение команд через неё."))).build();
+        if (flexOwned || !flexStatusKnown) flexButton.active = false;
+        addDrawableChild(flexButton);
         addDrawableChild(ButtonWidget.builder(Text.literal("МОЙ ПРОФИЛЬ И БАЛАНС"), b -> runNex("STAT"))
             .dimensions(left + 14, top + 266, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Показать кредиты, очки репутации и уровни модулей"))).build());
@@ -494,7 +541,10 @@ public final class CyberArenaScreen extends Screen {
 
     private void submit(String prefix) {
         String value = input == null ? "" : input.getText().trim();
-        if (!value.isEmpty()) send(prefix + translateVora(value));
+        if (!value.isEmpty()) {
+            String translated = translateVora(value);
+            send(prefix + (voraSelected ? "FLEX EXEC " : "") + translated);
+        }
     }
     private void runNex(String instruction) { send("arena nex " + instruction); }
     private void send(String command) {
