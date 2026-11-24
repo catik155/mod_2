@@ -329,7 +329,7 @@ public final class CyberArenaScreen extends Screen {
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + 110, top + 78, 118, 20).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
-        int navY = Math.min(top + 229, this.height - 52);
+        int navY = Math.max(top + 120, this.height - 66);
         addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕДЫДУЩИЙ САЙТ"), b -> openAdjacentSite(-1))
             .dimensions(left + 14, navY, navHalf, 18)
             .tooltip(Tooltip.of(Text.literal("Перейти к предыдущему сайту каталога"))).build());
@@ -339,7 +339,7 @@ public final class CyberArenaScreen extends Screen {
 
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
-        }).dimensions(left + 14, top + 292, panelWidth - 28, 22)
+        }).dimensions(left + 14, this.height - 42, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Просмотреть открытые описания записей. Игровые действия выполняются в консоли."))).build());
     }
 
@@ -487,7 +487,7 @@ public final class CyberArenaScreen extends Screen {
             int accent = siteAccent(idx);
             String category = siteCategory(idx);
             int contentTop = top + 110;
-            int contentBottom = top + panelHeight - 54;
+            int contentBottom = top + panelHeight - 90;
             int contentHeight = Math.max(90, contentBottom - contentTop);
             int contentOffset = browserScroll * 8;
             context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
@@ -537,7 +537,7 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal("Только игровые команды. Внешние команды запрещены."), left + 14, top + 274, 0xFF8295A8);
         }
         super.render(context, mouseX, mouseY, delta);
-        if (panelHeight >= 300) context.drawTextWithShadow(textRenderer, Text.literal("Сайты предназначены только для просмотра. Команды — в консоли."), left + 14, top + panelHeight - 16, 0xFF8295A8);
+        if (panelHeight >= 300 && page != 3) context.drawTextWithShadow(textRenderer, Text.literal("Сайты предназначены только для просмотра. Команды — в консоли."), left + 14, top + panelHeight - 16, 0xFF8295A8);
     }
 
 
