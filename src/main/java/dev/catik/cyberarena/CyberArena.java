@@ -46,7 +46,11 @@ public final class CyberArena implements ModInitializer {
                     long now = attacker.getWorld().getTime();
                     return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).raid(attacker, target, now));
                 })))
-                .then(CommandManager.literal("repair").executes(c -> {\n                    ServerPlayerEntity p = c.getSource().getPlayerOrThrow();\n                    return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).repairPower(p));\n                }))\n                .then(CommandManager.literal("upgrade").then(CommandManager.argument("type", StringArgumentType.word()).executes(c -> {
+                .then(CommandManager.literal("repair").executes(c -> {
+                    ServerPlayerEntity p = c.getSource().getPlayerOrThrow();
+                    return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).repairPower(p));
+                }))
+                .then(CommandManager.literal("upgrade").then(CommandManager.argument("type", StringArgumentType.word()).executes(c -> {
                     ServerPlayerEntity p = c.getSource().getPlayerOrThrow();
                     return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).upgrade(p, StringArgumentType.getString(c, "type").toLowerCase()));
                 })))
