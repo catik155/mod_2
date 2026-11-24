@@ -195,6 +195,7 @@ public final class ArenaState extends PersistentState {
         BlockPos machine = new BlockPos(p.homeX + 2, p.homeY + 1, p.homeZ - 2);
         world.setBlockState(machine, Blocks.AIR.getDefaultState());
         world.setBlockState(machine.up(), Blocks.AIR.getDefaultState());
+        world.setBlockState(machine.up(2), Blocks.AIR.getDefaultState());
     }
 
     private void buildFarm(ServerPlayerEntity player, PlayerProfile p) {
@@ -298,7 +299,22 @@ public final class ArenaState extends PersistentState {
                 yield "§eКРАЖА ЗАПАСОВ | Перенесено " + stolen + " игровых кредитов.";
             }
             case "alarm" -> { d.alertLevel = Math.min(5, d.alertLevel + 2); yield "§6ЛОЖНАЯ ТРЕВОГА | Сигнализация цели перегружена."; }
-            default -> "§cВарианты: FARM, POWER, SUPPLIES, ALARM.";
+            case "lock" -> { d.powerUntilTick = now + 600; yield "§cБЛОКИРОВКА СТАНЦИИ | Терминал цели заблокирован на 30 секунд."; }
+            case "data" -> {
+                int stolen = Math.min(d.dataShards, 2 + a.extractor);
+                d.dataShards -= stolen; a.dataShards += stolen;
+                yield "§bКРАЖА ДАННЫХ | Перенесено " + stolen + " осколков.";
+            }
+            case "falsecall" -> { d.wantedLevel = Math.min(5, d.wantedLevel + 2); yield "§cЛОЖНЫЙ ВЫЗОВ ПОЛИЦИИ | Уровень розыска цели повышен."; }
+            case "raiders" -> {
+                BlockPos home = new BlockPos(d.homeX, d.homeY + 1, d.homeZ);
+                for (int i = 0; i < 2; i++) {
+                    var raider = EntityType.PILLAGER.spawn(target.getServerWorld(), home.add(i == 0 ? -2 : 2, 0, 1), SpawnReason.EVENT);
+                    if (raider != null) { raider.setPersistent(); raider.setTarget(target); }
+                }
+                yield "§cПОДСТАВНОЙ НАЛЁТ | В дом цели проникли два рейдера.";
+            }
+            default -> "§cВарианты: FARM, POWER, SUPPLIES, DATA, ALARM, LOCK, FALSECALL, RAIDERS.";
         };
         markDirty();
         if (traced) attacker.sendMessage(Text.literal("§c[ПОЛИЦИЯ] §fТвой виртуальный след обнаружен. Розыск +" + 1 + "."), false);
