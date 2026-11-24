@@ -166,7 +166,7 @@ public final class NexEngine {
             case "IP" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).ipInfo(player);
             case "POLICE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).policeStatus(player);
             case "NET", "NETWORK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).network(player, arg);
-            case "SABOTAGE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : sabotagePlayer(player, arg);
+            case "SABOTAGE" -> error("OBSOLETE", "Прямой саботаж отключён. Используй NET DISCOVER → SCAN → ENUM → EXPLOIT.");
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
