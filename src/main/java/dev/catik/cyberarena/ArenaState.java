@@ -127,7 +127,10 @@ public final class ArenaState extends PersistentState {
             PlayerProfile p = state.profile(player);
             if (p.lastPassiveIncomeTick < 0) p.lastPassiveIncomeTick = now;
             if (p.eliminated || p.roundWon) { if (player.interactionManager.getGameMode() != GameMode.SPECTATOR) player.changeGameMode(GameMode.SPECTATOR); continue; }
-            if (now - p.lastPassiveIncomeTick >= 1200) {
+            if (state.isPowerOut(player)) {
+                // При отключённом питании не начисляем майнинг и ферму, а простой не компенсируем.
+                p.lastPassiveIncomeTick = now;
+            } else if (now - p.lastPassiveIncomeTick >= 1200) {
                 long cycles = Math.min(10, (now - p.lastPassiveIncomeTick) / 1200);
                 int income = (int) cycles * ((2 + p.miningRig * 2) + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0));
                 p.credits += income;
