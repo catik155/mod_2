@@ -116,7 +116,7 @@
 - [x] Expand starter home to an 11x11 interior with taller walls, windows, lighting, entry platform and separated equipment zones
 - [x] Put the physical workstation and mining farm inside the home; farm upgrade tiers visibly add machine details
 - [x] Add workstation durability, breakage, paid repair and an optional remote terminal upgrade
-- [x] Add a 10-second counterattack window after a direct player raid or home sabotage
+- [x] Add a 10-second counterattack window only after a successful defense against a direct player raid or home sabotage
 - [x] Police stakeout can remain a threat; random non-player house attacks are disabled
 - [ ] Add settings for incident frequency and safe-start protection on new servers
 
@@ -135,7 +135,10 @@
 - [x] Round objective: reach 10,000 credits to win; police arrest at the home eliminates the player
 
 ## Defense / multiplayer
-- [x] Raid success influenced by attacker upgrades and target firewall
+- [x] Raid success resolved by a PvP attack-vs-defense power contest using attacker upgrades (AUTOM, STEALTH, EXTRACT, CPU, VPN) against defender upgrades (FIREWALL, GUARD, CPU)
+- [x] Attacks can be initiated at any time without a global raid cooldown; attack availability does not depend on being attacked first
+- [x] A counterattack window opens only when the defender successfully blocks an attack; the defender gets 10 seconds to use COUNTER against the exposed attacker
+- [x] Failed attacks do not grant a counterattack window to the attacker; successful attacks do not grant one to the defender
 - [ ] Defense dashboard, honeypots, backup/recovery and incident notifications
 - [ ] NPC rivals, factions, teams, tournaments and seasonal leaderboards
 - [ ] Multiplayer contract sync and authoritative validation for all actions
