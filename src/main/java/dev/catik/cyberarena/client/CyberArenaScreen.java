@@ -276,7 +276,7 @@ public final class CyberArenaScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        renderBackground(context, mouseX, mouseY, delta);
+        // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
         int panelWidth = Math.min(520, this.width - 24);
         int left = (this.width - panelWidth) / 2;
         int top = Math.max(18, (this.height - 340) / 2);
