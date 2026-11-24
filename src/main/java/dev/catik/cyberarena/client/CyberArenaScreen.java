@@ -126,9 +126,9 @@ public final class CyberArenaScreen extends Screen {
             context.fill(getX(), getY()+height-1, getX()+width, getY()+height, border);
             context.fill(getX(), getY(), getX()+1, getY()+height, border);
             context.fill(getX()+width-1, getY(), getX()+width, getY()+height, border);
-            context.drawCenteredTextWithShadow(textRenderer, getMessage(), getX()+width/2, getY()+(height-textRenderer.fontHeight)/2, active ? (hovered ? 0xFF72F7E2 : 0xFFE0F0F5) : 0xFF71808B);
+            net.minecraft.client.font.TextRenderer renderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;\n            context.drawCenteredTextWithShadow(renderer, getMessage(), getX()+width/2, getY()+(height-renderer.fontHeight)/2, active ? (hovered ? 0xFF72F7E2 : 0xFFE0F0F5) : 0xFF71808B);
         }
-        @Override protected void onClick(Click click) { if (active && action != null) action.accept(this); }
+        @Override public void onClick(double mouseX, double mouseY) { if (active && action != null) action.accept(this); }
         static final class Builder {
             private final Text label;
             private final java.util.function.Consumer<ButtonWidget> action;
