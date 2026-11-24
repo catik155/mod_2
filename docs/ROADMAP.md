@@ -24,7 +24,12 @@
 - [ ] Give every site a distinct layout module (header, navigation, cards, content sections, footer) rather than the same generic page
 - [x] Browser is view-only: no service scan, extraction, or hacking buttons on site pages; all gameplay actions go through NX/FLEX console
 - [x] Browser panel width and tab widths now adapt to available screen width; continue testing small resolutions and vertical overflow
-- [ ] Finish responsive layout for short screens: stack controls, scale spacing, and prevent any clipped widgets at all GUI scales
+- [x] Expand the workstation/browser to a near-full-screen layout that uses the available display area
+- [x] Localize fictional site names, page text, navigation labels and NX help into Russian
+- [x] Show each fictional site's HTTPS-style domain and reserved TEST-NET simulation IP on its page
+- [x] Remove the visible site-service directory from browser pages; network discovery and analysis remain console commands
+- [x] Add mouse-wheel scrolling to the site content pane and keep navigation controls outside its scroll viewport
+- [ ] Finish responsive layout for very short screens and test every GUI scale in-game
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [x] Expand browser directory from 30 to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
@@ -104,6 +109,7 @@
 - [x] Passive mining income is paid automatically while the player is online; MINER levels increase the payout
 - [x] Periodic home incidents: hostile pillagers can raid the house and power sabotage can disable the workstation
 - [x] Workstation commands are blocked during a blackout except status/help/repair; emergency REPAIR costs credits
+- [x] Pause passive miner and home-farm income during a blackout, reset idle payout time, and show zero income in the HUD
 - [x] Consumable BREAKER and GUARD charges can each stop one matching incident; they are not permanent invulnerability
 - [x] Add more home sabotage events: workstation damage, stolen supplies, false alerts, station lock, data theft, false police calls and raider diversion
 - [x] Show purchased upgrades as physical stations and structures inside the personal home; refresh displays after purchases and on rejoin
