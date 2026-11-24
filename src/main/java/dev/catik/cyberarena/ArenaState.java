@@ -442,6 +442,56 @@ public final class ArenaState extends PersistentState {
             + (traced ? " §cТвой след обнаружен, розыск " + a.wantedLevel + "/5." : "");
     }
 
+    public String network(ServerPlayerEntity attacker, String instruction) {
+        PlayerProfile a = profile(attacker);
+        String[] parts = instruction.trim().split("\\s+", 3);
+        if (parts.length < 2) return "§eNET DISCOVER <игрок> | SCAN <игрок> | ENUM <игрок> | EXPLOIT <игрок> <FARM|POWER|DATA|SUPPLIES|ALARM|LOCK|FALSECALL|RAIDERS>";
+        String action = parts[0].toUpperCase();
+        String targetName = parts[1];
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayerList().stream().filter(p -> p.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
+        if (target == null) return "§cNET/NO_HOST | Игрок должен быть онлайн в этом мире.";
+        if (target.getUuid().equals(attacker.getUuid())) return "§cNET/SELF | Нельзя выбирать собственную сеть.";
+        PlayerProfile d = profile(target);
+        switch (action) {
+            case "DISCOVER" -> {
+                recordNetworkActivity(attacker, a, action, targetName);
+                a.networkTarget = target.getGameProfile().getName(); a.networkStage = 1;
+                String address = d.vpnActive ? "203.0.113." + (d.virtualIp % 200 + 20) + " (VPN-узел)" : "198.51.100." + (d.virtualIp % 200 + 20);
+                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 22;
+                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+                markDirty();
+                return "§bARENA DISCOVERY §7| §f" + targetName + "\n§fВиртуальный адрес: " + address + "\n§aУзел найден. Далее: NET SCAN " + targetName + (traced ? "\n§cПолиция заметила поисковый запрос." : "");
+            }
+            case "SCAN" -> {
+                recordNetworkActivity(attacker, a, action, targetName);
+                if (a.networkStage < 1 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER для этой цели.";
+                a.networkStage = 2; int fw = d.firewall;
+                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 32;
+                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+                markDirty();
+                return "§bPORT SCAN REPORT §7| §f" + targetName + "\n§e021/WEB-GATE §7" + (fw >= 4 ? "FILTERED" : "OPEN") + "\n§e044/DATA-RELAY §7" + (fw >= 2 ? "FILTERED" : "OPEN") + "\n§e071/ADMIN-CORE §7" + (fw >= 3 ? "FILTERED" : "OPEN") + "\n§7FIREWALL " + fw + "/5\n§aДалее: NET ENUM " + targetName + (traced ? "\n§cСканирование попало в журнал полиции." : "");
+            }
+            case "ENUM" -> {
+                recordNetworkActivity(attacker, a, action, targetName);
+                if (a.networkStage < 2 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала SCAN для этой цели.";
+                a.networkStage = 3; markDirty();
+                return "§bSERVICE ENUMERATION §7| §f" + targetName + "\n§f021 WEB-GATE: публичный портал\n§f044 DATA-RELAY: хранилище ресурсов\n§f071 ADMIN-CORE: управление домом\n§7Сервисы вымышлены; внешних подключений нет.\n§aДалее: NET EXPLOIT " + targetName + " FARM";
+            }
+            case "EXPLOIT" -> {
+                recordNetworkActivity(attacker, a, action, targetName);
+                if (parts.length < 3) return "§eУкажи игровой модуль: FARM, POWER, DATA, SUPPLIES, ALARM, LOCK, FALSECALL или RAIDERS.";
+                if (a.networkStage < 3 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER, SCAN и ENUM.";
+                long now = attacker.getServer().getOverworld().getTime();
+                a.lastNetworkActionTick = now; a.networkStage = 0;
+                String result = sabotage(attacker, target, parts[2].toLowerCase());
+                markDirty();
+                return "§bEXPLOIT SIMULATION §7| §f" + targetName + " / " + parts[2].toUpperCase() + "\n" + result;
+            }
+            default -> { return "§eNET DISCOVER | SCAN | ENUM | EXPLOIT"; }
+        }
+    }
+
+
     public String station(ServerPlayerEntity player, String action) {
         PlayerProfile p = profile(player);
         String[] args = action.trim().toLowerCase().split("\\s+");
