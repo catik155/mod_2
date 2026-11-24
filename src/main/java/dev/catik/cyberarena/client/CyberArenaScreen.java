@@ -94,6 +94,11 @@ public final class CyberArenaScreen extends Screen {
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
     private static final List<String> HISTORY = new ArrayList<>();
+    private static final List<String> TERMINAL_OUTPUT = new ArrayList<>();
+    private static final List<String> COMMAND_HISTORY = new ArrayList<>();
+    private static final List<String> COMPLETION_MATCHES = new ArrayList<>();
+    private static int historyCursor = -1;
+    private static int completionCursor = 0;
     private static int directoryPage = 0;
     private static boolean voraSelected = false;
     private static final int SITES_PER_PAGE = 5;
@@ -102,6 +107,8 @@ public final class CyberArenaScreen extends Screen {
     private final String selectedSite;
     private final String query;
     private TextFieldWidget input;
+    private int terminalScroll = 0;
+    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","HOME","DEFENSE","LOGS"};
 
     public CyberArenaScreen() { this(0, "", ""); }
     public CyberArenaScreen(int initialPage) { this(initialPage, "", ""); }
@@ -167,29 +174,104 @@ public final class CyberArenaScreen extends Screen {
         }
     }
 
+
     @Override
     protected void init() {
+        if (page == 1) { initTerminalFullScreen(); return; }
         int panelWidth = Math.max(220, Math.min(520, this.width - 24));
         int panelHeight = Math.max(250, Math.min(340, this.height - 20));
         int left = (this.width - panelWidth) / 2;
         int top = Math.max(10, (this.height - panelHeight) / 2);
-        int scaleY = panelHeight < 300 ? 1 : 1;
-        int tabGap = 5;
-        int tabWidth = (panelWidth - 28 - tabGap * 3) / 4;
-        addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0))
-            .dimensions(left + 12, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть виртуальные сайты, поиск, закладки и историю"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1))
-            .dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть консоль и вводить команды на NX или FLEX"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2))
-            .dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль AUTOM: до покупки действия выполняются вручную в консоли"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШЕНИЯ"), b -> navigate(8))
-            .dimensions(left + 14 + (tabWidth + tabGap) * 3, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Прокачка защиты, скрытности, процессора и других модулей"))).build());
-
+        int tabGap = 5, tabWidth = (panelWidth - 28 - tabGap * 3) / 4;
+        addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0)).dimensions(left + 12, top + 48, tabWidth, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1)).dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2)).dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШЕНИЯ"), b -> navigate(8)).dimensions(left + 14 + (tabWidth + tabGap) * 3, top + 48, tabWidth, 20).build());
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
-        else if (page == 1) initTerminal(left, top, panelWidth);
         else if (page == 7) initSiteConsole(left, top, panelWidth);
         else if (page == 8) initUpgrades(left, top, panelWidth);
         else initAutomation(left, top, panelWidth);
+    }
+
+    private void initTerminalFullScreen() {
+        int left = 8, width = this.width - 16, tabWidth = Math.max(70, (width - 36) / 4);
+        String[] labels = {"БРАУЗЕР", "NX / FLEX", "АВТОМАТИЗАЦИЯ", "УЛУЧШЕНИЯ"};
+        int[] pages = {0, 1, 2, 8};
+        for (int i = 0; i < labels.length; i++) {
+            final int destination = pages[i];
+            addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + 4), 16, tabWidth, 20).build());
+        }
+        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, width - 112, 22, Text.literal("NX command"));
+        input.setMaxLength(240);
+        input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
+        input.setChangedListener(this::refreshCompletions);
+        addDrawableChild(input);
+        addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 90, this.height - 42, 76, 22).build());
+        input.setFocused(true);
+        setInitialFocus(input);
+        if (TERMINAL_OUTPUT.isEmpty()) {
+            TERMINAL_OUTPUT.add("CYBER ARENA TERMINAL // " + (voraSelected ? "FLEX" : "NX"));
+            TERMINAL_OUTPUT.add("Закрытая игровая среда. Все адреса, узлы и службы вымышлены.");
+            TERMINAL_OUTPUT.add("MANU — справка | TAB — автодополнение | ↑/↓ — история | Ctrl+R — поиск");
+            TERMINAL_OUTPUT.add("");
+        }
+        refreshCompletions(input.getText());
+    }
+
+    private void refreshCompletions(String value) {
+        COMPLETION_MATCHES.clear();
+        if (value == null) return;
+        int split = value.lastIndexOf(' ');
+        String prefix = split >= 0 ? value.substring(split + 1) : value;
+        String head = split >= 0 ? value.substring(0, split).trim().toUpperCase(java.util.Locale.ROOT) : "";
+        List<String> options = new ArrayList<>();
+        if (head.isEmpty()) {
+            for (String command : NX_COMMANDS) options.add(voraSelected ? flexAlias(command) : command);
+        } else {
+            String[] args = switch (head) {
+                case "FARM" -> new String[]{"BUY","UPGRADE","REPAIR","STATUS"};
+                case "VPN" -> new String[]{"BUY","ON","OFF","STATUS"};
+                case "NET" -> new String[]{"DISCOVER","SCAN","ENUM","EXPLOIT"};
+                case "UPGR" -> new String[]{"FIREWALL","AUTOM","STEALTH","EXTRACT","MINER","CPU","STORAGE","BREAKER","GUARD"};
+                case "SABOTAGE" -> new String[]{"FARM","POWER","SUPPLIES","DATA","ALARM","LOCK","FALSECALL","RAIDERS"};
+                default -> new String[0];
+            };
+            for (String option : args) options.add(option);
+        }
+        for (String option : options) if (option.toLowerCase(java.util.Locale.ROOT).startsWith(prefix.toLowerCase(java.util.Locale.ROOT))) COMPLETION_MATCHES.add(option);
+        completionCursor = 0;
+    }
+
+    private String flexAlias(String command) {
+        return switch (command) {
+            case "MANU" -> "LUMA"; case "SEEK" -> "KERI"; case "PORTA" -> "DORA"; case "NODR" -> "NAVA";
+            case "STAT" -> "MIRA"; case "CRACK" -> "TARA"; case "MINE" -> "DARA"; case "SELR" -> "SELI";
+            case "UPGR" -> "UPRA"; case "RAID" -> "RIVA"; case "FLOW" -> "FENA"; case "SITE" -> "VESA";
+            default -> command;
+        };
+    }
+
+    private void submitTerminal() {
+        if (input == null) return;
+        String value = input.getText().trim();
+        if (value.isEmpty()) return;
+        String command = translateVora(value);
+        TERMINAL_OUTPUT.add("§a" + (voraSelected ? "flex" : "nx") + "@arena:~$ §f" + value);
+        COMMAND_HISTORY.add(value);
+        if (COMMAND_HISTORY.size() > 100) COMMAND_HISTORY.remove(0);
+        historyCursor = -1;
+        if (client != null && client.getNetworkHandler() != null) client.getNetworkHandler().sendChatCommand("arena nex " + command);
+        input.setText("");
+        terminalScroll = 0;
+    }
+
+    public static boolean isTerminalOpen() {
+        return net.minecraft.client.MinecraftClient.getInstance().currentScreen instanceof CyberArenaScreen screen && screen.page == 1;
+    }
+    public static void appendOutput(String message) {
+        if (message == null || message.isBlank()) return;
+        TERMINAL_OUTPUT.add(message);
+        while (TERMINAL_OUTPUT.size() > 250) TERMINAL_OUTPUT.remove(0);
     }
 
     private void initBrowser(int left, int top, int panelWidth) {
@@ -322,28 +404,6 @@ public final class CyberArenaScreen extends Screen {
         }
     }
 
-    private void initTerminal(int left, int top, int panelWidth) {
-        addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "ЯЗЫК: FLEX (АКТИВЕН)" : "ЯЗЫК: NX (АКТИВЕН)"), b -> {
-            voraSelected = !voraSelected;
-            if (client != null) client.setScreen(new CyberArenaScreen(1, "", ""));
-        }).dimensions(left + 14, top + 76, panelWidth - 28, 20).build());
-        input = new TextFieldWidget(textRenderer, left + 14, top + 103, panelWidth - 28, 20, Text.literal("Команда"));
-        input.setMaxLength(160);
-        input.setPlaceholder(Text.literal(voraSelected ? "LUMA / KERI vault / DORA vault.arena ..." : "MANU / SEEK vault / PORTA vault.arena ..."));
-        addDrawableChild(input);
-        addDrawableChild(ButtonWidget.builder(Text.literal("ВЫПОЛНИТЬ " + (voraSelected ? "FLEX" : "NX")), b -> submit("arena nex "))
-            .dimensions(left + 14, top + 132, (panelWidth - 36) / 2, 22).tooltip(Tooltip.of(Text.literal("Отправить введённую команду в игровую консоль"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СПРАВКА / МАНУАЛ"), b -> runNex("MANU"))
-            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 132, (panelWidth - 36) / 2, 22).tooltip(Tooltip.of(Text.literal("Список команд и синтаксис выбранного языка"))).build());
-        String[] commands = voraSelected ? new String[]{"MIRA", "NAVA", "JOBS", "DARA", "SELI", "UPRA stealth", "RIVA player"} : new String[]{"STAT", "NODR", "CONTRACTS", "MINE", "SELR", "UPGR stealth", "RAID player"};
-        for (int i = 0; i < commands.length; i++) {
-            final String command = commands[i];
-            int col = i % 2, row = i / 2;
-            addDrawableChild(ButtonWidget.builder(Text.literal(command), b -> runNex(translateVora(command)))
-                .dimensions(left + 14 + col * ((panelWidth - 36) / 2 + 8), top + 169 + row * 27, (panelWidth - 36) / 2, 21).tooltip(Tooltip.of(Text.literal("Быстрый запуск команды " + command + " — наведите, чтобы увидеть подсказку"))).build());
-        }
-    }
-
     private String translateVora(String text) {
         if (!voraSelected) return text;
         String[] p = text.trim().split("\\s+", 2);
@@ -405,7 +465,6 @@ public final class CyberArenaScreen extends Screen {
     private void send(String command) {
         if (client == null || client.player == null || client.getNetworkHandler() == null) return;
         client.getNetworkHandler().sendChatCommand(command);
-        close();
     }
 
     @Override
@@ -415,6 +474,7 @@ public final class CyberArenaScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (page == 1) { renderTerminal(context, mouseX, mouseY, delta); return; }
         // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
         int panelWidth = Math.max(220, Math.min(520, this.width - 24));
         int panelHeight = Math.max(250, Math.min(340, this.height - 20));
@@ -489,6 +549,42 @@ public final class CyberArenaScreen extends Screen {
         if (panelHeight >= 300) context.drawTextWithShadow(textRenderer, Text.literal("Сайты предназначены только для просмотра. Команды — в консоли."), left + 14, top + panelHeight - 16, 0xFF8295A8);
     }
 
+
+    private void renderTerminal(DrawContext context, int mouseX, int mouseY, float delta) {
+        int left = 8, top = 8, width = this.width - 16, height = this.height - 16;
+        context.fill(left, top, left + width, top + height, 0xF20A1119);
+        context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
+        context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
+        context.drawTextWithShadow(textRenderer, Text.literal("SESSION: LOCAL SIMULATION     HOST: arena-node     STATUS: ONLINE"), left + 12, top + 56, 0xFF8295A8);
+        int outputTop = top + 76, outputBottom = height - 62;
+        context.fill(left + 8, outputTop, left + width - 8, outputBottom, 0xFF0D1720);
+        int lineHeight = 12, maxLines = Math.max(1, (outputBottom - outputTop - 10) / lineHeight);
+        int start = Math.max(0, TERMINAL_OUTPUT.size() - maxLines - terminalScroll);
+        int end = Math.min(TERMINAL_OUTPUT.size(), start + maxLines);
+        int y = outputTop + 7;
+        for (int i = start; i < end; i++) {
+            String line = TERMINAL_OUTPUT.get(i).replaceAll("§[0-9a-fk-or]", "");
+            int color = line.contains("ERROR") || line.contains("ОШИБКА") ? 0xFFFF7777 : line.contains("УСПЕХ") ? 0xFF72E6B4 : 0xFFD0DCE6;
+            drawWrapped(context, line, left + 16, y, width - 34, color);
+            y += lineHeight;
+        }
+        if (input != null && input.isFocused() && !input.getText().isBlank()) {
+            int suggestY = height - 57;
+            context.fill(left + 8, suggestY - 3, left + width - 8, height - 34, 0xFF142431);
+            String heading = COMPLETION_MATCHES.isEmpty() ? "НЕТ СОВПАДЕНИЙ" : "ВОЗМОЖНЫЕ ДОПОЛНЕНИЯ (" + COMPLETION_MATCHES.size() + ")";
+            context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, suggestY, 0xFF70D8FF);
+            StringBuilder row = new StringBuilder();
+            for (int i = 0; i < Math.min(8, COMPLETION_MATCHES.size()); i++) {
+                if (i > 0) row.append("   ");
+                row.append(i == completionCursor ? "> " : "").append(COMPLETION_MATCHES.get(i));
+            }
+            context.drawTextWithShadow(textRenderer, Text.literal(row.toString()), left + 14, suggestY + 13, 0xFFBDEBFF);
+        }
+        context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "flex@arena:~>" : "nx@arena:~$"), left + 14, height - 23, 0xFF55E6D2);
+        context.drawTextWithShadow(textRenderer, Text.literal("TAB: доп.  ↑/↓: история  CTRL+R: поиск  ENTER: выполнить"), left + width - 320, height - 23, 0xFF8295A8);
+        super.render(context, mouseX, mouseY, delta);
+    }
+
     private int siteAccent(int index) {
         return switch (index % 10) {
             case 0 -> 0xFFFFB84D; case 1 -> 0xFF65C8FF; case 2 -> 0xFF62E6B5;
@@ -536,14 +632,52 @@ public final class CyberArenaScreen extends Screen {
         }
     }
 
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (page == 1 && input != null) {
+            if (keyCode == 258 && input.isFocused()) {
+                if (!COMPLETION_MATCHES.isEmpty()) {
+                    String value = input.getText();
+                    int split = value.lastIndexOf(' ');
+                    String prefix = split >= 0 ? value.substring(0, split + 1) : "";
+                    input.setText(prefix + COMPLETION_MATCHES.get(completionCursor));
+                    completionCursor = (completionCursor + 1) % COMPLETION_MATCHES.size();
+                }
+                return true;
+            }
+            if (keyCode == 265 && input.isFocused()) {
+                if (!COMMAND_HISTORY.isEmpty()) {
+                    historyCursor = Math.min(COMMAND_HISTORY.size() - 1, historyCursor + 1);
+                    input.setText(COMMAND_HISTORY.get(COMMAND_HISTORY.size() - 1 - historyCursor));
+                }
+                return true;
+            }
+            if (keyCode == 264 && input.isFocused()) {
+                if (historyCursor > 0) { historyCursor--; input.setText(COMMAND_HISTORY.get(COMMAND_HISTORY.size() - 1 - historyCursor)); }
+                else if (historyCursor == 0) { historyCursor = -1; input.setText(""); }
+                return true;
+            }
+            if (keyCode == 82 && Screen.hasControlDown() && input.isFocused()) {
+                String query = input.getText().toLowerCase(java.util.Locale.ROOT);
+                for (int i = COMMAND_HISTORY.size() - 1; i >= 0; i--) {
+                    if (COMMAND_HISTORY.get(i).toLowerCase(java.util.Locale.ROOT).contains(query)) {
+                        input.setText(COMMAND_HISTORY.get(i));
+                        appendOutput("§7(reverse-i-search) " + query + ": " + COMMAND_HISTORY.get(i));
+                        break;
+                    }
+                }
+                return true;
+            }
+            if (keyCode == 257 && input.isFocused()) { submitTerminal(); return true; }
+            if (keyCode == 266) { terminalScroll = Math.min(TERMINAL_OUTPUT.size(), terminalScroll + 8); return true; }
+            if (keyCode == 267) { terminalScroll = Math.max(0, terminalScroll - 8); return true; }
+        }
         if (keyCode == 257 && input != null && input.isFocused()) {
             if (page == 0) {
                 String q = input.getText().trim();
                 if (client != null) client.setScreen(new CyberArenaScreen(0, "", q));
-            } else if (page == 1) submit("arena nex ");
-            else if (page == 2) submit("arena nex FLOW ");
+            } else if (page == 2) submit("arena nex FLOW ");
             else if (page == 7) submitSiteConsole();
             return true;
         }
