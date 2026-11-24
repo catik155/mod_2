@@ -185,8 +185,9 @@ public final class NexEngine {
             + "§fMINE §7проверка майнера (доход идёт автоматически) | SELR §7обмен осколков | UPGR <модуль> §7улучшение\n"
             + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\n"
             + "§fREPAIR §7аварийное питание | FARM BUY/UPGRADE/REPAIR/STATUS §7домашняя ферма\n"
-            + "§fVPN BUY/ON/OFF/STATUS §7виртуальный VPN | IP §7игровой адрес | POLICE §7уровень розыска\n"
-            + "§fSABOTAGE <игрок> <FARM|POWER|SUPPLIES|DATA|ALARM|LOCK|FALSECALL|RAIDERS> §7подлянка в доме соперника\n"
+            + "§fVPN BUY/ON/OFF/STATUS §7виртуальный VPN | IP §7игровой адрес | POLICE §7слежение и розыск\n"
+            + "§fNET DISCOVER/SCAN/ENUM/EXPLOIT <игрок> [модуль] §7поэтапная сетевая операция\n"
+            + "§fSABOTAGE §7быстрый режим; NET — основной способ атаковать\n"
             + "§fUPGR BREAKER/GUARD §7расходуемая защита дома\n"
             + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\n"
             + "§7Все цели и данные вымышлены и существуют только внутри Cyber Arena.";
