@@ -11,7 +11,7 @@
 ## Core
 - [x] Fabric 1.21.1 / Java 21 project
 - [x] Server-authoritative persistent profiles and zero-start economy
-- [x] Simulated player-vs-player raids and alerts
+- [x] Simulated player-vs-player raids and alerts\n- [x] Add RAID <player> to the NX console so PvP attacks are launched from the console, not the browser
 
 ## Browser / fictional websites
 - [x] Browser workstation opened with O; separate Browser, ordinary Console (P), and Automation tabs
@@ -77,7 +77,7 @@
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
 - [x] Credits, data shards, extraction rewards and cooldowns
 - [x] Safe routine runner (up to six whitelisted instructions)
-- [ ] Automation tab is locked until AUTOM is purchased from the Improvements shop on a designated fictional .arena website; show price, unlock status and purchase feedback
+- [x] Add a dedicated Improvements tab with purchase buttons for all seven upgrade modules; purchases are validated and charged by the server\n- [ ] Automation tab must remain purchase-gated: before AUTOM is bought, show only the price and locked state; after purchase, reveal presets and FLOW
 - [ ] Once purchased, unlock ready-made unattended automation presets and custom FLOW scripts (bounded, game-only actions); automation can run without manual command-by-command player input
 - [ ] FLEX is a separate premium language purchase in the Improvements shop, with more capabilities than NX; clearly explain price and unlocked feature tiers
 - [ ] Saved scripts and reusable automation presets
@@ -92,7 +92,7 @@
 - [ ] Defense dashboard, honeypots, backup/recovery and incident notifications
 - [ ] NPC rivals, factions, teams, tournaments and seasonal leaderboards
 - [ ] Multiplayer contract sync and authoritative validation for all actions
-- [ ] Anti-grief, rate limits, audit trail and clear consent rules for PvP
+- [ ] Anti-grief, rate limits, audit trail and clear consent rules for PvP\n- [ ] Add an explicit opt-in PvP setting and configurable protection for new players
 
 ## UI / polish
 - [ ] Add a compact competition/leaderboard panel at the upper-left: player skins or faces, names, and earned points
