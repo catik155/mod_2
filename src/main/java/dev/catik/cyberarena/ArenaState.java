@@ -69,6 +69,31 @@ public final class ArenaState extends PersistentState {
         player.sendMessage(Text.literal("§a[CYBER ARENA] §fТвой дом и рабочая станция готовы. Точка возрождения установлена внутри."), false);
     }
 
+    private int homeCandidateX;
+    private int homeCandidateZ;
+
+    private int findHomeFloor(ServerWorld world, int wantedX, int wantedZ) {
+        for (int radius = 0; radius <= 48; radius += 4) {
+            for (int dx = -radius; dx <= radius; dx += 4) {
+                for (int dz = -radius; dz <= radius; dz += 4) {
+                    if (radius > 0 && Math.abs(dx) != radius && Math.abs(dz) != radius) continue;
+                    int x = wantedX + dx;
+                    int z = wantedZ + dz;
+                    int y = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+                    BlockPos ground = new BlockPos(x, y - 1, z);
+                    if (world.getBlockState(ground).isSolidBlock(world, ground)) {
+                        homeCandidateX = x;
+                        homeCandidateZ = z;
+                        return y;
+                    }
+                }
+            }
+        }
+        homeCandidateX = wantedX;
+        homeCandidateZ = wantedZ;
+        return world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, wantedX, wantedZ);
+    }
+
     private static void buildStarterHouse(ServerWorld world, int x, int y, int z) {
         for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
             world.setBlockState(new BlockPos(x + dx, y, z + dz), Blocks.OAK_PLANKS.getDefaultState());
@@ -100,10 +125,13 @@ public final class ArenaState extends PersistentState {
                 player.sendMessage(Text.literal("§6[МАЙНИНГ] §fПассивный доход: §a+" + income + " кредитов §7| §eMINER " + p.miningRig + "/5"), true);
                 state.markDirty();
             }
-            if (now - p.lastIncidentTick >= 6000 && ThreadLocalRandom.current().nextInt(100) < 30) {
-                p.lastIncidentTick = now;
-                state.triggerHomeIncident(player, p, now);
-                state.markDirty();
+            if (now - p.lastIncidentCheckTick >= 1200) {
+                p.lastIncidentCheckTick = now;
+                if (now - p.lastIncidentTick >= 6000 && ThreadLocalRandom.current().nextInt(100) < 35) {
+                    p.lastIncidentTick = now;
+                    state.triggerHomeIncident(player, p, now);
+                    state.markDirty();
+                }
             }
             if (now % 40 == 0) state.sendOverlay(player, p, now);
         }
