@@ -185,7 +185,7 @@ public final class NexEngine {
             + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\n"
             + "§fREPAIR §7аварийное питание | FARM BUY/UPGRADE/REPAIR/STATUS §7домашняя ферма\n"
             + "§fVPN BUY/ON/OFF/STATUS §7виртуальный VPN | IP §7игровой адрес | POLICE §7уровень розыска\n"
-            + "§fSABOTAGE <игрок> <FARM|POWER|SUPPLIES|ALARM> §7подлянка в доме соперника\n"
+            + "§fSABOTAGE <игрок> <FARM|POWER|SUPPLIES|DATA|ALARM|LOCK|FALSECALL|RAIDERS> §7подлянка в доме соперника\n"
             + "§fUPGR BREAKER/GUARD §7расходуемая защита дома\n"
             + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\n"
             + "§7Все цели и данные вымышлены и существуют только внутри Cyber Arena.";
@@ -315,7 +315,7 @@ public final class NexEngine {
 
     private static String raidPlayer(ServerPlayerEntity attacker, String targetName) {
         if (targetName == null || targetName.isBlank()) return error("RAID_SYNTAX", "Use RAID <online_player>.");
-        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayer(targetName);
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayerList().stream().filter(p -> p.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
         if (target == null) return error("RAID_TARGET", "Player must be online on this server.");
         return ArenaState.get(attacker.getServer()).raid(attacker, target, attacker.getWorld().getTime());
     }
@@ -323,7 +323,7 @@ public final class NexEngine {
     private static String sabotagePlayer(ServerPlayerEntity attacker, String args) {
         String[] parts = args.split("\\s+", 2);
         if (parts.length != 2) return error("SABOTAGE_SYNTAX", "Use SABOTAGE <online_player> <FARM|POWER|SUPPLIES|ALARM>.");
-        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayer(parts[0]);
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayerList().stream().filter(p -> p.getGameProfile().getName().equalsIgnoreCase(parts[0])).findFirst().orElse(null);
         if (target == null) return error("SABOTAGE_TARGET", "Target player must be online.");
         return ArenaState.get(attacker.getServer()).sabotage(attacker, target, parts[1]);
     }
