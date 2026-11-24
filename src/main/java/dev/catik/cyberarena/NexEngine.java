@@ -147,7 +147,7 @@ public final class NexEngine {
         String arg = parts.length > 1 ? unquote(parts[1].trim().toLowerCase(Locale.ROOT)) : "";
         return switch (cmd) {
             case "MANU", "HELP", "?" -> manual();
-            case "STAT", "STATUS" -> "§aNEX CORE 2.1 ONLINE §7| §fARENA-SIM isolated §7| §fExternal I/O: DISABLED";
+            case "STAT", "STATUS" -> player == null ? "§aNX CORE ONLINE §7| §fExternal I/O: DISABLED" : status(player);
             case "NODR", "NODES", "MAPA" -> nodes();
             case "SEEK" -> seek(arg);
             case "WHO", "WHOIS" -> who(arg);
@@ -158,7 +158,7 @@ public final class NexEngine {
             case "CRACK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).breachSite(player, arg);
             case "RAID" -> player == null ? error("NO_OPERATOR", "Operator context required.") : raidPlayer(player, arg);
             case "MINE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).mine(player);
-            case "UPGR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).upgrade(player, arg);
+            case "UPGR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).upgrade(player, arg);\n            case "REPAIR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).repairPower(player);
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
@@ -291,6 +291,15 @@ public final class NexEngine {
             default -> "Fictional public metadata record. No real personal data is stored.";
         };
         return "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
+    }
+
+    private static String status(ServerPlayerEntity player) {
+        ArenaState.ProfileView p = ArenaState.get(player.getServer()).view(player);
+        return "§aNX CORE 2.2 ONLINE §7| §fВНЕШНИЙ ДОСТУП ОТКЛЮЧЁН"
+            + "\\n§6Кредиты: " + p.credits() + " §7| §dREP: " + p.reputation() + " §7| §bОсколки: " + p.dataShards()
+            + "\\n§eFIREWALL " + p.firewall() + "/5 §7| AUTOM " + p.automation() + "/5 §7| STEALTH " + p.stealth() + "/5"
+            + "\\n§dEXTRACT " + p.extractor() + "/5 §7| MINER " + p.miningRig() + "/5 §7| CPU " + p.cpu() + "/5 §7| STORAGE " + p.storage() + "/5"
+            + "\\n§cЩиток: " + p.breakerCharges() + " зарядов §7| §aОхрана: " + p.guardCharges() + " зарядов";
     }
 
     private static String raidPlayer(ServerPlayerEntity attacker, String targetName) {
