@@ -521,6 +521,41 @@ public final class ArenaState extends PersistentState {
         }
     }
 
+    public String station(ServerPlayerEntity player, String action) {
+        PlayerProfile p = profile(player);
+        String[] args = action.trim().toLowerCase().split("\\s+");
+        String op = args.length == 0 ? "status" : args[0];
+        if (op.equals("repair")) {
+            if (p.stationHealth >= 100) return "§aРабочая станция полностью исправна.";
+            int cost = Math.max(20, (100 - p.stationHealth) * 2);
+            if (p.credits < cost) return "§cРемонт станции стоит " + cost + " кредитов.";
+            p.credits -= cost; p.stationHealth = 100; refreshHomeDisplays(player, p); markDirty();
+            return "§aРАБОЧАЯ СТАНЦИЯ ВОССТАНОВЛЕНА | 100% | -" + cost + " кредитов.";
+        }
+        if (op.equals("remote")) {
+            if (p.remoteStationLevel > 0) return "§eУдалённый терминал уже установлен.";
+            if (p.credits < 450) return "§cУдалённый терминал стоит 450 кредитов.";
+            p.credits -= 450; p.remoteStationLevel = 1;
+            ServerWorld world = player.getServer().getOverworld();
+            BlockPos antenna = new BlockPos(p.homeX, p.homeY + 6, p.homeZ);
+            world.setBlockState(antenna, Blocks.LIGHTNING_ROD.getDefaultState());
+            world.setBlockState(antenna.down(), Blocks.IRON_BLOCK.getDefaultState());
+            markDirty();
+            return "§aУДАЛЁННЫЙ ТЕРМИНАЛ УСТАНОВЛЕН | Теперь консоль доступна вне дома и при разрушенной основной станции.";
+        }
+        return "§bСТАНЦИЯ | Прочность " + p.stationHealth + "% | " + (p.stationHealth > 0 ? "основной терминал доступен" : "§cосновной терминал разрушен")
+            + " | Удалённый терминал: " + (p.remoteStationLevel > 0 ? "§aустановлен" : "§eне куплен")
+            + "\\n§fSTATION REPAIR — восстановить | STATION REMOTE — купить удалённый терминал за 450 кредитов.";
+    }
+
+    public boolean canUseWorkstation(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        if (p.remoteStationLevel > 0) return true;
+        if (p.stationHealth <= 0 || isPowerOut(player) || !p.homeBuilt) return false;
+        return Math.abs(player.getBlockX() - p.homeX) <= 5 && Math.abs(player.getBlockZ() - p.homeZ) <= 5
+            && player.getY() >= p.homeY && player.getY() <= p.homeY + 7;
+    }
+
     public String repairPower(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         if (p.powerUntilTick <= player.getServer().getOverworld().getTime()) return "§aПитание уже работает.";
