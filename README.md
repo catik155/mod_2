@@ -8,7 +8,7 @@ Press **K** in-game to open the Cyber Arena workstation. It combines a NEX comma
 
 ## NEX quick reference
 
-The full concise language reference, including syntax, aliases, all instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The virtual directory currently contains 20 sites, 10 nodes, 70 simulated service slots and 60 fictional file records.
+The full concise language reference, including syntax, aliases, all instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The virtual directory currently contains 30 sites, 15 nodes, 110 simulated service slots and 90 fictional file records.
 
 | Instruction | Function |
 |---|---|
