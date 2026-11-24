@@ -360,18 +360,18 @@ public final class CyberArenaScreen extends Screen {
             .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы на трёх сайтах без ручного ввода."))).build());
     }
     private void initUpgrades(int left, int top, int panelWidth) {
-        String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE"};
-        String[] labels = {"ЗАЩИТА", "АВТОМАТИЗАЦИЯ", "СКРЫТНОСТЬ", "ИЗВЛЕЧЕНИЕ", "МАЙНИНГ", "ПРОЦЕССОР", "ХРАНИЛИЩЕ"};
+        String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE", "BREAKER", "GUARD"};
+        String[] labels = {"ЗАЩИТА", "АВТОМАТИЗАЦИЯ", "СКРЫТНОСТЬ", "ИЗВЛЕЧЕНИЕ", "МАЙНИНГ", "ПРОЦЕССОР", "ХРАНИЛИЩЕ", "ЭЛЕКТРОЩИТОК", "ОХРАНА"};
         int gap = 8, colWidth = (panelWidth - 36) / 2;
         for (int i = 0; i < modules.length; i++) {
             final String module = modules[i];
             int col = i % 2, row = i / 2;
             addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШИТЬ: " + labels[i]), b -> runNex("UPGR " + module))
-                .dimensions(left + 14 + col * (colWidth + gap), top + 112 + row * 34, colWidth, 26)
+                .dimensions(left + 14 + col * (colWidth + gap), top + 110 + row * 29, colWidth, 24)
                 .tooltip(Tooltip.of(Text.literal("Купить следующий уровень " + module + ". Стоимость зависит от текущего уровня; максимум 5."))).build());
         }
         addDrawableChild(ButtonWidget.builder(Text.literal("МОЙ ПРОФИЛЬ И БАЛАНС"), b -> runNex("STAT"))
-            .dimensions(left + 14, top + 246, panelWidth - 28, 22)
+            .dimensions(left + 14, top + 266, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Показать кредиты, очки репутации и уровни модулей"))).build());
     }
 
