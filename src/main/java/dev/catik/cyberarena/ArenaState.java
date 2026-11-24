@@ -1,6 +1,13 @@
 package dev.catik.cyberarena;
 
 import net.minecraft.datafixer.DataFixTypes;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.mob.PillagerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Heightmap;
+import net.minecraft.text.Text;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
@@ -14,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class ArenaState extends PersistentState {
@@ -22,6 +30,7 @@ public final class ArenaState extends PersistentState {
         ArenaState::new, ArenaState::fromNbt, DataFixTypes.LEVEL
     );
     private final Map<UUID, PlayerProfile> profiles = new HashMap<>();
+    private int nextHomeIndex = 0;
 
     public static ArenaState get(MinecraftServer server) {
         ServerWorld world = server.getOverworld();
@@ -35,7 +44,111 @@ public final class ArenaState extends PersistentState {
     public ProfileView view(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         return new ProfileView(p.credits, p.reputation, p.dataShards, p.firewall, p.automation,
-            p.stealth, p.extractor, p.miningRig, p.cpu, p.storage, p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size());
+            p.stealth, p.extractor, p.miningRig, p.cpu, p.storage, p.alertLevel, p.completedContracts.size(), p.discoveredNodes.size(), p.breakerCharges, p.guardCharges, p.powerUntilTick);
+    }
+
+    public void ensureHome(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        if (p.homeBuilt) return;
+        ServerWorld world = player.getServer().getOverworld();
+        if (p.homeIndex < 0) p.homeIndex = nextHomeIndex++;
+        int gridX = p.homeIndex % 8;
+        int gridZ = p.homeIndex / 8;
+        BlockPos worldSpawn = world.getSpawnPos();
+        int centerX = worldSpawn.getX() + (gridX - 3) * 14;
+        int centerZ = worldSpawn.getZ() + (gridZ - 3) * 14;
+        int floorY = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ);
+        buildStarterHouse(world, centerX, floorY, centerZ);
+        p.homeX = centerX; p.homeY = floorY; p.homeZ = centerZ; p.homeBuilt = true;
+        BlockPos bedSpawn = new BlockPos(centerX, floorY + 1, centerZ);
+        player.setSpawnPoint(world.getRegistryKey(), bedSpawn, 0.0F, true, false);
+        player.teleport(world, centerX + 0.5, floorY + 1, centerZ + 0.5, 0.0F, 0.0F);
+        markDirty();
+        player.sendMessage(Text.literal("§a[CYBER ARENA] §fТвой дом и рабочая станция готовы. Точка возрождения установлена внутри."), false);
+    }
+
+    private static void buildStarterHouse(ServerWorld world, int x, int y, int z) {
+        for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
+            world.setBlockState(new BlockPos(x + dx, y, z + dz), Blocks.OAK_PLANKS.getDefaultState());
+            for (int dy = 1; dy <= 3; dy++) {
+                boolean wall = Math.abs(dx) == 3 || Math.abs(dz) == 3;
+                if (!wall) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.AIR.getDefaultState());
+                else if (dz == 3 && dx == 0 && dy <= 2) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.AIR.getDefaultState());
+                else if (dy == 2 && (Math.abs(dx) == 3 || Math.abs(dz) == 3) && (Math.abs(dx) == 3 || Math.abs(dz) == 3) && ((dx == -3 && dz == 0) || (dx == 3 && dz == 0) || (dx == 0 && dz == -3))) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.GLASS.getDefaultState());
+                else world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.SPRUCE_PLANKS.getDefaultState());
+            }
+            world.setBlockState(new BlockPos(x + dx, y + 4, z + dz), Blocks.SPRUCE_PLANKS.getDefaultState());
+        }
+        world.setBlockState(new BlockPos(x + 2, y + 1, z + 2), Blocks.CRAFTING_TABLE.getDefaultState());
+        world.setBlockState(new BlockPos(x - 2, y + 1, z + 2), Blocks.BARREL.getDefaultState());
+        world.setBlockState(new BlockPos(x, y + 3, z), Blocks.LANTERN.getDefaultState());
+    }
+
+    public static void tickServer(MinecraftServer server) {
+        ArenaState state = get(server);
+        long now = server.getOverworld().getTime();
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            PlayerProfile p = state.profile(player);
+            if (p.lastPassiveIncomeTick < 0) p.lastPassiveIncomeTick = now;
+            if (now - p.lastPassiveIncomeTick >= 1200) {
+                long cycles = Math.min(10, (now - p.lastPassiveIncomeTick) / 1200);
+                int income = (int) cycles * (2 + p.miningRig * 2);
+                p.credits += income;
+                p.lastPassiveIncomeTick += cycles * 1200;
+                player.sendMessage(Text.literal("§6[МАЙНИНГ] §fПассивный доход: §a+" + income + " кредитов §7| §eMINER " + p.miningRig + "/5"), true);
+                state.markDirty();
+            }
+            if (now - p.lastIncidentTick >= 6000 && ThreadLocalRandom.current().nextInt(100) < 30) {
+                p.lastIncidentTick = now;
+                state.triggerHomeIncident(player, p, now);
+                state.markDirty();
+            }
+            if (now % 40 == 0) state.sendOverlay(player, p, now);
+        }
+    }
+
+    private void triggerHomeIncident(ServerPlayerEntity player, PlayerProfile p, long now) {
+        if (ThreadLocalRandom.current().nextBoolean()) {
+            if (p.breakerCharges > 0) {
+                p.breakerCharges--;
+                player.sendMessage(Text.literal("§e[САБОТАЖ] §fПопытка отключить питание! Электрощиток выдержал удар и сгорел. Осталось зарядов: " + p.breakerCharges), false);
+            } else {
+                p.powerUntilTick = now + 1200;
+                player.sendMessage(Text.literal("§c[АВАРИЯ] §fПитание дома отключено на 60 секунд! Рабочая станция заблокирована. Используй REPAIR."), false);
+            }
+        } else {
+            if (p.guardCharges > 0) {
+                p.guardCharges--;
+                player.sendMessage(Text.literal("§e[НАПАДЕНИЕ] §fОхрана отбила налёт, но потеряла один заряд. Осталось: " + p.guardCharges), false);
+            } else {
+                BlockPos home = new BlockPos(p.homeX, p.homeY + 1, p.homeZ);
+                for (int i = 0; i < 2; i++) {
+                    BlockPos spawn = home.add(i == 0 ? -2 : 2, 0, 1);
+                    PillagerEntity raider = EntityType.PILLAGER.spawn(player.getServerWorld(), spawn, SpawnReason.EVENT);
+                    if (raider != null) { raider.setPersistent(); raider.setTarget(player); }
+                }
+                player.sendMessage(Text.literal("§c[ВТОРЖЕНИЕ] §fРейдеры ворвались в дом! Защищай рабочую станцию."), false);
+            }
+        }
+    }
+
+    private void sendOverlay(ServerPlayerEntity player, PlayerProfile p, long now) {
+        String power = p.powerUntilTick > now ? "§cПИТАНИЕ ОТКЛЮЧЕНО " + ((p.powerUntilTick - now + 19) / 20) + "с" : "§aПИТАНИЕ: ВКЛ";
+        player.sendMessage(Text.literal("§bCYBER §7| §6" + p.credits + " кр. §7| §dREP " + p.reputation
+            + " §7| §eMINER +" + (2 + p.miningRig * 2) + "/мин §7| " + power
+            + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges), true);
+    }
+
+    public boolean isPowerOut(ServerPlayerEntity player) {
+        return profile(player).powerUntilTick > player.getServerWorld().getTime();
+    }
+
+    public String repairPower(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        if (p.powerUntilTick <= player.getServerWorld().getTime()) return "§aПитание уже работает.";
+        if (p.credits < 15) return "§cДля аварийного ремонта нужно 15 кредитов.";
+        p.credits -= 15; p.powerUntilTick = 0; markDirty();
+        return "§aПИТАНИЕ ВОССТАНОВЛЕНО §7| §6-15 кредитов";
     }
 
     public boolean discoverNode(ServerPlayerEntity player, String nodeId) {
@@ -126,7 +239,7 @@ public final class ArenaState extends PersistentState {
     public String upgrade(ServerPlayerEntity player, String type) {
         PlayerProfile p = profile(player);
         int level = switch (type) {
-            case "firewall" -> p.firewall; case "autom", "automation" -> p.automation;
+            case "firewall" -> p.firewall; case "autom", "automation" -> p.automation; case "breaker" -> p.breakerLevel; case "guard", "guards" -> p.guardLevel;
             case "stealth" -> p.stealth; case "extract", "extractor" -> p.extractor;
             case "miner", "mining" -> p.miningRig; case "cpu" -> p.cpu; case "storage" -> p.storage;
             default -> -1;
@@ -137,7 +250,7 @@ public final class ArenaState extends PersistentState {
         if (p.credits < cost) return "§cINSUFFICIENT CREDITS. Required: " + cost + ".";
         p.credits -= cost;
         switch (type) {
-            case "firewall" -> p.firewall++; case "autom", "automation" -> p.automation++;
+            case "firewall" -> p.firewall++; case "autom", "automation" -> p.automation++; case "breaker" -> { p.breakerLevel++; p.breakerCharges++; } case "guard", "guards" -> { p.guardLevel++; p.guardCharges++; }
             case "stealth" -> p.stealth++; case "extract", "extractor" -> p.extractor++;
             case "miner", "mining" -> p.miningRig++; case "cpu" -> p.cpu++; case "storage" -> p.storage++;
         }
@@ -162,7 +275,7 @@ public final class ArenaState extends PersistentState {
         return "§aSITE INCIDENT RESOLVED §7| §f" + site + " §7| §6+" + reward + " credits";
     }
 
-    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes) {}
+    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes, int breakerCharges, int guardCharges, long powerUntilTick) {}
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
@@ -173,7 +286,7 @@ public final class ArenaState extends PersistentState {
             e.putInt("credits", p.credits); e.putInt("reputation", p.reputation);
             e.putInt("data_shards", p.dataShards); e.putInt("firewall", p.firewall);
             e.putInt("automation", p.automation); e.putInt("stealth", p.stealth); e.putInt("extractor", p.extractor); e.putInt("miner", p.miningRig); e.putInt("cpu", p.cpu); e.putInt("storage", p.storage); e.putInt("alert", p.alertLevel);
-            e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
+            e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);\n            e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("power_until", p.powerUntilTick);\n            e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);\n            e.putInt("home_index", p.homeIndex); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
             NbtList nodes = new NbtList();
             p.discoveredNodes.forEach(v -> { NbtCompound n = new NbtCompound(); n.putString("id", v); nodes.add(n); });
             e.put("nodes", nodes);
@@ -182,7 +295,7 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
-        nbt.putInt("schema_version", 3);
+        nbt.putInt("schema_version", 4);
         nbt.put("profiles", entries);
         return nbt;
     }
@@ -198,7 +311,7 @@ public final class ArenaState extends PersistentState {
             p.credits = Math.max(0, e.getInt("credits")); p.reputation = Math.max(0, e.getInt("reputation"));
             p.dataShards = Math.max(0, e.getInt("data_shards")); p.firewall = clamp(e.getInt("firewall"), 0, 5);
             p.automation = clamp(e.getInt("automation"), 0, 5); p.stealth = clamp(e.getInt("stealth"), 0, 5); p.extractor = clamp(e.getInt("extractor"), 0, 5); p.miningRig = clamp(e.getInt("miner"), 0, 5); p.cpu = clamp(e.getInt("cpu"), 0, 5); p.storage = clamp(e.getInt("storage"), 0, 5); p.alertLevel = clamp(e.getInt("alert"), 0, 5); p.lastSiteRaidTick = e.getLong("last_site_raid"); p.lastMineTick = e.getLong("last_mine");
-            p.lastRaidTick = e.getLong("last_raid");
+            p.lastRaidTick = e.getLong("last_raid");\n            p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.powerUntilTick = e.getLong("power_until");\n            p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);\n            p.homeIndex = e.contains("home_index") ? e.getInt("home_index") : -1; p.homeX = e.getInt("home_x"); p.homeY = e.getInt("home_y"); p.homeZ = e.getInt("home_z"); p.homeBuilt = e.getBoolean("home_built");\n            if (p.homeIndex >= 0) state.nextHomeIndex = Math.max(state.nextHomeIndex, p.homeIndex + 1);
             readSet(e.getList("nodes", NbtCompound.COMPOUND_TYPE), p.discoveredNodes);
             readSet(e.getList("jobs", NbtCompound.COMPOUND_TYPE), p.completedContracts);
             state.profiles.put(e.getUuid("uuid"), p);
@@ -216,8 +329,8 @@ public final class ArenaState extends PersistentState {
 
     private static final class PlayerProfile {
         private final String name;
-        private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
-        private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000;
+        private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;\n        private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;\n        private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
+        private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, powerUntilTick = 0;
         private final Set<String> discoveredNodes = new HashSet<>();
         private final Set<String> completedContracts = new HashSet<>();
         private PlayerProfile(String name) { this.name = name; }
