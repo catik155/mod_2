@@ -1,105 +1,159 @@
-# NEX — краткий справочник языка
+# NX and FLEX — language guide / roadmap
 
-**NEX (Node Exchange Language)** — вымышленный командный язык Cyber Arena. Он управляет только игровыми узлами, сайтами, файлами, ресурсами и улучшениями внутри Minecraft. Реальных сетевых запросов язык не выполняет.
+Cyber Arena will have two fictional programming languages. The current command interpreter is a limited prototype; the full programming constructs below are planned and are **not all implemented yet**.
 
-## Второй язык: VORA
+## Language identities
+- **NX** (current NEX command vocabulary): short, direct terminal language.
+- **FLEX** (current VORA alternate vocabulary): different keywords and style, same safe game capabilities.
+- Temporary compatibility aliases: NEX and VORA while the migration is in progress.
 
-В терминале можно переключаться между **NEX** и **VORA**. VORA — отдельный вымышленный набор слов, который интерфейс переводит в NEX-команды: `LUMA` справка, `KERI` поиск, `DORA` службы, `NAVA` карта, `MIRA` статус, `TARA` извлечение, `DARA` добыча, `SELI` обмен, `UPRA` улучшение, `JOBS` контракты. В терминале подсказки остаются видимыми, а быстрые кнопки меняют названия под выбранный язык.
+Both will compile/interpret into the same restricted game-only instruction model. They cannot access the real internet, IPs, external ports, operating-system commands, local files, or real devices.
 
-## Основной синтаксис
+## Current implemented command baseline
+| Purpose | NX/NEX command |
+|---|---|
+| Help | `MANU`, `HELP`, `?` |
+| Status | `STAT` |
+| Node map | `NODR`, `MAPA` |
+| Discover node | `SCAN <node>` |
+| Search site directory | `SEEK <word>` |
+| Site overview | `WHO <site.arena>` |
+| Simulated latency | `PING <site.arena>` |
+| Fictional service list | `PORTA <site.arena>` |
+| Service detail | `PORTA <site.arena> <slot>` |
+| File list / metadata | `FILES <site.arena>`, `READ <site.arena> <file>` |
+| Simulated extraction | `CRACK <site.arena>` |
+| Mining / sell shards | `MINE`, `SELR` |
+| Upgrade | `UPGR <module>` |
+| Contracts | `CONTRACTS`, `RUN <id>` |
+| Safe routine | `FLOW <step; step; ...>` |
 
-Одна инструкция:
-```text
-OPCODE аргументы
+## FLEX current command equivalents (prototype translator)
+| FLEX | Equivalent NX/NEX action |
+|---|---|
+| `LUMA` | `MANU` — help |
+| `KERI` | `SEEK` — search |
+| `DORA` | `PORTA` — services |
+| `NAVA` | `NODR` — node map |
+| `MIRA` | `STAT` — status |
+| `TARA` | `CRACK` — simulated extraction |
+| `DARA` | `MINE` — mining |
+| `SELI` | `SELR` — exchange shards |
+| `UPRA` | `UPGR` — upgrade |
+| `JOBS` | `CONTRACTS` — contract board |
+| `RUNA` | `RUN` — contract |
+| `SAVA` | `SCAN` — discover node |
+| `PIRA` | `PING` — simulated latency |
+| `FILA` | `FILES` — list game records |
+| `REVA` | `READ` — read record metadata |
+| `WORA` | `WHO` — site info |
+
+## Full language features — planned
+
+### 1. Variables, types, assignment
+Planned types: `number`, `text`, `bool`, `list`, `record`, and `null`.
+```nx
+let target = "vault.arena"
+let attempts = 3
+let stealthMode = true
+const rewardLimit = 120
 ```
 
-Команды нечувствительны к регистру. Аргументы можно писать без кавычек или заключать в кавычки. Адреса игровых сайтов заканчиваются на `.arena`.
+FLEX syntax will use its own words for declaration and assignment, but the same data types and rules.
 
-## Команды
+### 2. Operators
+Planned:
+- Arithmetic: `+`, `-`, `*`, `/`, `%`
+- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
+- Logic: `AND`, `OR`, `NOT` (plus symbolic equivalents)
+- String concatenation and safe interpolation
 
-| Команда | Назначение |
-|---|---|
-| `MANU` / `HELP` / `?` | Справка по языку |
-| `STAT` | Состояние ядра NEX |
-| `NODR` / `MAPA` | Карта виртуальных узлов |
-| `SCAN <node>` | Открыть игровой узел и получить репутацию за первое открытие |
-| `SEEK <слово>` | Поиск по каталогу сайтов |
-| `WHO <site.arena>` | Карточка сайта: класс, файлы и службы |
-| `PING <site.arena>` | Игровая задержка-симуляция |
-| `PORTA <site.arena>` | Список виртуальных сервисных слотов |
-| `PORTA <site.arena> <номер>` | Подробности одного слота |
-| `FILES <site.arena>` | Список файлов сайта |
-| `READ <site.arena> <файл>` | Просмотр описания игровой записи |
-| `CRACK <site.arena>` | Игровая операция извлечения данных |
-| `MINE` | Запустить виртуальный цикл добычи |
-| `SELR` | Обменять осколки данных на кредиты |
-| `UPGR <модуль>` | Купить улучшение |
-| `CONTRACTS` | Показать доску контрактов |
-| `RUN <id>` | Завершить доступный контракт |
-| `FLOW <шаги>` | Выполнить последовательность безопасных NEX-команд |
+### 3. Conditions
+```nx
+if alert < 40
+    print("Risk is manageable")
+else
+    print("Pause and review")
+endif
+```
 
-## Сокращения и псевдонимы
+### 4. Loops
+Planned `while`, bounded `for`, `break` and `continue`. Scripts will have a strict instruction budget and maximum iteration count.
+```nx
+for index in 1..3
+    print("Training pass " + index)
+endfor
+```
 
-- `PORTS` = `PORTA`
-- `LS` = `FILES`
-- `VIEW` = `READ`
-- `JOBS` = `CONTRACTS`
-- `STATUS` = `STAT`
-- `NODES` = `NODR`
-- `WHOIS` = `WHO`
+### 5. Functions
+Planned named functions, parameters, return values, local scope, recursion limit.
+```nx
+function estimateReward(base, bonus)
+    return base + bonus
+endfunction
+print(estimateReward(40, 15))
+```
 
-## Модули улучшений
+### 6. Lists and records
+```nx
+let sites = ["shop.arena", "food.arena", "music.arena"]
+let profile = {name: "rookie", credits: 50, alert: 0}
+print(sites[1])
+print(profile.credits)
+```
 
-`FIREWALL`, `AUTOM`, `STEALTH`, `EXTRACT`, `MINER`, `CPU`, `STORAGE`. Каждый модуль имеет пять уровней. Покупка требует игровых кредитов.
+### 7. Comments and script files
+Planned single-line `#` comments and multiline comments, named scripts, save/load, versioned import/export, validation before execution.
 
-## Автоматизация FLOW
+### 8. Built-in game functions (planned)
+Only fictional game APIs, for example:
+- `siteInfo(name)` — read public simulated site summary
+- `listRecords(name)` — return game records
+- `contractList()` — contracts in the player's game board
+- `playerStatus()` — own profile/status
+- `upgradeInfo(module)` — view upgrade information
 
-Шаги разделяются точкой с запятой. Одна последовательность может содержать до шести разрешённых инструкций и не более 240 символов. При ошибке выполнение останавливается.
+These functions will not perform real-world network actions or interact with outside systems.
 
-Пример разведки:
-```text
+### 9. Error handling / debugging (planned)
+- Syntax diagnostics with line/column and highlighted token
+- Suggestions for misspelled commands
+- `try/catch` for game simulation errors (planned)
+- Step mode, breakpoints, variable watch and execution trace (planned)
+- `dryrun` preview and instruction-budget display (planned)
+
+## Example current FLOW routine
+FLOW is the current limited automation feature, not the planned full scripting language. It accepts up to six approved instructions, separated by semicolons, and stops on error:
+```
 FLOW SEEK vault; WHO vault.arena; PORTA vault.arena; FILES vault.arena
 ```
 
-Пример добычи:
-```text
-FLOW MINE; SELR; STAT
+## Example future NX script (illustrative, not yet executable)
+```nx
+# inspect fictional sites, don't run external actions
+let target = "food.arena"
+let profile = playerStatus()
+print("Credits: " + profile.credits)
+if profile.alert < 30
+    print(siteInfo(target))
+else
+    print("High alert: review before accepting more work")
+endif
 ```
 
-Пример чтения публичной записи:
-```text
-FILES news.arena
-READ news.arena bulletins.txt
+## Example future FLEX script (illustrative, not yet executable)
+```flex
+set destination to "food.arena"
+show player
+when alert below 30 do
+    show site(destination)
+otherwise
+    say "Alert high; pause and review"
+end
 ```
 
-## Примеры полного сеанса
-
-```text
-MANU
-SEEK bank
-WHO bank.arena
-PING bank.arena
-PORTA bank.arena
-PORTA bank.arena 044
-FILES bank.arena
-READ bank.arena rates.dat
-CRACK bank.arena
-UPGR stealth
-STAT
-```
-
-## Содержимое сайтов
-
-Каждая страница `.arena` теперь содержит тематическую мини-информацию: каталоги, рецепты (например хлеб, тушёное блюдо и печёный картофель), новости, маршруты, архивы, спорт, группы NPC и прочее. Сайт остаётся частью игрового браузера; кнопки PORTS, EXTRACT и FILES ведут к игровым действиям.
-
-## Игровая сеть на текущем этапе
-
-- 30 вымышленных сайтов с разной сложностью.
-- 15 виртуальных узлов карты.
-- 110 виртуальных сервисных слотов с состояниями OPEN, GUARDED и LOCKED.
-- 90 записей файлового каталога — по три на сайт.
-- Данные, порты, задержки, атаки и добыча являются игровыми значениями, а не настоящими сетевыми объектами.
-
-## Граница симуляции
-
-NEX не умеет обращаться к интернету, IP-адресам, реальным портам или чужим устройствам. Он не запускает команды операционной системы и не читает реальные файлы. Все результаты проверяются и применяются серверной логикой Cyber Arena.
+## Safety and runtime constraints (planned)
+- No shell, eval, reflection, external libraries, network or file system.
+- Strict instruction/time/iteration limits, recursion depth cap, bounded memory.
+- Server-side validation of any credit, extraction, upgrade, contract or PvP effect.
+- Scripts may be previewed; shared scripts are validated and sandboxed.
