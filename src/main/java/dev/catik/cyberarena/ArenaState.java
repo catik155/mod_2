@@ -531,14 +531,6 @@ public final class ArenaState extends PersistentState {
         attacker.sendMessage(Text.literal("§c[СИСТЕМА] §fТвоя атака отражена. Защитный контур перегружен, окно уязвимости открыто."), false);
     }
 
-    private int attackPower(PlayerProfile p) {
-        return p.automation * 2 + p.stealth + p.extractor + p.cpu * 2 + (p.vpnActive ? 1 : 0);
-    }
-
-    private int defensePower(PlayerProfile p) {
-        return p.firewall * 2 + p.guardLevel * 2 + p.cpu * 2 + p.alertLevel;
-    }
-
     private void clearDuel(PlayerProfile a, PlayerProfile d) {
         a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = "";
         d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = "";
