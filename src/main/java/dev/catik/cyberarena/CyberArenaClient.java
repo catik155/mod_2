@@ -15,6 +15,13 @@ public final class CyberArenaClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+            if (CyberArenaScreen.isTerminalOpen() && !overlay) {
+                CyberArenaScreen.appendOutput(message.getString());
+                return false;
+            }
+            return true;
+        });
         openBrowser = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.cyber_arena.open_browser",
             InputUtil.Type.KEYSYM,
