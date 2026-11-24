@@ -17,6 +17,8 @@ public final class CyberArena implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ArenaState.get(server).ensureHome(handler.getPlayer()));
+        ServerTickEvents.END_SERVER_TICK.register(ArenaState::tickServer);
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             dispatcher.register(CommandManager.literal("arena")
                 .then(CommandManager.literal("help").executes(c -> reply(c.getSource(),
