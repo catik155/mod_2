@@ -10,20 +10,32 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 public final class CyberArenaClient implements ClientModInitializer {
-    private static KeyBinding openWorkstation;
+    private static KeyBinding openBrowser;
+    private static KeyBinding openConsole;
 
     @Override
     public void onInitializeClient() {
-        openWorkstation = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.cyber_arena.open_workstation",
+        openBrowser = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            "key.cyber_arena.open_browser",
             InputUtil.Type.KEYSYM,
             GLFW.GLFW_KEY_O,
             "category.cyber_arena"
         ));
+        openConsole = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            "key.cyber_arena.open_console",
+            InputUtil.Type.KEYSYM,
+            GLFW.GLFW_KEY_P,
+            "category.cyber_arena"
+        ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openWorkstation.wasPressed()) {
+            while (openBrowser.wasPressed()) {
                 if (client.player != null && client.currentScreen == null) {
-                    client.setScreen(new CyberArenaScreen());
+                    client.setScreen(new CyberArenaScreen(0));
+                }
+            }
+            while (openConsole.wasPressed()) {
+                if (client.player != null && client.currentScreen == null) {
+                    client.setScreen(new CyberArenaScreen(1));
                 }
             }
         });
