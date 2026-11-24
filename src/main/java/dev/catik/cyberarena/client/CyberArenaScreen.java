@@ -94,6 +94,9 @@ public final class CyberArenaScreen extends Screen {
     private static int completionCursor = 0;
     private static int directoryPage = 0;
     private static boolean voraSelected = false;
+    private static boolean automationStatusKnown = false;
+    private static boolean automationStatusRequested = false;
+    private static int automationLevel = 0;
     private static final int SITES_PER_PAGE = 5;
 
     private final int page;
@@ -269,6 +272,28 @@ public final class CyberArenaScreen extends Screen {
         while (TERMINAL_OUTPUT.size() > 250) TERMINAL_OUTPUT.remove(0);
     }
 
+    /** Consume the server-authoritative automation level sent by AUTOM STATUS. */
+    public static boolean handleAutomationStatus(String message) {
+        if (message == null) return false;
+        int marker = message.indexOf("AUTOMATION_LEVEL=");
+        if (marker < 0) return false;
+        int start = marker + "AUTOMATION_LEVEL=".length();
+        int end = start;
+        while (end < message.length() && Character.isDigit(message.charAt(end))) end++;
+        if (end == start) return false;
+        int nextLevel;
+        try { nextLevel = Integer.parseInt(message.substring(start, end)); }
+        catch (NumberFormatException ignored) { return false; }
+        boolean refresh = !automationStatusKnown || automationLevel != nextLevel;
+        automationLevel = Math.max(0, Math.min(5, nextLevel));
+        automationStatusKnown = true;
+        automationStatusRequested = false;
+        if (refresh && net.minecraft.client.MinecraftClient.getInstance().currentScreen instanceof CyberArenaScreen screen && screen.page == 2) {
+            net.minecraft.client.MinecraftClient.getInstance().setScreen(new CyberArenaScreen(2));
+        }
+        return true;
+    }
+
     private void initBrowser(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("КАТАЛОГ"), b -> navigate(0))
             .dimensions(left + 14, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Вернуться к списку сайтов"))).build());
@@ -417,25 +442,39 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
-        addDrawableChild(ButtonWidget.builder(Text.literal("ПРИОБРЕСТИ / УЛУЧШИТЬ AUTOM"), b -> runNex("UPGR AUTOM"))
-            .dimensions(left + 14, top + 76, panelWidth - 28, 21)
-            .tooltip(Tooltip.of(Text.literal("Покупает модуль AUTOM уровня 1. Он открывает готовые сценарии и FLOW."))).build());
-        input = new TextFieldWidget(textRenderer, left + 14, top + 102, panelWidth - 28, 20, Text.literal("Сценарий автоматизации"));
+        if (!automationStatusKnown && !automationStatusRequested && client != null && client.getNetworkHandler() != null) {
+            automationStatusRequested = true;
+            client.getNetworkHandler().sendChatCommand("arena nex AUTOM STATUS");
+        }
+        String purchaseLabel = automationLevel == 0 ? "РАЗБЛОКИРОВАТЬ AUTOM — 35 КРЕДИТОВ"
+            : automationLevel >= 5 ? "AUTOM МАКСИМАЛЬНОГО УРОВНЯ"
+            : "УЛУЧШИТЬ AUTOM — " + (35 + automationLevel * 45) + " КРЕДИТОВ";
+        ButtonWidget purchase = ButtonWidget.builder(Text.literal(purchaseLabel), b -> {
+            runNex("UPGR AUTOM");
+            if (client != null && client.getNetworkHandler() != null)
+                client.getNetworkHandler().sendChatCommand("arena nex AUTOM STATUS");
+        }).dimensions(left + 14, top + 76, panelWidth - 28, 21)
+            .tooltip(Tooltip.of(Text.literal("Покупка или улучшение серверного модуля AUTOM. Первый уровень открывает сценарии и FLOW."))).build();
+        if (automationLevel >= 5) purchase.active = false;
+        addDrawableChild(purchase);
+
+        if (automationLevel == 0) return;
+        input = new TextFieldWidget(textRenderer, left + 14, top + 110, panelWidth - 28, 20, Text.literal("Сценарий автоматизации"));
         input.setMaxLength(240);
         input.setPlaceholder(Text.literal("SEEK vault; PORTA vault.arena; STAT"));
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПУСТИТЬ СВОЙ СЦЕНАРИЙ"), b -> submit("arena nex FLOW "))
-            .dimensions(left + 14, top + 130, panelWidth - 28, 22)
-            .tooltip(Tooltip.of(Text.literal("Запускает введённые команды. Требуется AUTOM; максимум 6 игровых команд."))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: ОБЗОР"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
-            .dimensions(left + 14, top + 166, panelWidth - 28, 22)
-            .tooltip(Tooltip.of(Text.literal("Поиск сайтов, просмотр виртуальной карты и состояния профиля."))).build());
+            .dimensions(left + 14, top + 138, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("До 6 разрешённых игровых команд. Сценарий выполняется сервером."))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: ОБЗОР СЕТИ"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
+            .dimensions(left + 14, top + 174, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Поиск виртуальных сайтов, карта узлов и состояние профиля."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: РЕСУРСЫ"), b -> runNex("FLOW MINE; SELR; STAT"))
-            .dimensions(left + 14, top + 194, panelWidth - 28, 22)
+            .dimensions(left + 14, top + 202, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Игровая добыча, обмен осколков и проверка баланса."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: АУДИТ САЙТОВ"), b -> runNex("FLOW PORTA shop.arena; PORTA news.arena; PORTA grid.arena"))
-            .dimensions(left + 14, top + 222, panelWidth - 28, 22)
-            .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы на трёх сайтах без ручного ввода."))).build());
+            .dimensions(left + 14, top + 230, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы трёх сайтов."))).build());
     }
     private void initUpgrades(int left, int top, int panelWidth) {
         String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE", "BREAKER", "GUARD"};
@@ -541,9 +580,14 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal("МАГАЗИН МОДУЛЕЙ // ПРОКАЧКА ОПЕРАТОРА"), left + 14, top + 82, 0xFF70D8FF);
             drawWrapped(context, "Покупай уровни за игровые кредиты. Каждый модуль усиливает определённую часть системы. Максимум — 5 уровней. Баланс и текущие уровни смотри в профиле.", left + 14, top + 94, panelWidth - 28, 0xFFD0DCE6);
         } else {
-            context.drawTextWithShadow(textRenderer, Text.literal("АВТОМАТИЗАЦИЯ // ГОТОВЫЕ СЦЕНАРИИ"), left + 14, top + 78, 0xFF70D8FF);
-            context.drawTextWithShadow(textRenderer, Text.literal("Команды разделяются ; | До 6 шагов за запуск"), left + 14, top + 258, 0xFFD0DCE6);
-            context.drawTextWithShadow(textRenderer, Text.literal("Только игровые команды. Внешние команды запрещены."), left + 14, top + 274, 0xFF8295A8);
+            context.drawTextWithShadow(textRenderer, Text.literal("АВТОМАТИЗАЦИЯ // " + (automationLevel > 0 ? "МОДУЛЬ АКТИВЕН" : "МОДУЛЬ ЗАБЛОКИРОВАН")), left + 14, top + 78, automationLevel > 0 ? 0xFF70D8FF : 0xFFFFC46B);
+            if (!automationStatusKnown) {
+                drawWrapped(context, "ПОЛУЧЕНИЕ СОСТОЯНИЯ МОДУЛЯ С СЕРВЕРА…", left + 14, top + 112, panelWidth - 28, 0xFFD0DCE6);
+            } else if (automationLevel == 0) {
+                drawWrapped(context, "AUTOM не приобретён. Стоимость первого уровня — 35 кредитов. После покупки откроются готовые сценарии и запуск FLOW. До разблокировки автоматизация недоступна.", left + 14, top + 116, panelWidth - 28, 0xFFFFC46B);
+            } else {
+                drawWrapped(context, "Уровень AUTOM: " + automationLevel + "/5. Сценарии выполняются сервером, используют только игровые команды и останавливаются при ошибке.", left + 14, top + 270, panelWidth - 28, 0xFFD0DCE6);
+            }
         }
         super.render(context, mouseX, mouseY, delta);
         if (panelHeight >= 300 && page != 3) context.drawTextWithShadow(textRenderer, Text.literal("Сайты предназначены только для просмотра. Команды — в консоли."), left + 14, top + panelHeight - 16, 0xFF8295A8);
