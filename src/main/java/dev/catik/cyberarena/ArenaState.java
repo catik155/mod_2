@@ -279,10 +279,11 @@ public final class ArenaState extends PersistentState {
 
     private void buildWorkstation(ServerPlayerEntity player, PlayerProfile p) {
         if (!p.homeBuilt || p.stationHealth <= 0) return;
+        if (isPowerOut(player)) { breakWorkstation(player, p); return; }
         ServerWorld world = player.getServer().getOverworld();
         BlockPos desk = new BlockPos(p.homeX - 3, p.homeY + 1, p.homeZ - 3);
         world.setBlockState(desk, Blocks.OBSIDIAN.getDefaultState());
-        world.setBlockState(desk.up(), Blocks.COMPUTER.getDefaultState());
+        world.setBlockState(desk.up(), Blocks.OBSERVER.getDefaultState());
         world.setBlockState(desk.add(1, 0, 0), Blocks.IRON_BLOCK.getDefaultState());
         world.setBlockState(desk.add(1, 1, 0), Blocks.REDSTONE_LAMP.getDefaultState());
     }
@@ -387,15 +388,41 @@ public final class ArenaState extends PersistentState {
             + " | Последняя цель: " + (p.networkTarget.isBlank() ? "нет" : p.networkTarget);
     }
 
+    public String counterAttack(ServerPlayerEntity defender) {
+        PlayerProfile p = profile(defender);
+        long now = defender.getServer().getOverworld().getTime();
+        if (p.counterTarget.isBlank() || now > p.counterUntilTick) {
+            p.counterTarget = "";
+            markDirty();
+            return "§eОкно контратаки закрыто. Контратаковать можно только сразу после нападения.";
+        }
+        String targetName = p.counterTarget;
+        ServerPlayerEntity attacker = defender.getServer().getPlayerManager().getPlayerList().stream()
+            .filter(other -> other.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
+        p.counterTarget = "";
+        p.counterUntilTick = 0;
+        markDirty();
+        if (attacker == null) return "§eПротивник уже не в сети. Контратака отменена.";
+        return "§6КОНТРАТАКА §7| §fОтветный рейд на " + targetName + "\n" + raid(defender, attacker, now);
+    }
+
     public String sabotage(ServerPlayerEntity attacker, ServerPlayerEntity target, String action) {
         if (attacker.getUuid().equals(target.getUuid())) return "§cНельзя саботировать собственный дом.";
         PlayerProfile a = profile(attacker), d = profile(target);
         long now = attacker.getServer().getOverworld().getTime();
         if (now - a.lastRaidTick < 1200) return "§eПодлянки на перезарядке.";
         a.lastRaidTick = now;
+        d.counterTarget = attacker.getGameProfile().getName(); d.counterUntilTick = now + 200;
+        target.sendMessage(Text.literal("§6[КОНТРАТАКА] §fНа твой дом совершена атака! Введи COUNTER в течение 10 секунд."), false);
         boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(15, 65 - a.stealth * 8);
         if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
         String result = switch (action.toLowerCase()) {
+            case "station" -> {
+                if (d.stationHealth <= 0) yield "§eРабочая станция уже разрушена.";
+                int damage = Math.min(40, d.stationHealth); d.stationHealth -= damage;
+                if (d.stationHealth == 0) breakWorkstation(target, d);
+                yield "§cРАБОЧАЯ СТАНЦИЯ ПОВРЕЖДЕНА | -" + damage + "% прочности. При 0% консоль недоступна до ремонта.";
+            }
             case "farm" -> {
                 if (d.farmLevel == 0 || d.farmHealth == 0) yield "§eУ цели нет работающей фермы.";
                 if (d.guardCharges > 0) { d.guardCharges--; yield "§aОХРАНА ЗАЩИТИЛА ФЕРМУ | Потрачен один заряд охраны."; }
@@ -498,7 +525,7 @@ public final class ArenaState extends PersistentState {
         PlayerProfile p = profile(player);
         if (p.powerUntilTick <= player.getServer().getOverworld().getTime()) return "§aПитание уже работает.";
         if (p.credits < 15) return "§cДля аварийного ремонта нужно 15 кредитов.";
-        p.credits -= 15; p.powerUntilTick = 0; markDirty();
+        p.credits -= 15; p.powerUntilTick = 0; refreshHomeDisplays(player, p); markDirty();
         return "§aПИТАНИЕ ВОССТАНОВЛЕНО §7| §6-15 кредитов";
     }
 
@@ -532,6 +559,8 @@ public final class ArenaState extends PersistentState {
         PlayerProfile d = profile(target);
         if (now - a.lastRaidTick < 1200) return "§eAttack automation is cooling down. Wait " + ((1200 - (now - a.lastRaidTick) + 19) / 20) + "s.";
         a.lastRaidTick = now;
+        d.counterTarget = attacker.getGameProfile().getName(); d.counterUntilTick = now + 200;
+        target.sendMessage(Text.literal("§6[КОНТРАТАКА] §fНа тебя напали! Введи COUNTER в течение 10 секунд, чтобы ответить."), false);
         if (!a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(10, 55 - a.stealth * 7)) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
         int chance = Math.max(8, Math.min(92, 60 + a.automation * 5 + a.stealth * 4 + a.extractor * 3 - d.firewall * 12 + (a.vpnActive ? 8 : 0)));
         boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
