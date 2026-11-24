@@ -1018,7 +1018,7 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
-        nbt.putInt("schema_version", 6);
+        nbt.putInt("schema_version", 7);
         nbt.put("profiles", entries);
         return nbt;
     }
