@@ -228,8 +228,8 @@ public final class ArenaState extends PersistentState {
     private void sendOverlay(ServerPlayerEntity player, PlayerProfile p, long now) {
         String power = p.powerUntilTick > now ? "§cПИТАНИЕ ОТКЛЮЧЕНО " + ((p.powerUntilTick - now + 19) / 20) + "с" : "§aПИТАНИЕ: ВКЛ";
         player.sendMessage(Text.literal("§bCYBER §7| §6" + p.credits + " кр. §7| §dREP " + p.reputation
-            + " §7| §eMINER +" + (2 + p.miningRig * 2) + "/мин §7| " + power
-            + " §7| §bФерма +" + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин" + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel
+            + " §7| §eMINER +" + (isPowerOut(player) ? 0 : 2 + p.miningRig * 2) + "/мин §7| " + power
+            + " §7| §bФерма +" + (isPowerOut(player) ? 0 : p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин" + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel
             + " §7| §aЦель 10k: " + Math.min(100, p.credits / 100) + "%"
             + (p.policeStakeout ? " §c| ПАТРУЛЬ У ДОМА" : "")), true);
     }
