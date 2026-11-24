@@ -229,12 +229,15 @@ public final class CyberArenaScreen extends Screen {
     private void submitSiteConsole() {
         String value = input == null ? "" : input.getText().trim();
         if (value.isEmpty()) return;
+        String[] parts = value.split("\\s+", 2);
+        String head = parts[0].toUpperCase();
+        String args = parts.length > 1 ? parts[1].trim() : "";
         String command = value;
-        String head = value.split("\\s+", 2)[0].toUpperCase();
-        if (List.of("PORTA", "CRACK", "FILES", "SCAN").contains(head) && !value.toLowerCase().contains(selectedSite.toLowerCase())) command += " " + selectedSite;
-        else if (head.equals("READ") && !value.toLowerCase().contains(selectedSite.toLowerCase())) {
-            String[] parts = value.split("\\s+", 2);
-            command = "READ " + selectedSite + (parts.length > 1 ? " " + parts[1] : "");
+        if (List.of("PORTA", "PORTS", "CRACK", "FILES", "LS", "WHO", "WHOIS", "PING").contains(head)) {
+            if (args.isEmpty()) command = head + " " + selectedSite;
+        } else if (head.equals("READ") && !args.isEmpty()) {
+            String[] readParts = args.split("\\s+", 2);
+            if (readParts.length == 1 && !readParts[0].equalsIgnoreCase(selectedSite)) command = "READ " + selectedSite + " " + readParts[0];
         }
         send("arena nex " + command);
     }
