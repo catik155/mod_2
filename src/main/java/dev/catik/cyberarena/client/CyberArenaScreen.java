@@ -40,7 +40,8 @@ public final class CyberArenaScreen extends Screen {
     };
     private static final String[] RISKS = {
         "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH",
-        "LOW", "MEDIUM", "LOW", "HIGH", "MEDIUM", "EXPERT", "LOW", "HIGH", "MEDIUM", "HIGH"
+        "LOW", "MEDIUM", "LOW", "HIGH", "MEDIUM", "EXPERT", "LOW", "HIGH", "MEDIUM", "HIGH",
+        "MEDIUM", "HIGH", "LOW", "EXPERT", "MEDIUM", "LOW", "HIGH", "MEDIUM", "LOW", "EXPERT"
     };
     private static final String[][] FILE_NAMES = {
         {"catalog.idx", "offers.dat", "ledger.log"},
@@ -72,10 +73,17 @@ public final class CyberArenaScreen extends Screen {
         {"recipes.idx", "supply.dat", "orders.log"},
         {"plants.map", "energy.dat", "load.log"},
         {"leagues.idx", "matches.dat", "events.log"},
-        {"groups.idx", "posts.dat", "reputation.log"}
-    };
-    private static final String[] SERVICES = {
-        "021 WEB-GATE / OPEN", "044 DATA-VAULT / GUARDED", "071 ADMIN-CORE / LOCKED"
+        {"groups.idx", "posts.dat", "reputation.log"},
+        {"projects.idx", "packages.dat", "builds.log", "contributors.db", "issues.enc"},
+        {"vessels.map", "cargo.db", "crew.idx", "berths.log", "customs.enc"},
+        {"artifacts.idx", "provenance.db", "restoration.log", "donors.enc", "gallery.map"},
+        {"reactors.cfg", "output.dat", "safety.log", "isotopes.enc", "grid.map"},
+        {"climate.idx", "stormtracks.map", "sensors.db", "warnings.log", "models.enc"},
+        {"vacancies.idx", "profiles.db", "contracts.dat", "interviews.log", "payroll.enc"},
+        {"listings.idx", "owners.db", "mortgages.enc", "repairs.log", "districts.map"},
+        {"routes.map", "tickets.db", "fleet.idx", "delays.log", "signals.enc"},
+        {"species.idx", "habitats.map", "tracking.db", "rangers.log", "reserves.enc"},
+        {"relics.idx", "fragments.db", "chronology.map", "expeditions.log", "vault.enc"}
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
     private static final List<String> HISTORY = new ArrayList<>();
