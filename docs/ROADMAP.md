@@ -136,7 +136,7 @@
 
 ## Defense / multiplayer
 - [x] Raid success resolved by a PvP attack-vs-defense power contest using attacker upgrades (AUTOM, STEALTH, EXTRACT, CPU, VPN) against defender upgrades (FIREWALL, GUARD, CPU)
-- [x] Attacks can be initiated at any time without a global raid cooldown; attack availability does not depend on being attacked first
+- [x] Attacks can be initiated at any time without a global raid or network-exploit cooldown; attack availability does not depend on being attacked first
 - [x] A counterattack window opens only when the defender successfully blocks an attack; the defender gets 10 seconds to use COUNTER against the exposed attacker
 - [x] Failed attacks do not grant a counterattack window to the attacker; successful attacks do not grant one to the defender
 - [ ] Defense dashboard, honeypots, backup/recovery and incident notifications
