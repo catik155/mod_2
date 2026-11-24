@@ -161,6 +161,11 @@ public final class NexEngine {
             case "MINE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).mine(player);
             case "UPGR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).upgrade(player, arg);
             case "REPAIR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).repairPower(player);
+            case "FARM" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).farm(player, arg);
+            case "VPN" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).vpn(player, arg);
+            case "IP" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).ipInfo(player);
+            case "POLICE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).policeStatus(player);
+            case "SABOTAGE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : sabotagePlayer(player, arg);
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
@@ -178,7 +183,10 @@ public final class NexEngine {
             + "§fCRACK <сайт> §7игровое извлечение | RAID <игрок> §7PvP-рейд и кража ресурсов | SCAN <узел> §7скан узла | NODR §7карта узлов\n"
             + "§fMINE §7проверка майнера (доход идёт автоматически) | SELR §7обмен осколков | UPGR <модуль> §7улучшение\n"
             + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\n"
-            + "§fREPAIR §7аварийное питание | UPGR BREAKER/GUARD §7одноразовая защита от саботажа\n"
+            + "§fREPAIR §7аварийное питание | FARM BUY/UPGRADE/REPAIR/STATUS §7домашняя ферма\n"
+            + "§fVPN BUY/ON/OFF/STATUS §7виртуальный VPN | IP §7игровой адрес | POLICE §7уровень розыска\n"
+            + "§fSABOTAGE <игрок> <FARM|POWER|SUPPLIES|ALARM> §7подлянка в доме соперника\n"
+            + "§fUPGR BREAKER/GUARD §7расходуемая защита дома\n"
             + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\n"
             + "§7Все цели и данные вымышлены и существуют только внутри Cyber Arena.";
     }
@@ -310,6 +318,14 @@ public final class NexEngine {
         ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayer(targetName);
         if (target == null) return error("RAID_TARGET", "Player must be online on this server.");
         return ArenaState.get(attacker.getServer()).raid(attacker, target, attacker.getWorld().getTime());
+    }
+
+    private static String sabotagePlayer(ServerPlayerEntity attacker, String args) {
+        String[] parts = args.split("\\s+", 2);
+        if (parts.length != 2) return error("SABOTAGE_SYNTAX", "Use SABOTAGE <online_player> <FARM|POWER|SUPPLIES|ALARM>.");
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayer(parts[0]);
+        if (target == null) return error("SABOTAGE_TARGET", "Target player must be online.");
+        return ArenaState.get(attacker.getServer()).sabotage(attacker, target, parts[1]);
     }
 
     private static String scan(String id, ServerPlayerEntity player) {
