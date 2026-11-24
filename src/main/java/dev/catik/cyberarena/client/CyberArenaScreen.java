@@ -71,6 +71,7 @@ public final class CyberArenaScreen extends Screen {
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
     private static final List<String> HISTORY = new ArrayList<>();
     private static int directoryPage = 0;
+    private static boolean voraSelected = false;
     private static final int SITES_PER_PAGE = 5;
 
     private final int page;
@@ -211,21 +212,40 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initTerminal(int left, int top, int panelWidth) {
-        input = new TextFieldWidget(textRenderer, left + 14, top + 99, panelWidth - 28, 20, Text.literal("NEX instruction"));
+        addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "LANG: VORA (ACTIVE)" : "LANG: NEX (ACTIVE)"), b -> {
+            voraSelected = !voraSelected;
+            if (client != null) client.setScreen(new CyberArenaScreen(1, "", ""));
+        }).dimensions(left + 14, top + 76, panelWidth - 28, 20).build());
+        input = new TextFieldWidget(textRenderer, left + 14, top + 103, panelWidth - 28, 20, Text.literal("Command"));
         input.setMaxLength(160);
-        input.setPlaceholder(Text.literal("MANU / SEEK vault / PORTA vault.arena ..."));
+        input.setPlaceholder(Text.literal(voraSelected ? "LUMA / KERI vault / DORA vault.arena ..." : "MANU / SEEK vault / PORTA vault.arena ..."));
         addDrawableChild(input);
-        addDrawableChild(ButtonWidget.builder(Text.literal("EXECUTE NEX"), b -> submit("arena nex "))
-            .dimensions(left + 14, top + 128, (panelWidth - 36) / 2, 22).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("MANUAL"), b -> runNex("MANU"))
-            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 128, (panelWidth - 36) / 2, 22).build());
-        String[] commands = {"STAT", "NODR", "CONTRACTS", "MINE", "SELR", "UPGR stealth"};
+        addDrawableChild(ButtonWidget.builder(Text.literal("EXECUTE " + (voraSelected ? "VORA" : "NEX")), b -> submit("arena nex "))
+            .dimensions(left + 14, top + 132, (panelWidth - 36) / 2, 22).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("HELP / MANUAL"), b -> runNex("MANU"))
+            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 132, (panelWidth - 36) / 2, 22).build());
+        String[] commands = voraSelected ? new String[]{"MIRA", "NAVA", "JOBS", "DARA", "SELI", "UPRA stealth"} : new String[]{"STAT", "NODR", "CONTRACTS", "MINE", "SELR", "UPGR stealth"};
         for (int i = 0; i < commands.length; i++) {
             final String command = commands[i];
             int col = i % 2, row = i / 2;
-            addDrawableChild(ButtonWidget.builder(Text.literal(command), b -> runNex(command))
-                .dimensions(left + 14 + col * ((panelWidth - 36) / 2 + 8), top + 166 + row * 27, (panelWidth - 36) / 2, 21).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal(command), b -> runNex(translateVora(command)))
+                .dimensions(left + 14 + col * ((panelWidth - 36) / 2 + 8), top + 169 + row * 27, (panelWidth - 36) / 2, 21).build());
         }
+    }
+
+    private String translateVora(String text) {
+        if (!voraSelected) return text;
+        String[] p = text.trim().split("\\s+", 2);
+        String head = p[0].toUpperCase();
+        String mapped = switch (head) {
+            case "LUMA" -> "MANU"; case "KERI" -> "SEEK"; case "DORA" -> "PORTA";
+            case "NAVA" -> "NODR"; case "MIRA" -> "STAT"; case "TARA" -> "CRACK";
+            case "DARA" -> "MINE"; case "SELI" -> "SELR"; case "UPRA" -> "UPGR";
+            case "JOBS" -> "CONTRACTS"; case "RUNA" -> "RUN"; case "SAVA" -> "SCAN";
+            case "PIRA" -> "PING"; case "FILA" -> "FILES"; case "REVA" -> "READ";
+            case "WORA" -> "WHO"; default -> head;
+        };
+        return mapped + (p.length > 1 ? " " + p[1] : "");
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
@@ -245,7 +265,7 @@ public final class CyberArenaScreen extends Screen {
 
     private void submit(String prefix) {
         String value = input == null ? "" : input.getText().trim();
-        if (!value.isEmpty()) send(prefix + value);
+        if (!value.isEmpty()) send(prefix + translateVora(value));
     }
     private void runNex(String instruction) { send("arena nex " + instruction); }
     private void send(String command) {
@@ -300,8 +320,10 @@ public final class CyberArenaScreen extends Screen {
             }
             if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("No entries yet. Open a site or change your search."), left + 18, rowY + 12, 0xFF8295A8);
         } else if (page == 1) {
-            context.drawTextWithShadow(textRenderer, Text.literal("NEX > // PSEUDO-LANGUAGE CONSOLE"), left + 14, top + 78, 0xFF70D8FF);
-            context.drawTextWithShadow(textRenderer, Text.literal("Server validates every instruction before applying game state."), left + 14, top + 235, 0xFFD0DCE6);
+            context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "VORA > // SECOND FICTIONAL LANGUAGE" : "NEX > // PSEUDO-LANGUAGE CONSOLE"), left + 14, top + 78, 0xFF70D8FF);
+            String hints = voraSelected ? "LUMA help | KERI search | DORA services | NAVA map | MIRA status | TARA extract" : "MANU help | SEEK search | PORTA services | NODR map | STAT status | CRACK extract";
+            drawWrapped(context, "NEXT COMMANDS: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
+            drawWrapped(context, "Type a command or use the quick buttons. Syntax hints remain visible.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
         } else {
             context.drawTextWithShadow(textRenderer, Text.literal("NEX FLOW // SAFE AUTOMATION ROUTINES"), left + 14, top + 78, 0xFF70D8FF);
             context.drawTextWithShadow(textRenderer, Text.literal("Separate instructions with ; | Up to 6 steps per run"), left + 14, top + 258, 0xFFD0DCE6);
