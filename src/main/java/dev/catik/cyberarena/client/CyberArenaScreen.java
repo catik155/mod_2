@@ -188,13 +188,13 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + 14, top + 78, 90, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("NX КОНСОЛЬ САЙТА"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(7, selectedSite, ""));
-        }).dimensions(left + 110, top + 78, 118, 20)
+        }).dimensions(left + panelWidth - 126, top + 78, 112, 20)
             .tooltip(Tooltip.of(Text.literal("Открыть отдельную NX-консоль, привязанную к этому сайту"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
-        }).dimensions(left + panelWidth - 126, top + 78, 112, 20).build());
+        }).dimensions(left + 110, top + 78, 118, 20).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int third = (panelWidth - 36) / 3;
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ"), b -> runNex("PORTA " + selectedSite))
             .dimensions(left + 14, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Просмотреть виртуальные службы сайта"))).build());
@@ -211,7 +211,7 @@ public final class CyberArenaScreen extends Screen {
             .tooltip(Tooltip.of(Text.literal("Вернуться к странице сайта"))).build());
         input = new TextFieldWidget(textRenderer, left + 14, top + 105, panelWidth - 28, 20, Text.literal("NX-команда сайта"));
         input.setMaxLength(160);
-        input.setPlaceholder(Text.literal("PORTA / CRACK / FILES / SCAN ..."));
+        input.setPlaceholder(Text.literal("Команда NX — сайт добавится автоматически"));
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ВЫПОЛНИТЬ NX"), b -> submitSiteConsole())
             .dimensions(left + 14, top + 134, (panelWidth - 36) / 2, 22)
