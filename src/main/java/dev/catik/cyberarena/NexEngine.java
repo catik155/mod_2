@@ -207,7 +207,7 @@ public final class NexEngine {
                 : error("AUTOM_SYNTAX", "Use AUTOM STATUS.");
             case "FLEX" -> {
                 if (player == null) yield error("NO_OPERATOR", "Operator context required.");
-                String[] flexParts = arg.split("\\s+", 2);
+                String[] flexParts = rawArg.split("\\s+", 2);
                 String flexAction = flexParts[0];
                 if (flexAction.equals("exec")) {
                     if (!ArenaState.get(player.getServer()).flex(player, "status").contains("FLEX_OWNED=1"))
