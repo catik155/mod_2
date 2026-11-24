@@ -226,7 +226,7 @@ public final class CyberArenaScreen extends Screen {
                 case "FARM" -> new String[]{"BUY","UPGRADE","REPAIR","STATUS"};
                 case "VPN" -> new String[]{"BUY","ON","OFF","STATUS"};
                 case "NET" -> new String[]{"DISCOVER","SCAN","ENUM","EXPLOIT"};
-                case "DEFEND" -> new String[]{"STATUS","HELP","TYPE"};
+                case "DEFEND" -> new String[]{"STATUS","HELP","TYPE","ROUTE","MOVE"};
                 case "UPGR" -> new String[]{"FIREWALL","AUTOM","STEALTH","EXTRACT","MINER","CPU","STORAGE","BREAKER","GUARD"};
                 case "SABOTAGE", "NET EXPLOIT" -> new String[]{"FARM","POWER","SUPPLIES","DATA","ALARM","LOCK","FALSECALL","RAIDERS"};
                 default -> new String[0];
