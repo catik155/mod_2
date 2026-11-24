@@ -120,7 +120,7 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1))
             .dimensions(left + 18 + tabWidth, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть консоль и вводить команды на NX или FLEX"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2))
-            .dimensions(left + 24 + tabWidth * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть автоматизацию: готовые сценарии и запуск FLOW"))).build());
+            .dimensions(left + 24 + tabWidth * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль: приобретите AUTOM за 35 кредитов, чтобы открыть готовые сценарии и FLOW"))).build());
 
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 1) initTerminal(left, top, panelWidth);
@@ -250,20 +250,26 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
-        input = new TextFieldWidget(textRenderer, left + 14, top + 100, panelWidth - 28, 20, Text.literal("NEX FLOW routine"));
+        addDrawableChild(ButtonWidget.builder(Text.literal("КУПИТЬ АВТОМАТИЗАЦИЮ — 35 КРЕДИТОВ"), b -> runNex("UPGR AUTOM"))
+            .dimensions(left + 14, top + 76, panelWidth - 28, 21)
+            .tooltip(Tooltip.of(Text.literal("Покупает модуль AUTOM уровня 1. Он открывает готовые сценарии и FLOW."))).build());
+        input = new TextFieldWidget(textRenderer, left + 14, top + 102, panelWidth - 28, 20, Text.literal("Сценарий автоматизации"));
         input.setMaxLength(240);
-        input.setPlaceholder(Text.literal("SEEK vault; PORTA vault.arena; MINE"));
+        input.setPlaceholder(Text.literal("SEEK vault; PORTA vault.arena; STAT"));
         addDrawableChild(input);
-        addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПУСТИТЬ СЦЕНАРИЙ"), b -> submit("arena nex FLOW "))
-            .dimensions(left + 14, top + 130, panelWidth - 28, 22).tooltip(Tooltip.of(Text.literal("Выполнить до шести игровых команд, разделённых точкой с запятой"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЦЕНАРИЙ: ОБЗОР"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
-            .dimensions(left + 14, top + 166, panelWidth - 28, 22).tooltip(Tooltip.of(Text.literal("Поиск узлов, проверка статуса и просмотр игровой карты"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЦЕНАРИЙ: РЕСУРСЫ"), b -> runNex("FLOW MINE; SELR; STAT"))
-            .dimensions(left + 14, top + 194, panelWidth - 28, 22).tooltip(Tooltip.of(Text.literal("Добыча ресурсов, обмен осколков и проверка баланса"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЦЕНАРИЙ: АУДИТ"), b -> runNex("FLOW PORTA shop.arena; PORTA news.arena; PORTA grid.arena"))
-            .dimensions(left + 14, top + 222, panelWidth - 28, 22).tooltip(Tooltip.of(Text.literal("Проверить виртуальные службы нескольких сайтов подряд"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПУСТИТЬ СВОЙ СЦЕНАРИЙ"), b -> submit("arena nex FLOW "))
+            .dimensions(left + 14, top + 130, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Запускает введённые команды. Требуется AUTOM; максимум 6 игровых команд."))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: ОБЗОР"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
+            .dimensions(left + 14, top + 166, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Поиск сайтов, просмотр виртуальной карты и состояния профиля."))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: РЕСУРСЫ"), b -> runNex("FLOW MINE; SELR; STAT"))
+            .dimensions(left + 14, top + 194, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Игровая добыча, обмен осколков и проверка баланса."))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: АУДИТ САЙТОВ"), b -> runNex("FLOW PORTA shop.arena; PORTA news.arena; PORTA grid.arena"))
+            .dimensions(left + 14, top + 222, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы на трёх сайтах без ручного ввода."))).build());
     }
-
     private void submit(String prefix) {
         String value = input == null ? "" : input.getText().trim();
         if (!value.isEmpty()) send(prefix + translateVora(value));
