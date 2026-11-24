@@ -57,7 +57,9 @@ public final class ArenaState extends PersistentState {
         BlockPos worldSpawn = world.getSpawnPos();
         int centerX = worldSpawn.getX() + (gridX - 3) * 14;
         int centerZ = worldSpawn.getZ() + (gridZ - 3) * 14;
-        int floorY = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, centerX, centerZ);
+        int floorY = findHomeFloor(world, centerX, centerZ);
+        centerX = homeCandidateX;
+        centerZ = homeCandidateZ;
         buildStarterHouse(world, centerX, floorY, centerZ);
         p.homeX = centerX; p.homeY = floorY; p.homeZ = centerZ; p.homeBuilt = true;
         BlockPos bedSpawn = new BlockPos(centerX, floorY + 1, centerZ);
@@ -140,12 +142,12 @@ public final class ArenaState extends PersistentState {
     }
 
     public boolean isPowerOut(ServerPlayerEntity player) {
-        return profile(player).powerUntilTick > player.getServerWorld().getTime();
+        return profile(player).powerUntilTick > player.getServer().getOverworld().getTime();
     }
 
     public String repairPower(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
-        if (p.powerUntilTick <= player.getServerWorld().getTime()) return "§aПитание уже работает.";
+        if (p.powerUntilTick <= player.getServer().getOverworld().getTime()) return "§aПитание уже работает.";
         if (p.credits < 15) return "§cДля аварийного ремонта нужно 15 кредитов.";
         p.credits -= 15; p.powerUntilTick = 0; markDirty();
         return "§aПИТАНИЕ ВОССТАНОВЛЕНО §7| §6-15 кредитов";
@@ -287,7 +289,7 @@ public final class ArenaState extends PersistentState {
             e.putInt("data_shards", p.dataShards); e.putInt("firewall", p.firewall);
             e.putInt("automation", p.automation); e.putInt("stealth", p.stealth); e.putInt("extractor", p.extractor); e.putInt("miner", p.miningRig); e.putInt("cpu", p.cpu); e.putInt("storage", p.storage); e.putInt("alert", p.alertLevel);
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
-            e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("power_until", p.powerUntilTick);
+            e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
             e.putInt("home_index", p.homeIndex); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
             NbtList nodes = new NbtList();
@@ -315,7 +317,7 @@ public final class ArenaState extends PersistentState {
             p.dataShards = Math.max(0, e.getInt("data_shards")); p.firewall = clamp(e.getInt("firewall"), 0, 5);
             p.automation = clamp(e.getInt("automation"), 0, 5); p.stealth = clamp(e.getInt("stealth"), 0, 5); p.extractor = clamp(e.getInt("extractor"), 0, 5); p.miningRig = clamp(e.getInt("miner"), 0, 5); p.cpu = clamp(e.getInt("cpu"), 0, 5); p.storage = clamp(e.getInt("storage"), 0, 5); p.alertLevel = clamp(e.getInt("alert"), 0, 5); p.lastSiteRaidTick = e.getLong("last_site_raid"); p.lastMineTick = e.getLong("last_mine");
             p.lastRaidTick = e.getLong("last_raid");
-            p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.powerUntilTick = e.getLong("power_until");
+            p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
             p.homeIndex = e.contains("home_index") ? e.getInt("home_index") : -1; p.homeX = e.getInt("home_x"); p.homeY = e.getInt("home_y"); p.homeZ = e.getInt("home_z"); p.homeBuilt = e.getBoolean("home_built");
             if (p.homeIndex >= 0) state.nextHomeIndex = Math.max(state.nextHomeIndex, p.homeIndex + 1);
@@ -339,7 +341,7 @@ public final class ArenaState extends PersistentState {
         private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
         private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
-        private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, powerUntilTick = 0;
+        private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
         private final Set<String> discoveredNodes = new HashSet<>();
         private final Set<String> completedContracts = new HashSet<>();
         private PlayerProfile(String name) { this.name = name; }
