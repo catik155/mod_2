@@ -582,8 +582,8 @@ public final class ArenaState extends PersistentState {
     }
 
     private void clearDuel(PlayerProfile a, PlayerProfile d) {
-        a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = "";
-        d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = "";
+        a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = ""; a.defenseCode = ""; a.defenseAttempts = 3;
+        d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = ""; d.defenseCode = ""; d.defenseAttempts = 3;
     }
 
     private String startDuel(ServerPlayerEntity attacker, ServerPlayerEntity defender, String action, long now) {
@@ -591,11 +591,49 @@ public final class ArenaState extends PersistentState {
         if (!a.duelOpponent.isBlank() || !d.duelOpponent.isBlank()) return "§eОдин из игроков уже участвует в сетевом противостоянии.";
         a.duelOpponent = defender.getGameProfile().getName(); a.duelAction = action; a.duelRole = "ATTACK"; a.duelMove = ""; a.duelUntilTick = now + 600;
         d.duelOpponent = attacker.getGameProfile().getName(); d.duelAction = action; d.duelRole = "DEFEND"; d.duelMove = ""; d.duelUntilTick = now + 600;
+        d.defenseCode = "NX-" + randomCode(5); d.defenseAttempts = 3;
         attacker.sendMessage(Text.literal("§c[КОНСОЛЬНЫЙ ПОЕДИНОК] §fАвтозащита не удержала периметр. Выбери тактику: DUEL BURST / FEINT / OVERRIDE. У тебя 30 секунд."), false);
-        defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАвтозащита не остановила вторжение! Срочно выбери: DUEL PATCH / DECOY / TRACE. У тебя 30 секунд."), false);
+        defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАВТОЗАЩИТА ПРОБИТА! В консоли введи DEFEND STATUS, затем точно повтори код командой DEFEND TYPE <код>. Есть 3 попытки и 30 секунд."), false);
         markDirty();
         return "§cАВТОЗАЩИТА ПРОБИТА §7| Началось консольное противостояние с " + defender.getGameProfile().getName()
             + ". Выбери тактику: DUEL BURST, FEINT или OVERRIDE. Исход операции пока не определён.";
+    }
+
+    private static String randomCode(int length) {
+        String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < length; i++) code.append(alphabet.charAt(ThreadLocalRandom.current().nextInt(alphabet.length())));
+        return code.toString();
+    }
+
+    public String defend(ServerPlayerEntity player, String input) {
+        PlayerProfile p = profile(player);
+        long now = player.getServer().getOverworld().getTime();
+        if (!p.duelRole.equals("DEFEND") || p.duelOpponent.isBlank())
+            return "§eНет активной задачи защиты.";
+        if (now > p.duelUntilTick) return "§cВремя защиты истекло. Проверь состояние командой DEFEND STATUS.";
+        String[] parts = input.trim().split("\\s+", 2);
+        if (parts.length == 0 || parts[0].isBlank() || parts[0].equalsIgnoreCase("STATUS") || parts[0].equalsIgnoreCase("HELP")) {
+            return "§6ЗАДАЧА: КОДОВЫЙ ПЕРЕХВАТ\n§fПовтори код без изменений: §e" + p.defenseCode
+                + "\n§fПопытки: §c" + p.defenseAttempts + "/3 §7| Осталось: " + Math.max(0, (p.duelUntilTick - now + 19) / 20) + " сек."
+                + "\n§7Команда: DEFEND TYPE " + p.defenseCode;
+        }
+        if (!parts[0].equalsIgnoreCase("TYPE") || parts.length < 2)
+            return "§eФормат: DEFEND TYPE <код> | DEFEND STATUS | DEFEND HELP";
+        String answer = parts[1].trim();
+        if (!answer.equals(p.defenseCode)) {
+            p.defenseAttempts--;
+            markDirty();
+            if (p.defenseAttempts <= 0) {
+                player.sendMessage(Text.literal("§c[ЗАЩИТА] §fПопытки закончились. Защитный модуль переходит в аварийный режим."), false);
+                return duel(player, "DECOY");
+            }
+            return "§cКОД НЕВЕРЕН §7| Осталось попыток: " + p.defenseAttempts + "/3. Проверь регистр и символы.";
+        }
+        p.defenseCode = "";
+        player.sendMessage(Text.literal("§a[ЗАЩИТА] §fКод принят. Контур восстановлен частично, результат зависит от тактики противника."), false);
+        markDirty();
+        return duel(player, "PATCH");
     }
 
     public String duel(ServerPlayerEntity player, String move) {
@@ -790,7 +828,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
-            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putString("defense_code", p.defenseCode); e.putInt("defense_attempts", p.defenseAttempts); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
@@ -822,7 +860,7 @@ public final class ArenaState extends PersistentState {
             p.lastRaidTick = e.getLong("last_raid");
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
-            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.defenseCode = e.getString("defense_code"); p.defenseAttempts = e.contains("defense_attempts") ? clamp(e.getInt("defense_attempts"), 0, 3) : 3; p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
@@ -853,7 +891,8 @@ public final class ArenaState extends PersistentState {
         private String counterTarget = "";
         private long counterUntilTick = 0;
         private int counterBonus = 0;
-        private String duelOpponent = "", duelAction = "", duelMove = "", duelRole = "";
+        private String duelOpponent = "", duelAction = "", duelMove = "", duelRole = "", defenseCode = "";
+        private int defenseAttempts = 3;
         private long duelUntilTick = 0;
         private String networkTarget = "", lastNetworkEvent = "нет";
         private int networkHeat = 0;
