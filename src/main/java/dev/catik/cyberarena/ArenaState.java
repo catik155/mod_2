@@ -255,7 +255,7 @@ public final class ArenaState extends PersistentState {
         placeUpgradeDisplay(w, p, 0, 2, p.storage, Blocks.CHEST);
         placeUpgradeDisplay(w, p, -2, 2, p.vpnOwned ? (p.vpnActive ? 2 : 1) : 0, Blocks.ENDER_CHEST);
         placeUpgradeDisplay(w, p, 1, 2, p.breakerLevel, Blocks.LIGHTNING_ROD);
-        placeUpgradeDisplay(w, p, -1, 2, p.guardLevel, Blocks.SHIELD);
+        placeUpgradeDisplay(w, p, -1, 2, p.guardLevel, Blocks.IRON_BARS);
         buildFarm(player, p);
     }
 
