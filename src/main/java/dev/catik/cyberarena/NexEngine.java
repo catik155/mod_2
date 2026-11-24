@@ -134,16 +134,6 @@ public final class NexEngine {
         Map.entry("power.arena", List.of("021|VOLT-WEB|OPEN|Public power status", "044|ENERGY-DB|GUARDED|Energy records", "071|PLANT-CORE|LOCKED|Plant control", "099|GRID-VAULT|LOCKED|Backup energy archive")),
         Map.entry("sports.arena", List.of("021|SPORTS-WEB|OPEN|Public league board", "032|MATCH-FEED|OPEN|Match reports", "044|EVENT-DB|GUARDED|Event records", "071|LEAGUE-CORE|LOCKED|League management")),
         Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation")),
-        Map.entry("craft.arena", List.of("021|CRAFT-GATE|OPEN|Public recipe catalog", "032|GUILD-RELAY|OPEN|Guild notices", "044|BLUEPRINT-DB|GUARDED|Build plans", "071|CRAFT-CORE|LOCKED|Workshop control")),
-        Map.entry("music.arena", List.of("021|SONIC-WEB|OPEN|Public music index", "032|AUDIO-FEED|OPEN|Sound pack feed", "044|STUDIO-DB|GUARDED|Studio schedule", "071|MIX-CORE|LOCKED|Audio lab control")),
-        Map.entry("travel.arena", List.of("021|ROUTE-GATE|OPEN|Public routes", "032|DEST-FEED|OPEN|Destination catalog", "044|EXPEDITION-DB|GUARDED|Expedition reports", "071|VOYAGER-CORE|LOCKED|Travel operations")),
-        Map.entry("legal.arena", List.of("021|LEX-WEB|OPEN|Public rules index", "032|CASE-FEED|OPEN|Case bulletins", "044|COURT-DB|GUARDED|Case metadata", "071|JUDICIAL-CORE|LOCKED|Court simulation")),
-        Map.entry("archive2.arena", List.of("021|MEMORY-GATE|OPEN|Public timeline", "032|FRAGMENT-FEED|OPEN|Archive fragments", "044|HISTORY-DB|GUARDED|Historical records", "071|MEMORY-CORE|LOCKED|Archive management")),
-        Map.entry("robot.arena", List.of("021|ROBOT-WEB|OPEN|Robot catalog", "044|TEST-DB|GUARDED|Testing metadata", "071|AUTOMATA-CORE|LOCKED|Robot lab simulation", "099|SYNTH-VAULT|LOCKED|Protected designs")),
-        Map.entry("food.arena", List.of("021|PANTRY-WEB|OPEN|Public recipes", "032|DELIVERY-FEED|OPEN|Delivery listings", "044|SUPPLY-DB|GUARDED|Supply metadata", "071|KITCHEN-CORE|LOCKED|Kitchen control")),
-        Map.entry("power.arena", List.of("021|VOLT-WEB|OPEN|Public power status", "044|ENERGY-DB|GUARDED|Energy records", "071|PLANT-CORE|LOCKED|Plant control", "099|GRID-VAULT|LOCKED|Backup energy archive")),
-        Map.entry("sports.arena", List.of("021|SPORTS-WEB|OPEN|Public league board", "032|MATCH-FEED|OPEN|Match reports", "044|EVENT-DB|GUARDED|Event records", "071|LEAGUE-CORE|LOCKED|League management")),
-        Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation"))
     );
 
 
