@@ -406,6 +406,7 @@ public final class CyberArenaScreen extends Screen {
                 if (client != null) client.setScreen(new CyberArenaScreen(0, "", q));
             } else if (page == 1) submit("arena nex ");
             else if (page == 2) submit("arena nex FLOW ");
+            else if (page == 7) submitSiteConsole();
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
