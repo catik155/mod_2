@@ -159,11 +159,14 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1))
             .dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть консоль и вводить команды на NX или FLEX"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2))
-            .dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль: приобретите AUTOM за 35 кредитов, чтобы открыть готовые сценарии и FLOW"))).build());
+            .dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль AUTOM: до покупки действия выполняются вручную в консоли"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШЕНИЯ"), b -> navigate(8))
+            .dimensions(left + 14 + (tabWidth + tabGap) * 3, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Прокачка защиты, скрытности, процессора и других модулей"))).build());
 
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 1) initTerminal(left, top, panelWidth);
         else if (page == 7) initSiteConsole(left, top, panelWidth);
+        else if (page == 8) initUpgrades(left, top, panelWidth);
         else initAutomation(left, top, panelWidth);
     }
 
@@ -452,6 +455,9 @@ public final class CyberArenaScreen extends Screen {
         } else if (page == 7) {
             context.drawTextWithShadow(textRenderer, Text.literal("NX // КОНСОЛЬ САЙТА: " + selectedSite), left + 14, top + 78, 0xFF70D8FF);
             drawWrapped(context, "Команды работают в контексте выбранного виртуального сайта. Обычная консоль остаётся отдельной вкладкой.", left + 14, top + 224, panelWidth - 28, 0xFFD0DCE6);
+        } else if (page == 8) {
+            context.drawTextWithShadow(textRenderer, Text.literal("МАГАЗИН МОДУЛЕЙ // ПРОКАЧКА ОПЕРАТОРА"), left + 14, top + 82, 0xFF70D8FF);
+            drawWrapped(context, "Покупай уровни за игровые кредиты. Каждый модуль усиливает определённую часть системы. Максимум — 5 уровней. Баланс и текущие уровни смотри в профиле.", left + 14, top + 94, panelWidth - 28, 0xFFD0DCE6);
         } else {
             context.drawTextWithShadow(textRenderer, Text.literal("АВТОМАТИЗАЦИЯ // ГОТОВЫЕ СЦЕНАРИИ"), left + 14, top + 78, 0xFF70D8FF);
             context.drawTextWithShadow(textRenderer, Text.literal("Команды разделяются ; | До 6 шагов за запуск"), left + 14, top + 258, 0xFFD0DCE6);
