@@ -209,7 +209,10 @@ public final class NexEngine {
                 if (player == null) yield error("NO_OPERATOR", "Operator context required.");
                 String[] flexParts = rawArg.split("\\s+", 2);
                 String flexAction = flexParts[0];
-                if (flexAction.equals("exec")) {
+                if (flexAction.equalsIgnoreCase("buy")
+                    && (ArenaState.get(player.getServer()).isPowerOut(player) || !ArenaState.get(player.getServer()).canUseWorkstation(player)))
+                    yield error("FLEX_STATION", "Для покупки FLEX нужна исправная и запитанная рабочая станция.");
+                if (flexAction.equalsIgnoreCase("exec")) {
                     if (!ArenaState.get(player.getServer()).flex(player, "status").contains("FLEX_OWNED=1"))
                         yield error("FLEX_LOCKED", "FLEX is not purchased. Buy it in Improvements for 250 credits.");
                     String payload = flexParts.length > 1 ? flexParts[1].trim() : "";
