@@ -185,7 +185,8 @@ public final class NexEngine {
         String[] parts = raw.trim().split("\\s+", 2);
         String cmd = parts[0].toUpperCase(Locale.ROOT);
         String arg = parts.length > 1 ? unquote(parts[1].trim().toLowerCase(Locale.ROOT)) : "";
-        if (player != null && ArenaState.get(player.getServer()).isPowerOut(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "REPAIR").contains(cmd)) return error("POWER_OFF", "Рабочая станция обесточена. Дождись восстановления или введи REPAIR.");
+        if (player != null && ArenaState.get(player.getServer()).isPowerOut(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "REPAIR", "STATION").contains(cmd)) return error("POWER_OFF", "Рабочая станция обесточена. Дождись восстановления или введи REPAIR.");
+        if (player != null && !ArenaState.get(player.getServer()).canUseWorkstation(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "STATION").contains(cmd)) return error("STATION_OFFLINE", "Основная рабочая станция недоступна. Вернись домой, восстанови её командой STATION REPAIR или купи удалённый терминал: STATION REMOTE.");
         return switch (cmd) {
             case "MANU", "HELP", "?" -> manual();
             case "STAT", "STATUS" -> player == null ? "§aNX CORE ONLINE §7| §fExternal I/O: DISABLED" : status(player);
@@ -206,6 +207,8 @@ public final class NexEngine {
             case "IP" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).ipInfo(player);
             case "POLICE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).policeStatus(player);
             case "ROUND" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).roundStatus(player);
+            case "STATION" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).station(player, arg);
+            case "COUNTER" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).counterAttack(player);
             case "NET", "NETWORK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).network(player, arg);
             case "SABOTAGE" -> error("OBSOLETE", "Прямой саботаж отключён. Используй NET DISCOVER → SCAN → ENUM → EXPLOIT.");
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
