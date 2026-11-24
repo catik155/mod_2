@@ -634,18 +634,24 @@ public final class ArenaState extends PersistentState {
             markDirty();
             if (p.defenseAttempts <= 0) {
                 player.sendMessage(Text.literal("§c[ЗАЩИТА] §fПопытки закончились. Защитный модуль переходит в аварийный режим."), false);
-                return duel(player, "DECOY");
+                return duelInternal(player, "DECOY", true);
             }
             return "§cКОД НЕВЕРЕН §7| Осталось попыток: " + p.defenseAttempts + "/3. Проверь регистр и символы.";
         }
         p.defenseCode = "";
         player.sendMessage(Text.literal("§a[ЗАЩИТА] §fКод принят. Контур восстановлен частично, результат зависит от тактики противника."), false);
         markDirty();
-        return duel(player, "PATCH");
+        return duelInternal(player, "PATCH", true);
     }
 
     public String duel(ServerPlayerEntity player, String move) {
+        return duelInternal(player, move, false);
+    }
+
+    private String duelInternal(ServerPlayerEntity player, String move, boolean fromDefenseGame) {
         PlayerProfile p = profile(player);
+        if (p.duelRole.equals("DEFEND") && !fromDefenseGame)
+            return "§eЗащитнику нужно пройти мини-игру: DEFEND STATUS, затем DEFEND TYPE <код>.";
         long now = player.getServer().getOverworld().getTime();
         if (p.duelOpponent.isBlank()) return "§eАктивного противостояния нет.";
         if (now > p.duelUntilTick) {
