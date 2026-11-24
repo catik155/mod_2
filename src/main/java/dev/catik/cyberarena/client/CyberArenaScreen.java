@@ -81,6 +81,7 @@ public final class CyberArenaScreen extends Screen {
     private TextFieldWidget input;
 
     public CyberArenaScreen() { this(0, "", ""); }
+    public CyberArenaScreen(int initialPage) { this(initialPage, "", ""); }
     private CyberArenaScreen(int page, String selectedSite, String query) {
         super(Text.literal("Cyber Arena"));
         this.page = page;
