@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
+import net.minecraft.world.GameMode;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +51,9 @@ public final class ArenaState extends PersistentState {
     public void ensureHome(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         ServerWorld world = player.getServer().getOverworld();
+        if (p.eliminated || p.roundWon) { player.changeGameMode(GameMode.SPECTATOR); return; }
         if (p.homeBuilt) {
+            refreshHomeDisplays(player, p);
             BlockPos homeSpawn = new BlockPos(p.homeX, p.homeY + 1, p.homeZ);
             player.setSpawnPoint(world.getRegistryKey(), homeSpawn, 0.0F, true, false);
             player.teleport(world, p.homeX + 0.5, p.homeY + 1, p.homeZ + 0.5, player.getYaw(), player.getPitch());
@@ -67,6 +70,7 @@ public final class ArenaState extends PersistentState {
         centerZ = homeCandidateZ;
         buildStarterHouse(world, centerX, floorY, centerZ);
         p.homeX = centerX; p.homeY = floorY; p.homeZ = centerZ; p.homeBuilt = true;
+        refreshHomeDisplays(player, p);
         BlockPos bedSpawn = new BlockPos(centerX, floorY + 1, centerZ);
         player.setSpawnPoint(world.getRegistryKey(), bedSpawn, 0.0F, true, false);
         player.teleport(world, centerX + 0.5, floorY + 1, centerZ + 0.5, 0.0F, 0.0F);
@@ -122,6 +126,7 @@ public final class ArenaState extends PersistentState {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             PlayerProfile p = state.profile(player);
             if (p.lastPassiveIncomeTick < 0) p.lastPassiveIncomeTick = now;
+            if (p.eliminated || p.roundWon) { if (player.interactionManager.getGameMode() != GameMode.SPECTATOR) player.changeGameMode(GameMode.SPECTATOR); continue; }
             if (now - p.lastPassiveIncomeTick >= 1200) {
                 long cycles = Math.min(10, (now - p.lastPassiveIncomeTick) / 1200);
                 int income = (int) cycles * ((2 + p.miningRig * 2) + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0));
@@ -129,6 +134,11 @@ public final class ArenaState extends PersistentState {
                 p.lastPassiveIncomeTick += cycles * 1200;
                 player.sendMessage(Text.literal("§6[МАЙНИНГ] §fПассивный доход: §a+" + income + " кредитов §7| §eMINER " + p.miningRig + "/5"), true);
                 state.markDirty();
+            }
+            if (p.credits >= 10000) {
+                p.credits = 10000; p.roundWon = true; state.markDirty();
+                player.sendMessage(Text.literal("§a[CYBER ARENA] §fЦЕЛЬ ДОСТИГНУТА: 10 000 КРЕДИТОВ. ТЫ ВЫИГРАЛ РАУНД!"), false);
+                player.changeGameMode(GameMode.SPECTATOR); continue;
             }
             if (now - p.lastIncidentCheckTick >= 1200) {
                 p.lastIncidentCheckTick = now;
@@ -150,20 +160,34 @@ public final class ArenaState extends PersistentState {
                 if (ThreadLocalRandom.current().nextInt(100) < detectionChance) {
                     boolean attributed = !p.vpnActive || ThreadLocalRandom.current().nextInt(100) < 18;
                     if (attributed) p.wantedLevel = Math.min(5, p.wantedLevel + 1);
-                    if (p.wantedLevel >= 4 && attributed && p.homeBuilt) {
-                        int fine = Math.min(p.credits, 10 + p.wantedLevel * 8); p.credits -= fine;
-                        BlockPos patrolPos = new BlockPos(p.homeX, p.homeY + 1, p.homeZ);
+                    if (p.wantedLevel >= 4 && attributed && p.homeBuilt && !p.policeStakeout) {
+                        p.policeStakeout = true;
+                        BlockPos patrolPos = new BlockPos(p.homeX + 5, p.homeY + 1, p.homeZ + 5);
                         var officer = EntityType.IRON_GOLEM.spawn(player.getServerWorld(), patrolPos, SpawnReason.EVENT);
-                        if (officer != null) { officer.setPersistent(); officer.setTarget(player); }
-                        player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fРасследование сопоставило журналы и установило твой игровой адрес. Штраф: " + fine + " кредитов. Патруль вошёл в твой дом."), false);
+                        if (officer != null) { officer.setPersistent(); officer.setCustomName(Text.literal("§cПОЛИЦИЯ ARENA")); officer.setCustomNameVisible(true); }
+                        player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fТвой адрес установлен. Патруль занял позицию у дома. Если войдёшь внутрь — задержание и выбывание из раунда."), false);
                     } else {
                         player.sendMessage(Text.literal("§6[ПОЛИЦИЯ ARENA] §fСетевые журналы показывают подозрительную активность: " + p.lastNetworkEvent + ". " + (attributed ? "Источник частично установлен." : "VPN скрыл источник, но событие осталось в журнале.")), false);
                     }
                     state.markDirty();
                 }
             }
+            if (p.policeStakeout && !p.eliminated && !p.roundWon && isInsideHome(player, p)) {
+                p.eliminated = true; state.markDirty();
+                player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fТЕБЯ ЗАДЕРЖАЛИ. СЕТЬ ПОЛНОСТЬЮ РАСКРЫТА. ТЫ ВЫБЫЛ ИЗ РАУНДА."), false);
+                player.changeGameMode(GameMode.SPECTATOR);
+                for (ServerPlayerEntity other : server.getPlayerManager().getPlayerList()) if (!other.getUuid().equals(player.getUuid()))
+                    other.sendMessage(Text.literal("§c[ARENA] §fИгрок " + player.getGameProfile().getName() + " задержан полицией и выбыл из раунда."), false);
+                continue;
+            }
             if (now % 40 == 0) state.sendOverlay(player, p, now);
         }
+    }
+
+    private static boolean isInsideHome(ServerPlayerEntity player, PlayerProfile p) {
+        return p.homeBuilt && player.getBlockX() >= p.homeX - 3 && player.getBlockX() <= p.homeX + 3
+            && player.getBlockZ() >= p.homeZ - 3 && player.getBlockZ() <= p.homeZ + 3
+            && player.getY() >= p.homeY && player.getY() <= p.homeY + 6;
     }
 
     private void triggerHomeIncident(ServerPlayerEntity player, PlayerProfile p, long now) {
@@ -219,6 +243,33 @@ public final class ArenaState extends PersistentState {
         world.setBlockState(machine.up(2), Blocks.AIR.getDefaultState());
     }
 
+    private void refreshHomeDisplays(ServerPlayerEntity player, PlayerProfile p) {
+        if (!p.homeBuilt) return;
+        ServerWorld w = player.getServer().getOverworld();
+        placeUpgradeDisplay(w, p, -2, -2, p.firewall, Blocks.IRON_BARS);
+        placeUpgradeDisplay(w, p, 0, -2, p.automation, Blocks.REDSTONE_LAMP);
+        placeUpgradeDisplay(w, p, 2, 0, p.stealth, Blocks.TINTED_GLASS);
+        placeUpgradeDisplay(w, p, -2, 0, p.extractor, Blocks.HOPPER);
+        placeUpgradeDisplay(w, p, 0, 0, p.cpu, Blocks.NOTE_BLOCK);
+        placeUpgradeDisplay(w, p, 2, 1, p.miningRig, Blocks.OBSERVER);
+        placeUpgradeDisplay(w, p, 0, 2, p.storage, Blocks.CHEST);
+        placeUpgradeDisplay(w, p, -2, 2, p.vpnOwned ? (p.vpnActive ? 2 : 1) : 0, Blocks.ENDER_CHEST);
+        placeUpgradeDisplay(w, p, 1, 2, p.breakerLevel, Blocks.LIGHTNING_ROD);
+        placeUpgradeDisplay(w, p, -1, 2, p.guardLevel, Blocks.SHIELD);
+        buildFarm(player, p);
+    }
+
+    private void placeUpgradeDisplay(ServerWorld world, PlayerProfile p, int dx, int dz, int level, net.minecraft.block.Block block) {
+        BlockPos pos = new BlockPos(p.homeX + dx, p.homeY + 1, p.homeZ + dz);
+        if (level <= 0) {
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+            world.setBlockState(pos.up(), Blocks.AIR.getDefaultState());
+            return;
+        }
+        world.setBlockState(pos, block.getDefaultState());
+        world.setBlockState(pos.up(), level >= 3 ? block.getDefaultState() : Blocks.AIR.getDefaultState());
+    }
+
     private void buildFarm(ServerPlayerEntity player, PlayerProfile p) {
         if (!p.homeBuilt || p.farmLevel == 0 || p.farmHealth <= 0) return;
         ServerWorld world = player.getServer().getOverworld();
@@ -234,7 +285,7 @@ public final class ArenaState extends PersistentState {
             case "buy" -> {
                 if (p.farmLevel > 0) return "§eМайнинг-ферма уже установлена. Используй FARM UPGRADE.";
                 if (p.credits < 120) return "§cНужно 120 кредитов для покупки фермы.";
-                p.credits -= 120; p.farmLevel = 1; p.farmHealth = 100; buildFarm(player, p); markDirty();
+                p.credits -= 120; p.farmLevel = 1; p.farmHealth = 100; refreshHomeDisplays(player, p); markDirty();
                 return "§aФЕРМА УСТАНОВЛЕНА | Уровень 1 | Прочность 100% | Доход +8 кредитов/мин.";
             }
             case "upgrade" -> {
@@ -242,7 +293,7 @@ public final class ArenaState extends PersistentState {
                 if (p.farmLevel >= 5) return "§eФерма уже максимального 5 уровня.";
                 int cost = 100 + p.farmLevel * 90;
                 if (p.credits < cost) return "§cУлучшение фермы стоит " + cost + " кредитов.";
-                p.credits -= cost; p.farmLevel++; p.farmHealth = Math.min(100, p.farmHealth + 20); markDirty();
+                p.credits -= cost; p.farmLevel++; p.farmHealth = Math.min(100, p.farmHealth + 20); refreshHomeDisplays(player, p); markDirty();
                 return "§aФЕРМА УЛУЧШЕНА | Уровень " + p.farmLevel + "/5 | Доход +" + (5 + p.farmLevel * 3) + "/мин.";
             }
             case "repair" -> {
@@ -250,7 +301,7 @@ public final class ArenaState extends PersistentState {
                 if (p.farmHealth >= 100) return "§aФерма полностью исправна.";
                 int cost = Math.max(10, (100 - p.farmHealth) / 2);
                 if (p.credits < cost) return "§cРемонт фермы стоит " + cost + " кредитов.";
-                p.credits -= cost; p.farmHealth = 100; buildFarm(player, p); markDirty();
+                p.credits -= cost; p.farmHealth = 100; refreshHomeDisplays(player, p); markDirty();
                 return "§aФЕРМА ОТРЕМОНТИРОВАНА | 100% | -" + cost + " кредитов.";
             }
             case "status" -> {
@@ -267,12 +318,12 @@ public final class ArenaState extends PersistentState {
             case "buy" -> {
                 if (p.vpnOwned) return "§eVPN уже приобретён.";
                 if (p.credits < 90) return "§cVPN-модуль стоит 90 кредитов.";
-                p.credits -= 90; p.vpnOwned = true; markDirty();
+                p.credits -= 90; p.vpnOwned = true; refreshHomeDisplays(player, p); markDirty();
                 return "§aVPN-МОДУЛЬ КУПЛЕН. Включи его: VPN ON.";
             }
             case "on" -> {
                 if (!p.vpnOwned) return "§cСначала купи VPN: VPN BUY.";
-                p.vpnActive = true; p.wantedLevel = Math.max(0, p.wantedLevel - 1); markDirty();
+                p.vpnActive = true; p.wantedLevel = Math.max(0, p.wantedLevel - 1); refreshHomeDisplays(player, p); markDirty();
                 return "§aVPN ПОДКЛЮЧЁН | Игровой адрес скрыт за виртуальным узлом.";
             }
             case "off" -> { p.vpnActive = false; markDirty(); return "§eVPN ОТКЛЮЧЁН | Будет виден твой игровой адрес."; }
@@ -515,6 +566,7 @@ public final class ArenaState extends PersistentState {
             case "stealth" -> p.stealth++; case "extract", "extractor" -> p.extractor++;
             case "miner", "mining" -> p.miningRig++; case "cpu" -> p.cpu++; case "storage" -> p.storage++;
         }
+        refreshHomeDisplays(player, p);
         markDirty();
         return "§aMODULE INSTALLED §f" + type.toUpperCase() + " §eLEVEL " + (level + 1) + "/5 §6-" + cost + " credits";
     }
@@ -553,6 +605,7 @@ public final class ArenaState extends PersistentState {
             e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
+            e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
             e.putInt("home_index", p.homeIndex); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
             NbtList nodes = new NbtList();
             p.discoveredNodes.forEach(v -> { NbtCompound n = new NbtCompound(); n.putString("id", v); nodes.add(n); });
@@ -562,7 +615,7 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
-        nbt.putInt("schema_version", 5);
+        nbt.putInt("schema_version", 6);
         nbt.put("profiles", entries);
         return nbt;
     }
@@ -585,6 +638,7 @@ public final class ArenaState extends PersistentState {
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
+            p.policeStakeout = e.getBoolean("police_stakeout"); p.eliminated = e.getBoolean("eliminated"); p.roundWon = e.getBoolean("round_won");
             p.homeIndex = e.contains("home_index") ? e.getInt("home_index") : -1; p.homeX = e.getInt("home_x"); p.homeY = e.getInt("home_y"); p.homeZ = e.getInt("home_z"); p.homeBuilt = e.getBoolean("home_built");
             if (p.homeIndex >= 0) state.nextHomeIndex = Math.max(state.nextHomeIndex, p.homeIndex + 1);
             readSet(e.getList("nodes", NbtCompound.COMPOUND_TYPE), p.discoveredNodes);
@@ -612,6 +666,7 @@ public final class ArenaState extends PersistentState {
         private int networkHeat = 0;
         private long lastNetworkActivityTick = 0;
         private boolean vpnOwned = false, vpnActive = false;
+        private boolean policeStakeout = false, eliminated = false, roundWon = false;
         private long lastPoliceCheckTick = 0, lastNetworkActionTick = -100000;
         private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
         private final Set<String> discoveredNodes = new HashSet<>();
