@@ -153,7 +153,7 @@ public final class CyberArenaScreen extends Screen {
         int top = Math.max(10, (this.height - panelHeight) / 2);
         int scaleY = panelHeight < 300 ? 1 : 1;
         int tabGap = 5;
-        int tabWidth = (panelWidth - 28 - tabGap * 2) / 3;
+        int tabWidth = (panelWidth - 28 - tabGap * 3) / 4;
         addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0))
             .dimensions(left + 12, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть виртуальные сайты, поиск, закладки и историю"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1))
@@ -310,7 +310,7 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + 14, top + 132, (panelWidth - 36) / 2, 22).tooltip(Tooltip.of(Text.literal("Отправить введённую команду в игровую консоль"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("СПРАВКА / МАНУАЛ"), b -> runNex("MANU"))
             .dimensions(left + 22 + (panelWidth - 36) / 2, top + 132, (panelWidth - 36) / 2, 22).tooltip(Tooltip.of(Text.literal("Список команд и синтаксис выбранного языка"))).build());
-        String[] commands = voraSelected ? new String[]{"MIRA", "NAVA", "JOBS", "DARA", "SELI", "UPRA stealth"} : new String[]{"STAT", "NODR", "CONTRACTS", "MINE", "SELR", "UPGR stealth"};
+        String[] commands = voraSelected ? new String[]{"MIRA", "NAVA", "JOBS", "DARA", "SELI", "UPRA stealth", "RIVA player"} : new String[]{"STAT", "NODR", "CONTRACTS", "MINE", "SELR", "UPGR stealth", "RAID player"};
         for (int i = 0; i < commands.length; i++) {
             final String command = commands[i];
             int col = i % 2, row = i / 2;
@@ -328,7 +328,7 @@ public final class CyberArenaScreen extends Screen {
             case "NAVA" -> "NODR"; case "MIRA" -> "STAT"; case "TARA" -> "CRACK";
             case "DARA" -> "MINE"; case "SELI" -> "SELR"; case "UPRA" -> "UPGR";
             case "JOBS" -> "CONTRACTS"; case "RUNA" -> "RUN"; case "SAVA" -> "SCAN";
-            case "PIRA" -> "PING"; case "FILA" -> "FILES"; case "REVA" -> "READ";
+            case "PIRA" -> "PING"; case "FILA" -> "FILES"; case "REVA" -> "READ"; case "RIVA" -> "RAID";
             case "WORA" -> "WHO"; case "FENA" -> "FLOW"; case "VESA" -> "SITE";
             default -> head;
         };
@@ -336,7 +336,7 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
-        addDrawableChild(ButtonWidget.builder(Text.literal("КУПИТЬ АВТОМАТИЗАЦИЮ — 35 КРЕДИТОВ"), b -> runNex("UPGR AUTOM"))
+        addDrawableChild(ButtonWidget.builder(Text.literal("ПРИОБРЕСТИ / УЛУЧШИТЬ AUTOM"), b -> runNex("UPGR AUTOM"))
             .dimensions(left + 14, top + 76, panelWidth - 28, 21)
             .tooltip(Tooltip.of(Text.literal("Покупает модуль AUTOM уровня 1. Он открывает готовые сценарии и FLOW."))).build());
         input = new TextFieldWidget(textRenderer, left + 14, top + 102, panelWidth - 28, 20, Text.literal("Сценарий автоматизации"));
@@ -356,6 +356,22 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + 14, top + 222, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы на трёх сайтах без ручного ввода."))).build());
     }
+    private void initUpgrades(int left, int top, int panelWidth) {
+        String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE"};
+        String[] labels = {"ЗАЩИТА", "АВТОМАТИЗАЦИЯ", "СКРЫТНОСТЬ", "ИЗВЛЕЧЕНИЕ", "МАЙНИНГ", "ПРОЦЕССОР", "ХРАНИЛИЩЕ"};
+        int gap = 8, colWidth = (panelWidth - 36) / 2;
+        for (int i = 0; i < modules.length; i++) {
+            final String module = modules[i];
+            int col = i % 2, row = i / 2;
+            addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШИТЬ: " + labels[i]), b -> runNex("UPGR " + module))
+                .dimensions(left + 14 + col * (colWidth + gap), top + 112 + row * 34, colWidth, 26)
+                .tooltip(Tooltip.of(Text.literal("Купить следующий уровень " + module + ". Стоимость зависит от текущего уровня; максимум 5."))).build());
+        }
+        addDrawableChild(ButtonWidget.builder(Text.literal("МОЙ ПРОФИЛЬ И БАЛАНС"), b -> runNex("STAT"))
+            .dimensions(left + 14, top + 246, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Показать кредиты, очки репутации и уровни модулей"))).build());
+    }
+
     private void submit(String prefix) {
         String value = input == null ? "" : input.getText().trim();
         if (!value.isEmpty()) send(prefix + translateVora(value));
