@@ -201,7 +201,7 @@ public final class CyberArenaScreen extends Screen {
             final int destination = pages[i];
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + 4), 16, tabWidth, 20).build());
         }
-        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, width - 112, 22, Text.literal("NX command"));
+        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, width - 180, 22, Text.literal("NX command"));
         input.setMaxLength(240);
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
         input.setChangedListener(this::refreshCompletions);
