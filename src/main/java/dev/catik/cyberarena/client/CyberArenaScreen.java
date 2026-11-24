@@ -108,7 +108,7 @@ public final class CyberArenaScreen extends Screen {
     private TextFieldWidget input;
     private int terminalScroll = 0;
     private int browserScroll = 0;
-    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","DUEL","DEFEND","COUNTER","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","HOME","DEFENSE","LOGS"};
+    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","DUEL","DEFEND","COUNTER","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","FLEX","HOME","DEFENSE","LOGS"};
 
     public CyberArenaScreen() { this(0, "", ""); }
     public CyberArenaScreen(int initialPage) { this(initialPage, "", ""); }
@@ -543,7 +543,8 @@ public final class CyberArenaScreen extends Screen {
         String value = input == null ? "" : input.getText().trim();
         if (!value.isEmpty()) {
             String translated = translateVora(value);
-            send(prefix + (voraSelected ? "FLEX EXEC " : "") + translated);
+            if (voraSelected) send("arena nex FLEX EXEC FLOW " + translated);
+            else send(prefix + translated);
         }
     }
     private void runNex(String instruction) { send("arena nex " + instruction); }
