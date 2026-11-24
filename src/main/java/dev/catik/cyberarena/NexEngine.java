@@ -215,6 +215,8 @@ public final class NexEngine {
                     String payload = flexParts.length > 1 ? flexParts[1].trim() : "";
                     if (payload.isBlank() || payload.toUpperCase(Locale.ROOT).startsWith("FLEX "))
                         yield error("FLEX_SYNTAX", "FLEX EXEC requires one NX-compatible translated instruction.");
+                    if (payload.regionMatches(true, 0, "FLOW ", 0, 5))
+                        yield flexFlow(payload.substring(5), player);
                     yield execute(payload, player);
                 }
                 yield ArenaState.get(player.getServer()).flex(player, flexAction);
@@ -272,20 +274,32 @@ public final class NexEngine {
     }
 
     private static String flow(String script, ServerPlayerEntity player) {
+        return runFlow(script, player, false);
+    }
+
+    private static String flexFlow(String script, ServerPlayerEntity player) {
+        return runFlow(script, player, true);
+    }
+
+    private static String runFlow(String script, ServerPlayerEntity player, boolean premium) {
         if (player == null) return error("NO_OPERATOR", "FLOW requires an operator session.");
         if (script.isBlank()) return error("FLOW_SYNTAX", "Use FLOW opcode; opcode; opcode.");
-        if (script.length() > 240) return error("FLOW_LIMIT", "Routine limit is 240 characters.");
+        int maxLength = premium ? 480 : 240;
+        int maxSteps = premium ? 12 : 6;
+        if (script.length() > maxLength) return error("FLOW_LIMIT", "Routine limit is " + maxLength + " characters.");
         String[] steps = script.split(";", -1);
-        if (steps.length > 6) return error("FLOW_LIMIT", "Maximum 6 instructions per routine.");
+        if (steps.length > maxSteps) return error("FLOW_LIMIT", "Maximum " + maxSteps + " instructions per routine.");
         if (ArenaState.get(player.getServer()).view(player).automation() < 1)
             return error("AUTOMATION_LOCKED", "Automation is locked. Purchase AUTOM module first: UPGR AUTOM (35 credits).");
-        StringBuilder result = new StringBuilder("§bNEX FLOW // ").append(steps.length).append(" STEPS");
-        Set<String> allowed = Set.of("SEEK","WHO","PING","PORTA","PORTS","FILES","LS","READ","VIEW","CRACK","MINE","UPGR","SELR","SCAN","STAT","NODR","MAPA","CONTRACTS","JOBS");
+        StringBuilder result = new StringBuilder(premium ? "§dFLEX FLOW // " : "§bNEX FLOW // ").append(steps.length).append(" STEPS");
+        Set<String> allowed = premium
+            ? Set.of("SEEK","WHO","PING","PORTA","PORTS","FILES","LS","READ","VIEW","CRACK","MINE","UPGR","SELR","SCAN","STAT","NODR","MAPA","CONTRACTS","JOBS","FARM","VPN","IP","POLICE","ROUND","SITE","RUN","REPAIR")
+            : Set.of("SEEK","WHO","PING","PORTA","PORTS","FILES","LS","READ","VIEW","CRACK","MINE","UPGR","SELR","SCAN","STAT","NODR","MAPA","CONTRACTS","JOBS");
         for (int i = 0; i < steps.length; i++) {
             String step = steps[i].trim();
             if (step.isEmpty()) return error("FLOW_SYNTAX", "Step " + (i + 1) + " is empty.");
             String opcode = step.split("\\s+", 2)[0].toUpperCase(Locale.ROOT);
-            if (!allowed.contains(opcode)) return error("FLOW_BLOCKED", opcode + " is not permitted in routines.");
+            if (!allowed.contains(opcode)) return error("FLOW_BLOCKED", opcode + " is not permitted in this routine tier.");
             String output = execute(step, player);
             result.append("\n§7[").append(i + 1).append("] §f").append(output);
             if (output.startsWith("§c")) {
