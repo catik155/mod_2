@@ -29,7 +29,8 @@ public final class CyberArena implements ModInitializer {
                         + "\n§bData shards: §f" + v.dataShards() + " §7| §cAlert: §f" + v.alertLevel() + "/5"
                         + "\n§aFirewall: §f" + v.firewall() + "/5 §7| §eAutomation: §f" + v.automation() + "/5"
                         + "\n§bStealth " + v.stealth() + "/5 §7| §dExtract " + v.extractor() + "/5 §7| §6Miner " + v.miningRig() + "/5"
-                        + "\n§fCPU " + v.cpu() + "/5 §7| Storage " + v.storage() + "/5"\n                        + "\n§eЭлектрощиток: " + v.breakerCharges() + " зарядов §7| §aОхрана: " + v.guardCharges() + " зарядов"
+                        + "\n§fCPU " + v.cpu() + "/5 §7| Storage " + v.storage() + "/5"
+                        + "\n§eЭлектрощиток: " + v.breakerCharges() + " зарядов §7| §aОхрана: " + v.guardCharges() + " зарядов"
                         + "\n§7Completed jobs: " + v.completedContracts() + " §8| mapped nodes: " + v.discoveredNodes());
                 }))
                 .then(CommandManager.literal("contracts").executes(c -> reply(c.getSource(),
