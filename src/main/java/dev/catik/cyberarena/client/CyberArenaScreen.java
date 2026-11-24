@@ -17,19 +17,41 @@ import java.util.Set;
 public final class CyberArenaScreen extends Screen {
     private static final String[] SITES = {
         "shop.arena", "news.arena", "grid.arena", "vault.arena", "labs.arena", "forum.arena", "bank.arena", "metro.arena", "weather.arena", "clinic.arena", "factory.arena", "museum.arena", "uni.arena", "port.arena", "security.arena", "casino.arena", "farm.arena", "media.arena", "space.arena", "auction.arena",
-        "craft.arena", "music.arena", "travel.arena", "legal.arena", "archive2.arena", "robot.arena", "food.arena", "power.arena", "sports.arena", "social.arena"
+        "craft.arena", "music.arena", "travel.arena", "legal.arena", "archive2.arena", "robot.arena", "food.arena", "power.arena", "sports.arena", "social.arena",
+        "code.arena", "docks.arena", "museum2.arena", "energy.arena", "weather2.arena", "jobs.arena", "housing.arena", "transit.arena", "wildlife.arena", "archive3.arena"
     };
     private static final String[] TITLES = {
         "NEX MARKET", "ARENA DAILY", "GRID CONTROL", "VAULT ARCHIVE", "NEX LABS", "OPEN FORUM", "ARENA BANK", "METRO LINK", "SKYCAST", "CIVIC CLINIC", "FACTORIUM", "DIGITAL MUSEUM", "ARENA CAMPUS", "HARBOR CONTROL", "SENTINEL", "LUCKY BYTE", "GREENFIELD", "PIXEL PRESS", "STARLAB", "BIDNET",
-        "PIXEL CRAFT", "SONIC ARCHIVE", "VOYAGER", "LEXICON", "MEMORY BANK", "AUTOMATA", "PANTRY", "VOLTAGE", "ARENA SPORTS", "SOCIAL BYTE"
+        "PIXEL CRAFT", "SONIC ARCHIVE", "VOYAGER", "LEXICON", "MEMORY BANK", "AUTOMATA", "PANTRY", "VOLTAGE", "ARENA SPORTS", "SOCIAL BYTE",
+        "CODE FORGE", "DOCKYARD", "ARTIFACT HALL", "FUSION LAB", "CLIMANET", "WORKLINK", "HOMESTEAD", "RAILNET", "WILDLIFE", "DEEP VAULT"
     };
     private static final String[] DESCRIPTIONS = {
         "Public exchange storefront and market bulletins.", "Public news relay, contracts and security bulletins.", "Energy grid control and infrastructure telemetry.", "Encrypted archive with high-value protected data.", "Research laboratory and experimental records.", "Community message board with public threads.", "Fictional finance exchange and protected ledgers.", "Transit network with station maps and timetables.", "Weather simulation with forecasts and alerts.", "Medical research portal and supply manifests.", "Industrial production, robotics and assembly records.", "Public cultural archive and exhibit catalog.", "Education network, courses and library records.", "Logistics hub with cargo manifests and berth schedules.", "Advanced defense simulation with sensors and decoys.", "Entertainment network with games and simulated payouts.", "Agriculture network with harvest and storage reports.", "Media studio with stories and broadcast schedules.", "Space research with orbital telemetry and mission archives.", "Auction exchange with lots, bids and settlements.",
-        "Crafting recipes, build catalogs and guild projects.", "Fictional tracks, sound packs and audio event schedules.", "Travel destinations, routes and expedition reports.", "Court cases, public rules and simulated legal records.", "Historical records, timelines and recovered fragments.", "Robotics research, machine profiles and test schedules.", "Food supply, recipe index and delivery orders.", "Power plant simulator, energy schedules and load records.", "League standings, match reports and event calendars.", "Profiles of fictional NPC groups, posts and reputation boards."
+        "Crafting recipes, build catalogs and guild projects.", "Fictional tracks, sound packs and audio event schedules.", "Travel destinations, routes and expedition reports.", "Court cases, public rules and simulated legal records.", "Historical records, timelines and recovered fragments.", "Robotics research, machine profiles and test schedules.", "Food supply, recipe index and delivery orders.", "Power plant simulator, energy schedules and load records.", "League standings, match reports and event calendars.", "Profiles of fictional NPC groups, posts and reputation boards.",
+        "Code forge: projects, package changelogs, build status and contributor notes.",
+        "Dockyard: ship arrivals, cargo manifests, crew notices and berth schedules.",
+        "Artifact hall: curated relics, provenance cards, restoration diaries and exhibits.",
+        "Fusion lab: reactor output, safety bulletins, research milestones and test logs.",
+        "Climanet: storm tracks, sensor readings, climate models and warning archive.",
+        "Worklink: vacancies, fictional candidate profiles, interview calendar and contracts.",
+        "Homestead: property listings, district plans, repair histories and owner notices.",
+        "Railnet: route maps, ticket notices, fleet status, signal maintenance and delays.",
+        "Wildlife: species index, habitat maps, ranger reports and reserve records.",
+        "Deep Vault: expedition fragments, chronology files, relic index and sealed archive records."
     };
     private static final String[] SITE_CONTENT = {
         "Market board: starter tools, rotating offers, trader notes.", "Daily feed: city headlines, event notes, public alerts.", "Grid status: district load, relay notices, maintenance windows.", "Vault landing: archive categories, access notices, recovery hints.", "Lab portal: experiments, prototype summaries, researcher notes.", "Forum: public threads, guild discussions, community rules.", "Bank: exchange rates, fictional accounts, transaction notices.", "Metro: station map, timetable, service disruptions.", "Weather: forecast, climate map, storm advisories.", "Clinic: research topics, supply lists, appointment notices.", "Factory: assembly lines, robot status, shift schedule.", "Museum: exhibits, visitor guide, archive highlights.", "Campus: courses, library shelf, campus map.", "Port: cargo board, berth schedule, logistics notices.", "Sentinel: defense bulletin, sensor status, decoy warnings.", "Casino: game catalog, odds notes, payout schedule.", "Farm: harvest calendar, silo stock and weather report.", "Media: latest stories, studio schedule, broadcast notes.", "Space: mission board, orbital map, telemetry highlights.", "Auction: current lots, bid history, settlement notices.",
-        "Crafting recipes: wooden tools, stone kit, lantern set; guild build ideas.", "Audio catalog: ambient packs, event jingles, sound design notes.", "Travel board: forest camps, mountain routes, expedition checklists.", "Legal library: arena rules, case summaries, public verdicts.", "Timeline: ancient ruins, server milestones, recovered history fragments.", "Robot catalog: helper bots, test results, factory prototypes.", "Recipe pantry: bread, stew, baked potatoes; ingredient lists and delivery menu.", "Power dashboard: plant output, energy forecast, planned maintenance.", "Sports center: league table, match summaries, upcoming arena events.", "Social feed: NPC groups, community posts, reputation trends."
+        "Crafting recipes: wooden tools, stone kit, lantern set; guild build ideas.", "Audio catalog: ambient packs, event jingles, sound design notes.", "Travel board: forest camps, mountain routes, expedition checklists.", "Legal library: arena rules, case summaries, public verdicts.", "Timeline: ancient ruins, server milestones, recovered history fragments.", "Robot catalog: helper bots, test results, factory prototypes.", "Recipe pantry: bread, stew, baked potatoes; ingredient lists and delivery menu.", "Power dashboard: plant output, energy forecast, planned maintenance.", "Sports center: league table, match summaries, upcoming arena events.", "Social feed: NPC groups, community posts, reputation trends.",
+        "Code forge: project catalog, package versions, contributor board, build history and issue tracker.",
+        "Dockyard: ship manifests, cargo inspections, crew schedules, port maps and customs bulletins.",
+        "Artifact hall: relic descriptions, donor cards, restoration records, gallery map and curator notes.",
+        "Fusion lab: reactor telemetry, test summaries, safety reports, research papers and backup logs.",
+        "Climanet: regional forecasts, storm archive, sensor stations, climate datasets and alert history.",
+        "Worklink: job listings, applicant cards, interview slots, contract templates and payroll notices.",
+        "Homestead: house listings, ownership records, district maps, repair requests and market trends.",
+        "Railnet: train schedules, station maps, fleet maintenance, signal logs and passenger bulletins.",
+        "Wildlife: species profiles, habitat maps, ranger diaries, migration reports and reserve registry.",
+        "Deep Vault: expedition logs, sealed artifacts, historical fragments, chronology index and recovery notes."
     };
     private static final String[] RISKS = {
         "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH",
