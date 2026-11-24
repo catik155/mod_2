@@ -329,11 +329,12 @@ public final class CyberArenaScreen extends Screen {
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + 110, top + 78, 118, 20).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
+        int navY = Math.min(top + 229, this.height - 52);
         addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕДЫДУЩИЙ САЙТ"), b -> openAdjacentSite(-1))
-            .dimensions(left + 14, top + 229, navHalf, 18)
+            .dimensions(left + 14, navY, navHalf, 18)
             .tooltip(Tooltip.of(Text.literal("Перейти к предыдущему сайту каталога"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕДУЮЩИЙ САЙТ →"), b -> openAdjacentSite(1))
-            .dimensions(left + 22 + navHalf, top + 229, navHalf, 18)
+            .dimensions(left + 22 + navHalf, navY, navHalf, 18)
             .tooltip(Tooltip.of(Text.literal("Перейти к следующему сайту каталога"))).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
@@ -485,17 +486,25 @@ public final class CyberArenaScreen extends Screen {
             int idx = siteIndex(selectedSite);
             int accent = siteAccent(idx);
             String category = siteCategory(idx);
-            // Каждая вымышленная площадка получает собственную цветовую тему и шапку.
-            context.fill(left + 10, top + 105, left + panelWidth - 10, top + 222, 0xFF142431);
-            context.fill(left + 10, top + 105, left + panelWidth - 10, top + 109, accent);
-            context.fill(left + 10, top + 105, left + 14, top + 222, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  ARENA:// " + selectedSite), left + 22, top + 116, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, top + 139, 0xFFF0F6FA);
-            drawWrapped(context, DESCRIPTIONS[idx], left + 22, top + 160, panelWidth - 44, 0xFFD0DCE6);
-            drawWrapped(context, SITE_CONTENT[idx], left + 22, top + 184, panelWidth - 44, 0xFFB5D9C8);
-            context.fill(left + 14, top + 224, left + panelWidth - 14, top + 245, 0xFF1B2D3A);
-            context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + translateRisk(RISKS[idx]) + "     •     СОСТОЯНИЕ: ДОСТУПЕН"), left + 22, top + 231, accent);
+            int contentTop = top + 110;
+            int contentBottom = top + panelHeight - 54;
+            int contentHeight = Math.max(90, contentBottom - contentTop);
+            int contentOffset = browserScroll * 8;
             context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
+            context.enableScissor(left + 10, contentTop, left + panelWidth - 10, contentBottom);
+            context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + contentHeight - contentOffset, 0xFF142431);
+            context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + 4 - contentOffset, accent);
+            context.fill(left + 10, contentTop - contentOffset, left + 14, contentTop + contentHeight - contentOffset, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + selectedSite), left + 22, contentTop + 12 - contentOffset, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
+            drawWrapped(context, DESCRIPTIONS[idx], left + 22, contentTop + 58 - contentOffset, panelWidth - 44, 0xFFD0DCE6);
+            drawWrapped(context, SITE_CONTENT[idx], left + 22, contentTop + 92 - contentOffset, panelWidth - 44, 0xFFB5D9C8);
+            context.fill(left + 22, contentTop + 142 - contentOffset, left + panelWidth - 22, contentTop + 164 - contentOffset, 0xFF1B2D3A);
+            context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + translateRisk(RISKS[idx]) + "  •  СОСТОЯНИЕ: ДОСТУПЕН"), left + 30, contentTop + 149 - contentOffset, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal("ПУБЛИЧНАЯ ИНФОРМАЦИЯ"), left + 22, contentTop + 184 - contentOffset, 0xFF70D8FF);
+            drawWrapped(context, "Это демонстрационный игровой ресурс. Его домен и IP существуют только внутри мира Cyber Arena. Для исследования узлов, поиска слабых мест, атаки и настройки защиты используй консоль NX/FLEX.", left + 22, contentTop + 202 - contentOffset, panelWidth - 44, 0xFFB5C5D2);
+            context.disableScissor();
+            context.drawTextWithShadow(textRenderer, Text.literal("ПРОКРУТКА: КОЛЁСИКО МЫШИ"), left + 14, top + panelHeight - 38, 0xFF8295A8);
         } else if (page == 0 || page == 4 || page == 5) {
             String heading = page == 4 ? "СОХРАНЁННЫЕ САЙТЫ" : page == 5 ? "ИСТОРИЯ ПОСЕЩЕНИЙ" : "КАТАЛОГ ВИРТУАЛЬНЫХ САЙТОВ";
             context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, top + 98, 0xFF70D8FF);
