@@ -528,6 +528,9 @@ public final class ArenaState extends PersistentState {
         private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
         private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
+        private int farmLevel = 0, farmHealth = 0, wantedLevel = 0, virtualIp = 42;
+        private boolean vpnOwned = false, vpnActive = false;
+        private long lastPoliceCheckTick = 0;
         private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
         private final Set<String> discoveredNodes = new HashSet<>();
         private final Set<String> completedContracts = new HashSet<>();
