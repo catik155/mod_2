@@ -951,6 +951,21 @@ public final class ArenaState extends PersistentState {
         return "§aDATA EXCHANGE §b-" + amount + " shards §6+" + payout + " credits";
     }
 
+    public String flex(ServerPlayerEntity player, String action) {
+        PlayerProfile p = profile(player);
+        if (action.equalsIgnoreCase("status")) return "§bFLEX_OWNED=" + (p.flexOwned ? "1" : "0") + " §7| PREMIUM LANGUAGE";
+        if (action.equalsIgnoreCase("buy")) {
+            if (p.flexOwned) return "§eFLEX уже приобретён. Переключение доступно в терминале.";
+            int cost = 250;
+            if (p.credits < cost) return "§cНедостаточно кредитов для FLEX. Требуется: " + cost + ".";
+            p.credits -= cost;
+            p.flexOwned = true;
+            markDirty();
+            return "§aFLEX УСТАНОВЛЕН §7| §fСписано " + cost + " кредитов. Перезапусти терминал и выбери FLEX.";
+        }
+        return "§eИспользуй FLEX STATUS или FLEX BUY.";
+    }
+
     public String upgrade(ServerPlayerEntity player, String type) {
         PlayerProfile p = profile(player);
         int level = switch (type) {
@@ -1005,7 +1020,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
-            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putString("defense_code", p.defenseCode); e.putInt("defense_attempts", p.defenseAttempts); e.putString("defense_game", p.defenseGame); e.putString("defense_route", p.defenseRoute); e.putInt("defense_route_step", p.defenseRouteStep); e.putInt("defense_x", p.defenseX); e.putInt("defense_y", p.defenseY); e.putString("defense_grid", p.defenseGrid); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putString("defense_code", p.defenseCode); e.putInt("defense_attempts", p.defenseAttempts); e.putString("defense_game", p.defenseGame); e.putString("defense_route", p.defenseRoute); e.putInt("defense_route_step", p.defenseRouteStep); e.putInt("defense_x", p.defenseX); e.putInt("defense_y", p.defenseY); e.putString("defense_grid", p.defenseGrid); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putBoolean("flex_owned", p.flexOwned); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
@@ -1018,7 +1033,7 @@ public final class ArenaState extends PersistentState {
             e.put("jobs", jobs);
             entries.add(e);
         });
-        nbt.putInt("schema_version", 7);
+        nbt.putInt("schema_version", 8);
         nbt.put("profiles", entries);
         return nbt;
     }
@@ -1037,7 +1052,7 @@ public final class ArenaState extends PersistentState {
             p.lastRaidTick = e.getLong("last_raid");
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
-            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.defenseCode = e.getString("defense_code"); p.defenseAttempts = e.contains("defense_attempts") ? clamp(e.getInt("defense_attempts"), 0, 3) : 3; p.defenseGame = e.getString("defense_game"); p.defenseRoute = e.getString("defense_route"); p.defenseRouteStep = clamp(e.getInt("defense_route_step"), 0, 9); p.defenseX = clamp(e.getInt("defense_x"), 0, 2); p.defenseY = clamp(e.getInt("defense_y"), 0, 2); p.defenseGrid = e.getString("defense_grid"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.defenseCode = e.getString("defense_code"); p.defenseAttempts = e.contains("defense_attempts") ? clamp(e.getInt("defense_attempts"), 0, 3) : 3; p.defenseGame = e.getString("defense_game"); p.defenseRoute = e.getString("defense_route"); p.defenseRouteStep = clamp(e.getInt("defense_route_step"), 0, 9); p.defenseX = clamp(e.getInt("defense_x"), 0, 2); p.defenseY = clamp(e.getInt("defense_y"), 0, 2); p.defenseGrid = e.getString("defense_grid"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.flexOwned = e.getBoolean("flex_owned"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
@@ -1074,7 +1089,7 @@ public final class ArenaState extends PersistentState {
         private String networkTarget = "", lastNetworkEvent = "нет";
         private int networkHeat = 0;
         private long lastNetworkActivityTick = 0;
-        private boolean vpnOwned = false, vpnActive = false;
+        private boolean vpnOwned = false, vpnActive = false, flexOwned = false;
         private boolean policeStakeout = false, eliminated = false, roundWon = false;
         private long lastPoliceCheckTick = 0, lastNetworkActionTick = -100000;
         private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
