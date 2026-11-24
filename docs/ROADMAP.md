@@ -73,13 +73,26 @@
 - [ ] Events: timed competitions, site refreshes, incidents, bonus objectives
 - [ ] Mission narrative, choices, optional objectives and multiple reward types
 
+## Home economy, mining farm, VPN and police
+- [x] Buy a physical mining-farm machine inside the personal house; farm level increases passive credits per minute
+- [x] Track farm durability; sabotage can damage it and stop its income until repaired
+- [x] Upgrade and repair the mining farm through the NX terminal
+- [x] Add fictional per-player IP addresses using documentation-only TEST-NET ranges
+- [x] Add a purchasable in-game VPN that masks the displayed fictional IP and reduces trace chance
+- [x] Add wanted level and simulated police patrols, fines and hostile patrol NPCs at high heat
+- [x] Add terminal home sabotage: farm damage, power outage, supply theft, data theft, false alarm, station lock, false police call and raider diversion
+- [ ] Add physical block-break interception for farm machine with durability, ownership and protection checks
+- [ ] Add multiple farm models, cooling, power use, storage capacity, overheating and power-grid upgrades
+- [ ] Add police investigation missions, bribes, evidence cleanup, warrants, escape and reputation effects
+- [ ] Add VPN node selection, rotating virtual endpoints, bandwidth and temporary VPN outages
+
 ## Home, raids and power sabotage
 - [x] Generate a personal starter house near world spawn and set the player's respawn point inside it
 - [x] Passive mining income is paid automatically while the player is online; MINER levels increase the payout
 - [x] Periodic home incidents: hostile pillagers can raid the house and power sabotage can disable the workstation
 - [x] Workstation commands are blocked during a blackout except status/help/repair; emergency REPAIR costs credits
 - [x] Consumable BREAKER and GUARD charges can each stop one matching incident; they are not permanent invulnerability
-- [ ] Add more sabotage events: workstation damage, stolen supplies, false alerts, temporary network isolation and NPC informants
+- [x] Add more home sabotage events: workstation damage, stolen supplies, false alerts, station lock, data theft, false police calls and raider diversion
 - [ ] Add repairable house devices and a clear home defense panel with remaining charges and incident history
 - [ ] Add settings for incident frequency and safe-start protection on new servers
 
