@@ -153,6 +153,13 @@ public final class ArenaState extends PersistentState {
     }
 
     private void triggerHomeIncident(ServerPlayerEntity player, PlayerProfile p, long now) {
+        if (p.farmLevel > 0 && p.farmHealth > 0 && ThreadLocalRandom.current().nextInt(4) == 0) {
+            int damage = Math.min(25, p.farmHealth);
+            p.farmHealth -= damage;
+            if (p.farmHealth == 0) playerBreakFarm(player, p);
+            player.sendMessage(Text.literal("§c[ДОМ] §fДиверсия повредила майнинг-ферму: -" + damage + "% прочности. Доход остановлен, используй FARM REPAIR."), false);
+            return;
+        }
         if (ThreadLocalRandom.current().nextBoolean()) {
             if (p.breakerCharges > 0) {
                 p.breakerCharges--;
