@@ -21,37 +21,22 @@ public final class CyberArenaScreen extends Screen {
         "code.arena", "docks.arena", "museum2.arena", "energy.arena", "weather2.arena", "jobs.arena", "housing.arena", "transit.arena", "wildlife.arena", "archive3.arena"
     };
     private static final String[] TITLES = {
-        "NEX MARKET", "ARENA DAILY", "GRID CONTROL", "VAULT ARCHIVE", "NEX LABS", "OPEN FORUM", "ARENA BANK", "METRO LINK", "SKYCAST", "CIVIC CLINIC", "FACTORIUM", "DIGITAL MUSEUM", "ARENA CAMPUS", "HARBOR CONTROL", "SENTINEL", "LUCKY BYTE", "GREENFIELD", "PIXEL PRESS", "STARLAB", "BIDNET",
-        "PIXEL CRAFT", "SONIC ARCHIVE", "VOYAGER", "LEXICON", "MEMORY BANK", "AUTOMATA", "PANTRY", "VOLTAGE", "ARENA SPORTS", "SOCIAL BYTE",
-        "CODE FORGE", "DOCKYARD", "ARTIFACT HALL", "FUSION LAB", "CLIMANET", "WORKLINK", "HOMESTEAD", "RAILNET", "WILDLIFE", "DEEP VAULT"
+        "РЫНОК АРЕНЫ", "ЕЖЕДНЕВНЫЕ НОВОСТИ", "УПРАВЛЕНИЕ СЕТЬЮ", "АРХИВ ХРАНИЛИЩА", "ЛАБОРАТОРИЯ", "ОТКРЫТЫЙ ФОРУМ", "БАНК АРЕНЫ", "МЕТРО СВЯЗЬ", "ПРОГНОЗ ПОГОДЫ", "ГОРОДСКАЯ КЛИНИКА",
+        "ЗАВОД", "ЦИФРОВОЙ МУЗЕЙ", "УНИВЕРСИТЕТ", "ПОРТОВЫЙ УЗЕЛ", "СТРАЖ", "ИГРОВОЙ КЛУБ", "ЗЕЛЁНАЯ ФЕРМА", "ПИКСЕЛЬНЫЕ НОВОСТИ", "КОСМИЧЕСКАЯ ЛАБОРАТОРИЯ", "АУКЦИОН",
+        "МАСТЕРСКАЯ", "МУЗЫКАЛЬНЫЙ АРХИВ", "ПУТЕШЕСТВИЯ", "ПРАВОВОЙ СПРАВОЧНИК", "БАНК ПАМЯТИ", "АВТОМАТИКА", "ПРОДОВОЛЬСТВИЕ", "ЭНЕРГОСЕТЬ", "СПОРТИВНАЯ АРЕНА", "СОЦИАЛЬНАЯ СЕТЬ",
+        "КОДОВАЯ МАСТЕРСКАЯ", "ВЕРФЬ", "ЗАЛ АРТЕФАКТОВ", "ЛАБОРАТОРИЯ СИНТЕЗА", "КЛИМАТИЧЕСКИЙ ЦЕНТР", "БИРЖА РАБОТЫ", "ДОМА И УЧАСТКИ", "ЖЕЛЕЗНОДОРОЖНАЯ СЕТЬ", "МИР ДИКОЙ ПРИРОДЫ", "ГЛУБОКИЙ АРХИВ"
     };
     private static final String[] DESCRIPTIONS = {
-        "Public exchange storefront and market bulletins.", "Public news relay, contracts and security bulletins.", "Energy grid control and infrastructure telemetry.", "Encrypted archive with high-value protected data.", "Research laboratory and experimental records.", "Community message board with public threads.", "Fictional finance exchange and protected ledgers.", "Transit network with station maps and timetables.", "Weather simulation with forecasts and alerts.", "Medical research portal and supply manifests.", "Industrial production, robotics and assembly records.", "Public cultural archive and exhibit catalog.", "Education network, courses and library records.", "Logistics hub with cargo manifests and berth schedules.", "Advanced defense simulation with sensors and decoys.", "Entertainment network with games and simulated payouts.", "Agriculture network with harvest and storage reports.", "Media studio with stories and broadcast schedules.", "Space research with orbital telemetry and mission archives.", "Auction exchange with lots, bids and settlements.",
-        "Crafting recipes, build catalogs and guild projects.", "Fictional tracks, sound packs and audio event schedules.", "Travel destinations, routes and expedition reports.", "Court cases, public rules and simulated legal records.", "Historical records, timelines and recovered fragments.", "Robotics research, machine profiles and test schedules.", "Food supply, recipe index and delivery orders.", "Power plant simulator, energy schedules and load records.", "League standings, match reports and event calendars.", "Profiles of fictional NPC groups, posts and reputation boards.",
-        "Code forge: projects, package changelogs, build status and contributor notes.",
-        "Dockyard: ship arrivals, cargo manifests, crew notices and berth schedules.",
-        "Artifact hall: curated relics, provenance cards, restoration diaries and exhibits.",
-        "Fusion lab: reactor output, safety bulletins, research milestones and test logs.",
-        "Climanet: storm tracks, sensor readings, climate models and warning archive.",
-        "Worklink: vacancies, fictional candidate profiles, interview calendar and contracts.",
-        "Homestead: property listings, district plans, repair histories and owner notices.",
-        "Railnet: route maps, ticket notices, fleet status, signal maintenance and delays.",
-        "Wildlife: species index, habitat maps, ranger reports and reserve records.",
-        "Deep Vault: expedition fragments, chronology files, relic index and sealed archive records."
+        "Витрина игрового рынка, предложения и заметки торговцев.", "Лента новостей города, события и публичные предупреждения.", "Состояние энергосети, нагрузка районов и ремонтные работы.", "Архив записей, защищённые данные и подсказки восстановления.", "Исследования, прототипы и заметки учёных.", "Обсуждения игроков, темы сообщества и правила форума.", "Игровой банк, счета и история операций.", "Карта станций метро и расписание поездов.", "Прогноз погоды, климатическая карта и предупреждения.", "Медицинские исследования и список снабжения.",
+        "Производственные линии, состояние роботов и сменный график.", "Выставки, экспонаты и культурный архив.", "Учебные курсы, библиотека и карта кампуса.", "Грузовые ведомости, причалы и расписание судов.", "Система игровой защиты, датчики и ложные сигналы.", "Развлекательные игры и расписание выплат.", "Календарь урожая, запасы силосов и прогноз погоды.", "Новости студии и расписание передач.", "Космические миссии, орбитальная карта и телеметрия.", "Каталог лотов, история ставок и расчёты.",
+        "Рецепты, чертежи и проекты гильдий.", "Музыкальные наборы и расписание звуковых событий.", "Маршруты, места отдыха и планы экспедиций.", "Судебные дела, правила и игровые решения.", "Исторические записи и восстановленные фрагменты.", "Каталог роботов, испытания и заводские прототипы.", "Рецепты, запасы продуктов и меню доставки.", "Выработка электростанций и плановые отключения.", "Турнирная таблица, матчи и календарь событий.", "Публикации игровых групп и репутация жителей.",
+        "Каталог проектов, версии пакетов и журнал сборок.", "Прибытие судов, грузовые проверки и карты порта.", "Описание реликвий, реставрация и музейные экспозиции.", "Показатели реактора, испытания и отчёты безопасности.", "Прогнозы регионов, датчики и архив штормов.", "Вакансии, профили кандидатов и договоры.", "Объявления о домах, планы районов и история ремонта.", "Маршруты поездов, состояние составов и задержки.", "Виды животных, карты среды обитания и отчёты смотрителей.", "Журналы экспедиций, древние артефакты и закрытые архивы."
     };
     private static final String[] SITE_CONTENT = {
-        "Market board: starter tools, rotating offers, trader notes.", "Daily feed: city headlines, event notes, public alerts.", "Grid status: district load, relay notices, maintenance windows.", "Vault landing: archive categories, access notices, recovery hints.", "Lab portal: experiments, prototype summaries, researcher notes.", "Forum: public threads, guild discussions, community rules.", "Bank: exchange rates, fictional accounts, transaction notices.", "Metro: station map, timetable, service disruptions.", "Weather: forecast, climate map, storm advisories.", "Clinic: research topics, supply lists, appointment notices.", "Factory: assembly lines, robot status, shift schedule.", "Museum: exhibits, visitor guide, archive highlights.", "Campus: courses, library shelf, campus map.", "Port: cargo board, berth schedule, logistics notices.", "Sentinel: defense bulletin, sensor status, decoy warnings.", "Casino: game catalog, odds notes, payout schedule.", "Farm: harvest calendar, silo stock and weather report.", "Media: latest stories, studio schedule, broadcast notes.", "Space: mission board, orbital map, telemetry highlights.", "Auction: current lots, bid history, settlement notices.",
-        "Crafting recipes: wooden tools, stone kit, lantern set; guild build ideas.", "Audio catalog: ambient packs, event jingles, sound design notes.", "Travel board: forest camps, mountain routes, expedition checklists.", "Legal library: arena rules, case summaries, public verdicts.", "Timeline: ancient ruins, server milestones, recovered history fragments.", "Robot catalog: helper bots, test results, factory prototypes.", "Recipe pantry: bread, stew, baked potatoes; ingredient lists and delivery menu.", "Power dashboard: plant output, energy forecast, planned maintenance.", "Sports center: league table, match summaries, upcoming arena events.", "Social feed: NPC groups, community posts, reputation trends.",
-        "Code forge: project catalog, package versions, contributor board, build history and issue tracker.",
-        "Dockyard: ship manifests, cargo inspections, crew schedules, port maps and customs bulletins.",
-        "Artifact hall: relic descriptions, donor cards, restoration records, gallery map and curator notes.",
-        "Fusion lab: reactor telemetry, test summaries, safety reports, research papers and backup logs.",
-        "Climanet: regional forecasts, storm archive, sensor stations, climate datasets and alert history.",
-        "Worklink: job listings, applicant cards, interview slots, contract templates and payroll notices.",
-        "Homestead: house listings, ownership records, district maps, repair requests and market trends.",
-        "Railnet: train schedules, station maps, fleet maintenance, signal logs and passenger bulletins.",
-        "Wildlife: species profiles, habitat maps, ranger diaries, migration reports and reserve registry.",
-        "Deep Vault: expedition logs, sealed artifacts, historical fragments, chronology index and recovery notes."
+        "Доска рынка: инструменты, специальные предложения и заметки торговцев.", "Городская лента: главные события, происшествия и публичные оповещения.", "Сеть: нагрузка районов, состояние узлов и окна обслуживания.", "Архив: категории записей, правила доступа и подсказки восстановления.", "Лаборатория: эксперименты, прототипы и отчёты исследователей.", "Форум: обсуждения, группы игроков и правила сообщества.", "Банк: игровые счета, курсы обмена и уведомления об операциях.", "Метро: схема станций, расписание и изменения движения.", "Погода: прогноз, карта климата и предупреждения о штормах.", "Клиника: исследования, запасы и расписание приёма.",
+        "Завод: сборочные линии, роботы и смены персонала.", "Музей: список экспонатов, карта залов и история коллекции.", "Университет: курсы, библиотека и карта учебных корпусов.", "Порт: список грузов, причалы и логистические уведомления.", "Страж: датчики, защитные правила и журнал происшествий.", "Клуб: игровые автоматы, правила и расписание турниров.", "Ферма: урожай, запасы зерна и прогноз погоды.", "Медиа: последние статьи, студийные передачи и эфирная сетка.", "Космос: миссии, орбиты и сводка телеметрии.", "Аукцион: лоты, история ставок и завершённые сделки.",
+        "Мастерская: рецепты, чертежи и проекты строительства.", "Музыка: звуковые наборы, композиции и заметки студии.", "Путешествия: лесные стоянки, горные маршруты и списки снаряжения.", "Право: правила арены, обзоры дел и публичные решения.", "Хронология: древние руины, события сервера и исторические находки.", "Роботы: помощники, результаты испытаний и заводские модели.", "Кухня: хлеб, рагу, печёный картофель и списки ингредиентов.", "Энергия: выработка станции, прогноз нагрузки и обслуживание.", "Спорт: таблица лиги, результаты матчей и будущие события.", "Сообщество: группы жителей, публикации и репутация.",
+        "Каталог кода: проекты, версии пакетов, журнал сборок и список задач.", "Верфь: манифесты судов, осмотр грузов и расписание экипажей.", "Артефакты: описание реликвий, история владельцев и реставрация.", "Реактор: телеметрия, испытания, отчёты безопасности и резервные журналы.", "Климат: штормы, станции датчиков, модели погоды и предупреждения.", "Работа: вакансии, анкеты, собеседования и шаблоны договоров.", "Жильё: объявления, владельцы, карты районов и заявки на ремонт.", "Железная дорога: расписание, станции, ремонт путей и задержки.", "Природа: виды животных, среда обитания, миграция и заповедники.", "Архив: экспедиции, закрытые артефакты, временная шкала и записи находок."
     };
     private static final String[] RISKS = {
         "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH",
@@ -489,7 +474,7 @@ public final class CyberArenaScreen extends Screen {
 
         if (page == 6) {
             int idx = siteIndex(selectedSite);
-            context.drawTextWithShadow(textRenderer, Text.literal("ARENA:// " + selectedSite + " / СПИСОК ФАЙЛОВ"), left + 14, top + 108, 0xFF70D8FF);
+            context.drawTextWithShadow(textRenderer, Text.literal("АРХИВ:// " + selectedSite + " / СПИСОК ЗАПИСЕЙ"), left + 14, top + 108, 0xFF70D8FF);
             for (int i = 0; i < FILE_NAMES[idx].length; i++) {
                 int y = top + 143 + i * 43;
                 context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
@@ -509,7 +494,7 @@ public final class CyberArenaScreen extends Screen {
             drawWrapped(context, DESCRIPTIONS[idx], left + 22, top + 160, panelWidth - 44, 0xFFD0DCE6);
             drawWrapped(context, SITE_CONTENT[idx], left + 22, top + 184, panelWidth - 44, 0xFFB5D9C8);
             context.fill(left + 14, top + 224, left + panelWidth - 14, top + 245, 0xFF1B2D3A);
-            context.drawTextWithShadow(textRenderer, Text.literal("ЗАЩИТА: " + translateRisk(RISKS[idx]) + "     •     СТАТУС: В СЕТИ"), left + 22, top + 231, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + translateRisk(RISKS[idx]) + "     •     СОСТОЯНИЕ: ДОСТУПЕН"), left + 22, top + 231, accent);
             context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
         } else if (page == 0 || page == 4 || page == 5) {
             String heading = page == 4 ? "СОХРАНЁННЫЕ САЙТЫ" : page == 5 ? "ИСТОРИЯ ПОСЕЩЕНИЙ" : "КАТАЛОГ ВИРТУАЛЬНЫХ САЙТОВ";
@@ -684,7 +669,7 @@ public final class CyberArenaScreen extends Screen {
     }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (page == 1) { terminalScroll = Math.max(0, Math.min(TERMINAL_OUTPUT.size(), terminalScroll + (verticalAmount > 0 ? 4 : -4))); return true; }
-        if (page == 3 || page == 6) { browserScroll = Math.max(0, Math.min(80, browserScroll + (verticalAmount < 0 ? 3 : -3))); return true; }
+        if (page == 3 || page == 6) { browserScroll = Math.max(0, Math.min(40, browserScroll + (verticalAmount < 0 ? 3 : -3))); return true; }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
     @Override public boolean shouldPause() { return false; }
