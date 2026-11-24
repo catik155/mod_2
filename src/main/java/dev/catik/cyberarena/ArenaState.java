@@ -49,8 +49,13 @@ public final class ArenaState extends PersistentState {
 
     public void ensureHome(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
-        if (p.homeBuilt) return;
         ServerWorld world = player.getServer().getOverworld();
+        if (p.homeBuilt) {
+            BlockPos homeSpawn = new BlockPos(p.homeX, p.homeY + 1, p.homeZ);
+            player.setSpawnPoint(world.getRegistryKey(), homeSpawn, 0.0F, true, false);
+            player.teleport(world, p.homeX + 0.5, p.homeY + 1, p.homeZ + 0.5, player.getYaw(), player.getPitch());
+            return;
+        }
         if (p.homeIndex < 0) p.homeIndex = nextHomeIndex++;
         int gridX = p.homeIndex % 8;
         int gridZ = p.homeIndex / 8;
@@ -133,18 +138,20 @@ public final class ArenaState extends PersistentState {
                     state.markDirty();
                 }
             }
-            if (p.wantedLevel >= 4 && now - p.lastPoliceCheckTick >= 1200) {
+            if (p.wantedLevel >= 1 && now - p.lastPoliceCheckTick >= 600) {
                 p.lastPoliceCheckTick = now;
-                if (!p.vpnActive) {
-                    int fine = Math.min(p.credits, 10 + p.wantedLevel * 8);
-                    p.credits -= fine;
-                    p.wantedLevel = Math.max(0, p.wantedLevel - 2);
-                    if (p.homeBuilt) {
-                        BlockPos patrolPos = new BlockPos(p.homeX + 5, p.homeY + 1, p.homeZ);
-                        var officer = EntityType.IRON_GOLEM.spawn(player.getServerWorld(), patrolPos, SpawnReason.EVENT);
-                        if (officer != null) { officer.setPersistent(); officer.setTarget(player); }
-                    }
-                    player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fПатруль нашёл твой игровой адрес. Штраф: " + fine + " кредитов."), false);
+                int detectionChance = Math.max(5, 85 - (p.vpnActive ? 65 : 0) - p.stealth * 3);
+                if (ThreadLocalRandom.current().nextInt(100) < detectionChance) {
+                    if (p.wantedLevel >= 4 && !p.vpnActive) {
+                        int fine = Math.min(p.credits, 10 + p.wantedLevel * 8); p.credits -= fine;
+                        if (p.homeBuilt) {
+                            BlockPos patrolPos = new BlockPos(p.homeX + 1, p.homeY + 1, p.homeZ - 1);
+                            var officer = EntityType.IRON_GOLEM.spawn(player.getServerWorld(), patrolPos, SpawnReason.EVENT);
+                            if (officer != null) { officer.setPersistent(); officer.setTarget(player); }
+                        }
+                        player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fРасследование связало сетевую активность с твоим адресом. Штраф: " + fine + " кредитов."), false);
+                        p.wantedLevel = Math.max(2, p.wantedLevel - 1);
+                    } else player.sendMessage(Text.literal("§6[ПОЛИЦИЯ ARENA] §fЗафиксирована подозрительная сетевая активность. Розыск: " + p.wantedLevel + "/5."), false);
                     state.markDirty();
                 }
             }
@@ -276,8 +283,9 @@ public final class ArenaState extends PersistentState {
     public String policeStatus(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         return "§cПОЛИЦИЯ ARENA | Розыск " + p.wantedLevel + "/5 | "
-            + (p.wantedLevel >= 4 ? "патруль ищет твой игровой адрес" : p.wantedLevel >= 2 ? "подозрение" : "ты не в розыске")
-            + " | VPN " + (p.vpnActive ? "активен" : "неактивен");
+            + (p.wantedLevel >= 4 ? "активное расследование и патруль" : p.wantedLevel >= 2 ? "анализ журналов и подозрение" : p.wantedLevel == 1 ? "наблюдение за сетевыми событиями" : "активного дела нет")
+            + " | VPN " + (p.vpnActive ? "маскирует адрес, но не стирает события" : "адрес виден")
+            + " | Последняя цель: " + (p.networkTarget.isBlank() ? "нет" : p.networkTarget);
     }
 
     public String sabotage(ServerPlayerEntity attacker, ServerPlayerEntity target, String action) {
@@ -327,6 +335,52 @@ public final class ArenaState extends PersistentState {
         if (traced) attacker.sendMessage(Text.literal("§c[ПОЛИЦИЯ] §fТвой виртуальный след обнаружен. Розыск +" + 1 + "."), false);
         target.sendMessage(Text.literal("§c[ДОМ] §fОбнаружена попытка саботажа: " + action.toUpperCase()), false);
         return result + (traced ? " §c| След обнаружен, розыск " + a.wantedLevel + "/5." : " §a| След не обнаружен.");
+    }
+
+    public String network(ServerPlayerEntity attacker, String instruction) {
+        PlayerProfile a = profile(attacker);
+        String[] parts = instruction.trim().split("\\s+", 3);
+        if (parts.length < 2) return "§eNET DISCOVER <игрок> | SCAN <игрок> | ENUM <игрок> | EXPLOIT <игрок> <FARM|POWER|DATA|SUPPLIES|ALARM|LOCK|FALSECALL|RAIDERS>";
+        String action = parts[0].toUpperCase();
+        String targetName = parts[1];
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayerList().stream().filter(p -> p.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
+        if (target == null) return "§cNET/NO_HOST | Игрок должен быть онлайн в этом мире.";
+        if (target.getUuid().equals(attacker.getUuid())) return "§cNET/SELF | Нельзя выбирать собственную сеть.";
+        PlayerProfile d = profile(target);
+        switch (action) {
+            case "DISCOVER" -> {
+                a.networkTarget = target.getGameProfile().getName(); a.networkStage = 1;
+                String address = d.vpnActive ? "203.0.113." + (d.virtualIp % 200 + 20) + " (VPN-узел)" : "198.51.100." + (d.virtualIp % 200 + 20);
+                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 22;
+                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+                markDirty();
+                return "§bARENA DISCOVERY §7| §f" + targetName + "\n§fВиртуальный адрес: " + address + "\n§aУзел найден. Далее: NET SCAN " + targetName + (traced ? "\n§cПолиция заметила поисковый запрос." : "");
+            }
+            case "SCAN" -> {
+                if (a.networkStage < 1 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER для этой цели.";
+                a.networkStage = 2; int fw = d.firewall;
+                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 32;
+                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+                markDirty();
+                return "§bPORT SCAN REPORT §7| §f" + targetName + "\n§e021/WEB-GATE §7" + (fw >= 4 ? "FILTERED" : "OPEN") + "\n§e044/DATA-RELAY §7" + (fw >= 2 ? "FILTERED" : "OPEN") + "\n§e071/ADMIN-CORE §7" + (fw >= 3 ? "FILTERED" : "OPEN") + "\n§7FIREWALL " + fw + "/5\n§aДалее: NET ENUM " + targetName + (traced ? "\n§cСканирование попало в журнал полиции." : "");
+            }
+            case "ENUM" -> {
+                if (a.networkStage < 2 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала SCAN для этой цели.";
+                a.networkStage = 3; markDirty();
+                return "§bSERVICE ENUMERATION §7| §f" + targetName + "\n§f021 WEB-GATE: публичный портал\n§f044 DATA-RELAY: хранилище ресурсов\n§f071 ADMIN-CORE: управление домом\n§7Сервисы вымышлены; внешних подключений нет.\n§aДалее: NET EXPLOIT " + targetName + " FARM";
+            }
+            case "EXPLOIT" -> {
+                if (parts.length < 3) return "§eУкажи игровой модуль: FARM, POWER, DATA, SUPPLIES, ALARM, LOCK, FALSECALL или RAIDERS.";
+                if (a.networkStage < 3 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER, SCAN и ENUM.";
+                long now = attacker.getServer().getOverworld().getTime();
+                if (now - a.lastNetworkActionTick < 1200) return "§eNET/COOLDOWN | Операция пока перезаряжается.";
+                a.lastNetworkActionTick = now; a.networkStage = 0;
+                String result = sabotage(attacker, target, parts[2].toLowerCase());
+                markDirty();
+                return "§bEXPLOIT SIMULATION §7| §f" + targetName + " / " + parts[2].toUpperCase() + "\n" + result;
+            }
+            default -> { return "§eNET DISCOVER | SCAN | ENUM | EXPLOIT"; }
+        }
     }
 
     public String repairPower(ServerPlayerEntity player) {
@@ -477,6 +531,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
             e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("home_index", p.homeIndex); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
             NbtList nodes = new NbtList();
             p.discoveredNodes.forEach(v -> { NbtCompound n = new NbtCompound(); n.putString("id", v); nodes.add(n); });
@@ -506,6 +561,7 @@ public final class ArenaState extends PersistentState {
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
             p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.homeIndex = e.contains("home_index") ? e.getInt("home_index") : -1; p.homeX = e.getInt("home_x"); p.homeY = e.getInt("home_y"); p.homeZ = e.getInt("home_z"); p.homeBuilt = e.getBoolean("home_built");
             if (p.homeIndex >= 0) state.nextHomeIndex = Math.max(state.nextHomeIndex, p.homeIndex + 1);
             readSet(e.getList("nodes", NbtCompound.COMPOUND_TYPE), p.discoveredNodes);
@@ -528,9 +584,10 @@ public final class ArenaState extends PersistentState {
         private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
         private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
-        private int farmLevel = 0, farmHealth = 0, wantedLevel = 0, virtualIp = 42;
+        private int farmLevel = 0, farmHealth = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
+        private String networkTarget = "";
         private boolean vpnOwned = false, vpnActive = false;
-        private long lastPoliceCheckTick = 0;
+        private long lastPoliceCheckTick = 0, lastNetworkActionTick = -100000;
         private long lastRaidTick = -100000, lastSiteRaidTick = -100000, lastMineTick = -100000, lastPassiveIncomeTick = -1, lastIncidentTick = 0, lastIncidentCheckTick = 0, powerUntilTick = 0;
         private final Set<String> discoveredNodes = new HashSet<>();
         private final Set<String> completedContracts = new HashSet<>();
