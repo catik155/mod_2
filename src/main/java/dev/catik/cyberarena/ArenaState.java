@@ -139,7 +139,12 @@ public final class ArenaState extends PersistentState {
                     int fine = Math.min(p.credits, 10 + p.wantedLevel * 8);
                     p.credits -= fine;
                     p.wantedLevel = Math.max(0, p.wantedLevel - 2);
-                    player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fПатруль вычислил твой игровой адрес. Штраф: " + fine + " кредитов."), false);
+                    if (p.homeBuilt) {
+                        BlockPos patrolPos = new BlockPos(p.homeX + 5, p.homeY + 1, p.homeZ);
+                        var officer = EntityType.IRON_GOLEM.spawn(player.getServerWorld(), patrolPos, SpawnReason.EVENT);
+                        if (officer != null) { officer.setPersistent(); officer.setTarget(player); }
+                    }
+                    player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fПатруль нашёл твой игровой адрес. Штраф: " + fine + " кредитов."), false);
                     state.markDirty();
                 }
             }
@@ -339,7 +344,8 @@ public final class ArenaState extends PersistentState {
         PlayerProfile d = profile(target);
         if (now - a.lastRaidTick < 1200) return "§eAttack automation is cooling down. Wait " + ((1200 - (now - a.lastRaidTick) + 19) / 20) + "s.";
         a.lastRaidTick = now;
-        int chance = Math.max(8, Math.min(92, 60 + a.automation * 5 + a.stealth * 4 + a.extractor * 3 - d.firewall * 12));
+        if (!a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(10, 55 - a.stealth * 7)) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+        int chance = Math.max(8, Math.min(92, 60 + a.automation * 5 + a.stealth * 4 + a.extractor * 3 - d.firewall * 12 + (a.vpnActive ? 8 : 0)));
         boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
         if (success) {
             int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
@@ -370,7 +376,7 @@ public final class ArenaState extends PersistentState {
         if (now - p.lastSiteRaidTick < 400) return "§eNEX cooldown: " + ((400 - (now - p.lastSiteRaidTick) + 19) / 20) + "s.";
         p.lastSiteRaidTick = now;
         int chance = Math.max(10, Math.min(95, 78 + p.automation * 4 + p.stealth * 5 + p.extractor * 4 - difficulty * 12));
-        if (ThreadLocalRandom.current().nextInt(100) >= chance) { p.alertLevel = Math.min(5, p.alertLevel + 1); markDirty(); return "§cACCESS REJECTED | ALERT " + p.alertLevel + "/5. Upgrade STEALTH or AUTOM."; }
+        if (ThreadLocalRandom.current().nextInt(100) >= chance) { p.alertLevel = Math.min(5, p.alertLevel + 1); if (!p.vpnActive) p.wantedLevel = Math.min(5, p.wantedLevel + 1); markDirty(); return "§cACCESS REJECTED | ALERT " + p.alertLevel + "/5. Upgrade STEALTH or AUTOM."; }
         int shards = 1 + p.extractor / 2 + (difficulty >= 4 ? 1 : 0);
         int credits = 12 + difficulty * 7;
         if (p.dataShards + shards > 10 + p.storage * 10) return "§cDATA VAULT FULL. Sell shards with SELR or upgrade STORAGE.";
