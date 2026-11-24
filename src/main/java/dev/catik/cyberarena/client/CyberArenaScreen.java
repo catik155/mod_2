@@ -203,7 +203,7 @@ public final class CyberArenaScreen extends Screen {
         }
         int inputWidth = width >= 300 ? width - 180 : width - 112;
         input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, inputWidth, 22, Text.literal("NX command"));
-        input.setMaxLength(240);
+        input.setMaxLength(voraSelected ? 480 : 240);
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
         input.setChangedListener(this::refreshCompletions);
         addDrawableChild(input);
