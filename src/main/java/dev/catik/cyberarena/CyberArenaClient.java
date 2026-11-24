@@ -18,6 +18,7 @@ public final class CyberArenaClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             if (!overlay && CyberArenaScreen.handleAutomationStatus(message.getString())) return false;
+            if (!overlay && CyberArenaScreen.handleFlexStatus(message.getString())) return false;
             if (CyberArenaScreen.isTerminalOpen() && !overlay) {
                 CyberArenaScreen.appendOutput(message.getString());
                 return false;
