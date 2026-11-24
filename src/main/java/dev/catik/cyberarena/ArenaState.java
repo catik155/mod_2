@@ -176,7 +176,7 @@ public final class ArenaState extends PersistentState {
         String power = p.powerUntilTick > now ? "§cПИТАНИЕ ОТКЛЮЧЕНО " + ((p.powerUntilTick - now + 19) / 20) + "с" : "§aПИТАНИЕ: ВКЛ";
         player.sendMessage(Text.literal("§bCYBER §7| §6" + p.credits + " кр. §7| §dREP " + p.reputation
             + " §7| §eMINER +" + (2 + p.miningRig * 2) + "/мин §7| " + power
-            + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel), true);
+            + " §7| §bФерма +" + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин" + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel), true);
     }
 
     public boolean isPowerOut(ServerPlayerEntity player) {
@@ -184,13 +184,30 @@ public final class ArenaState extends PersistentState {
     }
 
 
+    private void playerBreakFarm(ServerPlayerEntity player, PlayerProfile p) {
+        if (!p.homeBuilt) return;
+        ServerWorld world = player.getServer().getOverworld();
+        BlockPos machine = new BlockPos(p.homeX + 2, p.homeY + 1, p.homeZ - 2);
+        world.setBlockState(machine, Blocks.AIR.getDefaultState());
+        world.setBlockState(machine.up(), Blocks.AIR.getDefaultState());
+    }
+
+    private void buildFarm(ServerPlayerEntity player, PlayerProfile p) {
+        if (!p.homeBuilt || p.farmLevel == 0 || p.farmHealth <= 0) return;
+        ServerWorld world = player.getServer().getOverworld();
+        BlockPos machine = new BlockPos(p.homeX + 2, p.homeY + 1, p.homeZ - 2);
+        world.setBlockState(machine, Blocks.IRON_BLOCK.getDefaultState());
+        world.setBlockState(machine.up(), Blocks.BLAST_FURNACE.getDefaultState());
+        world.setBlockState(machine.up(2), Blocks.REDSTONE_LAMP.getDefaultState());
+    }
+
     public String farm(ServerPlayerEntity player, String action) {
         PlayerProfile p = profile(player);
         switch (action.toLowerCase()) {
             case "buy" -> {
                 if (p.farmLevel > 0) return "§eМайнинг-ферма уже установлена. Используй FARM UPGRADE.";
                 if (p.credits < 120) return "§cНужно 120 кредитов для покупки фермы.";
-                p.credits -= 120; p.farmLevel = 1; p.farmHealth = 100; markDirty();
+                p.credits -= 120; p.farmLevel = 1; p.farmHealth = 100; buildFarm(player, p); markDirty();
                 return "§aФЕРМА УСТАНОВЛЕНА | Уровень 1 | Прочность 100% | Доход +8 кредитов/мин.";
             }
             case "upgrade" -> {
@@ -206,7 +223,7 @@ public final class ArenaState extends PersistentState {
                 if (p.farmHealth >= 100) return "§aФерма полностью исправна.";
                 int cost = Math.max(10, (100 - p.farmHealth) / 2);
                 if (p.credits < cost) return "§cРемонт фермы стоит " + cost + " кредитов.";
-                p.credits -= cost; p.farmHealth = 100; markDirty();
+                p.credits -= cost; p.farmHealth = 100; buildFarm(player, p); markDirty();
                 return "§aФЕРМА ОТРЕМОНТИРОВАНА | 100% | -" + cost + " кредитов.";
             }
             case "status" -> {
@@ -261,10 +278,15 @@ public final class ArenaState extends PersistentState {
         String result = switch (action.toLowerCase()) {
             case "farm" -> {
                 if (d.farmLevel == 0 || d.farmHealth == 0) yield "§eУ цели нет работающей фермы.";
+                if (d.guardCharges > 0) { d.guardCharges--; yield "§aОХРАНА ЗАЩИТИЛА ФЕРМУ | Потрачен один заряд охраны."; }
                 int damage = Math.min(45, d.farmHealth); d.farmHealth -= damage;
+                if (d.farmHealth == 0) playerBreakFarm(target, d);
                 yield "§cСАБОТАЖ ФЕРМЫ | -" + damage + "% прочности | Доход остановлен до ремонта.";
             }
-            case "power" -> { d.powerUntilTick = now + 1200; yield "§cОТКЛЮЧЕНИЕ ПИТАНИЯ | Станция цели отключена на 60 секунд."; }
+            case "power" -> {
+                if (d.breakerCharges > 0) { d.breakerCharges--; yield "§aЭЛЕКТРОЩИТОК ВЫДЕРЖАЛ | Потрачен один заряд защиты."; }
+                d.powerUntilTick = now + 1200; yield "§cОТКЛЮЧЕНИЕ ПИТАНИЯ | Станция цели отключена на 60 секунд.";
+            }
             case "supplies" -> {
                 int stolen = Math.min(d.credits, 20 + a.extractor * 5);
                 d.credits -= stolen; a.credits += stolen;
