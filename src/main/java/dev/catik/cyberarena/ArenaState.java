@@ -611,7 +611,7 @@ public final class ArenaState extends PersistentState {
         long now = player.getServer().getOverworld().getTime();
         if (!p.duelRole.equals("DEFEND") || p.duelOpponent.isBlank())
             return "§eНет активной задачи защиты.";
-        if (now > p.duelUntilTick) return "§cВремя защиты истекло. Проверь состояние командой DEFEND STATUS.";
+        if (now > p.duelUntilTick) return duel(player, "PATCH");
         String[] parts = input.trim().split("\\s+", 2);
         if (parts.length == 0 || parts[0].isBlank() || parts[0].equalsIgnoreCase("STATUS") || parts[0].equalsIgnoreCase("HELP")) {
             return "§6ЗАДАЧА: КОДОВЫЙ ПЕРЕХВАТ\n§fПовтори код без изменений: §e" + p.defenseCode
@@ -639,9 +639,25 @@ public final class ArenaState extends PersistentState {
     public String duel(ServerPlayerEntity player, String move) {
         PlayerProfile p = profile(player);
         long now = player.getServer().getOverworld().getTime();
-        if (p.duelOpponent.isBlank() || now > p.duelUntilTick) {
-            p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; markDirty();
-            return "§eАктивного противостояния нет или время выбора истекло.";
+        if (p.duelOpponent.isBlank()) return "§eАктивного противостояния нет.";
+        if (now > p.duelUntilTick) {
+            ServerPlayerEntity expiredOpponent = player.getServer().getPlayerManager().getPlayerList().stream()
+                .filter(other -> other.getGameProfile().getName().equalsIgnoreCase(p.duelOpponent)).findFirst().orElse(null);
+            if (expiredOpponent == null) {
+                p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; p.defenseCode = ""; p.defenseAttempts = 3; markDirty();
+                return "§eВремя истекло, противник отключился. Противостояние отменено.";
+            }
+            PlayerProfile otherProfile = profile(expiredOpponent);
+            ServerPlayerEntity expiredAttacker = p.duelRole.equals("ATTACK") ? player : expiredOpponent;
+            ServerPlayerEntity expiredDefender = p.duelRole.equals("DEFEND") ? player : expiredOpponent;
+            String expiredAction = profile(expiredAttacker).duelAction;
+            String effect = applyCombatEffect(expiredAttacker, expiredDefender, expiredAction, now);
+            clearDuel(profile(expiredAttacker), profile(expiredDefender));
+            markDirty();
+            String timeoutReport = "§cВРЕМЯ ЗАЩИТЫ ИСТЕКЛО §7| Атака прошла автоматически.\n" + effect;
+            expiredAttacker.sendMessage(Text.literal(timeoutReport), false);
+            expiredDefender.sendMessage(Text.literal(timeoutReport), false);
+            return timeoutReport;
         }
         String choice = move.trim().toUpperCase();
         Set<String> allowed = p.duelRole.equals("ATTACK") ? Set.of("BURST", "FEINT", "OVERRIDE") : Set.of("PATCH", "DECOY", "TRACE");
