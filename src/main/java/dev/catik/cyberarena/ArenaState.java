@@ -802,6 +802,9 @@ public final class ArenaState extends PersistentState {
         private int farmLevel = 0, farmHealth = 0, stationHealth = 100, remoteStationLevel = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
         private String counterTarget = "";
         private long counterUntilTick = 0;
+        private int counterBonus = 0;
+        private String duelOpponent = "", duelAction = "", duelMove = "", duelRole = "";
+        private long duelUntilTick = 0;
         private String networkTarget = "", lastNetworkEvent = "нет";
         private int networkHeat = 0;
         private long lastNetworkActivityTick = 0;
