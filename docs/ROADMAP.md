@@ -68,8 +68,10 @@
 - [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
 - [x] Credits, data shards, extraction rewards and cooldowns
 - [x] Safe routine runner (up to six whitelisted instructions)
+- [ ] Automation module is a purchaseable unlock: first level opens ready-made presets and custom FLOW (planned server gate)
 - [ ] Saved scripts and reusable automation presets
 - [ ] Automation triggers, schedule and bounded repeat behavior
+- [ ] Make FLEX the premium, purchased language with more advanced scripting features than NX
 - [ ] Module prerequisite tree, specialized builds and skill perks
 - [ ] Unique tools/programs that unlock new simulated actions
 - [ ] Balance economy and rewards against risk and time investment
