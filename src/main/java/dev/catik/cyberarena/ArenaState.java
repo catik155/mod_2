@@ -53,6 +53,7 @@ public final class ArenaState extends PersistentState {
         ServerWorld world = player.getServer().getOverworld();
         if (p.eliminated || p.roundWon) { player.changeGameMode(GameMode.SPECTATOR); return; }
         if (p.homeBuilt) {
+            if (p.homeVersion < 2) { buildStarterHouse(world, p.homeX, p.homeY, p.homeZ); p.homeVersion = 2; markDirty(); }
             refreshHomeDisplays(player, p);
             BlockPos homeSpawn = new BlockPos(p.homeX, p.homeY + 1, p.homeZ);
             player.setSpawnPoint(world.getRegistryKey(), homeSpawn, 0.0F, true, false);
@@ -69,7 +70,7 @@ public final class ArenaState extends PersistentState {
         centerX = homeCandidateX;
         centerZ = homeCandidateZ;
         buildStarterHouse(world, centerX, floorY, centerZ);
-        p.homeX = centerX; p.homeY = floorY; p.homeZ = centerZ; p.homeBuilt = true;
+        p.homeX = centerX; p.homeY = floorY; p.homeZ = centerZ; p.homeBuilt = true; p.homeVersion = 2;
         refreshHomeDisplays(player, p);
         BlockPos bedSpawn = new BlockPos(centerX, floorY + 1, centerZ);
         player.setSpawnPoint(world.getRegistryKey(), bedSpawn, 0.0F, true, false);
@@ -718,7 +719,7 @@ public final class ArenaState extends PersistentState {
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
-            e.putInt("home_index", p.homeIndex); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
+            e.putInt("home_index", p.homeIndex); e.putInt("home_version", p.homeVersion); e.putInt("home_x", p.homeX); e.putInt("home_y", p.homeY); e.putInt("home_z", p.homeZ); e.putBoolean("home_built", p.homeBuilt);
             NbtList nodes = new NbtList();
             p.discoveredNodes.forEach(v -> { NbtCompound n = new NbtCompound(); n.putString("id", v); nodes.add(n); });
             e.put("nodes", nodes);
@@ -772,7 +773,7 @@ public final class ArenaState extends PersistentState {
         private final String name;
         private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
-        private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
+        private int homeIndex = -1, homeX, homeY, homeZ, homeVersion = 0; private boolean homeBuilt = false;
         private int farmLevel = 0, farmHealth = 0, stationHealth = 100, remoteStationLevel = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
         private String counterTarget = "";
         private long counterUntilTick = 0;
