@@ -63,8 +63,8 @@ public final class ArenaState extends PersistentState {
         int gridX = p.homeIndex % 8;
         int gridZ = p.homeIndex / 8;
         BlockPos worldSpawn = world.getSpawnPos();
-        int centerX = worldSpawn.getX() + (gridX - 3) * 14;
-        int centerZ = worldSpawn.getZ() + (gridZ - 3) * 14;
+        int centerX = worldSpawn.getX() + (gridX - 3) * 24;
+        int centerZ = worldSpawn.getZ() + (gridZ - 3) * 24;
         int floorY = findHomeFloor(world, centerX, centerZ);
         centerX = homeCandidateX;
         centerZ = homeCandidateZ;
@@ -104,20 +104,28 @@ public final class ArenaState extends PersistentState {
     }
 
     private static void buildStarterHouse(ServerWorld world, int x, int y, int z) {
-        for (int dx = -3; dx <= 3; dx++) for (int dz = -3; dz <= 3; dz++) {
-            world.setBlockState(new BlockPos(x + dx, y, z + dz), Blocks.OAK_PLANKS.getDefaultState());
-            for (int dy = 1; dy <= 3; dy++) {
-                boolean wall = Math.abs(dx) == 3 || Math.abs(dz) == 3;
-                if (!wall) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.AIR.getDefaultState());
-                else if (dz == 3 && dx == 0 && dy <= 2) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.AIR.getDefaultState());
-                else if (dy == 2 && (Math.abs(dx) == 3 || Math.abs(dz) == 3) && (Math.abs(dx) == 3 || Math.abs(dz) == 3) && ((dx == -3 && dz == 0) || (dx == 3 && dz == 0) || (dx == 0 && dz == -3))) world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.GLASS.getDefaultState());
-                else world.setBlockState(new BlockPos(x + dx, y + dy, z + dz), Blocks.SPRUCE_PLANKS.getDefaultState());
+        // Дом 11x11: просторный зал, высокие стены, панорамные окна и выразительная крыша.
+        for (int dx = -5; dx <= 5; dx++) for (int dz = -5; dz <= 5; dz++) {
+            world.setBlockState(new BlockPos(x + dx, y, z + dz), Blocks.DEEPSLATE_TILES.getDefaultState());
+            for (int dy = 1; dy <= 4; dy++) {
+                boolean wall = Math.abs(dx) == 5 || Math.abs(dz) == 5;
+                BlockPos pos = new BlockPos(x + dx, y + dy, z + dz);
+                if (!wall) world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                else if (dz == 5 && dx == 0 && dy <= 2) world.setBlockState(pos, Blocks.AIR.getDefaultState());
+                else if (dy == 2 && ((Math.abs(dx) == 5 && dz % 2 == 0) || (Math.abs(dz) == 5 && dx % 2 == 0))) world.setBlockState(pos, Blocks.GLASS_PANE.getDefaultState());
+                else world.setBlockState(pos, Blocks.SPRUCE_PLANKS.getDefaultState());
             }
-            world.setBlockState(new BlockPos(x + dx, y + 4, z + dz), Blocks.SPRUCE_PLANKS.getDefaultState());
+            world.setBlockState(new BlockPos(x + dx, y + 5, z + dz), Blocks.DARK_OAK_PLANKS.getDefaultState());
         }
-        world.setBlockState(new BlockPos(x + 2, y + 1, z + 2), Blocks.CRAFTING_TABLE.getDefaultState());
-        world.setBlockState(new BlockPos(x - 2, y + 1, z + 2), Blocks.BARREL.getDefaultState());
+        // Подсветка и входная площадка.
         world.setBlockState(new BlockPos(x, y + 3, z), Blocks.LANTERN.getDefaultState());
+        world.setBlockState(new BlockPos(x, y + 1, z + 5), Blocks.SPRUCE_DOOR.getDefaultState());
+        world.setBlockState(new BlockPos(x - 1, y, z + 6), Blocks.STONE_BRICKS.getDefaultState());
+        world.setBlockState(new BlockPos(x, y, z + 6), Blocks.STONE_BRICKS.getDefaultState());
+        world.setBlockState(new BlockPos(x + 1, y, z + 6), Blocks.STONE_BRICKS.getDefaultState());
+        world.setBlockState(new BlockPos(x + 4, y + 1, z + 3), Blocks.CRAFTING_TABLE.getDefaultState());
+        world.setBlockState(new BlockPos(x - 4, y + 1, z + 3), Blocks.BARREL.getDefaultState());
+        world.setBlockState(new BlockPos(x, y + 1, z - 4), Blocks.BOOKSHELF.getDefaultState());
     }
 
     public static void tickServer(MinecraftServer server) {
@@ -143,14 +151,7 @@ public final class ArenaState extends PersistentState {
                 player.sendMessage(Text.literal("§a[CYBER ARENA] §fЦЕЛЬ ДОСТИГНУТА: 10 000 КРЕДИТОВ. ТЫ ВЫИГРАЛ РАУНД!"), false);
                 player.changeGameMode(GameMode.SPECTATOR); continue;
             }
-            if (now - p.lastIncidentCheckTick >= 1200) {
-                p.lastIncidentCheckTick = now;
-                if (now - p.lastIncidentTick >= 6000 && ThreadLocalRandom.current().nextInt(100) < 35) {
-                    p.lastIncidentTick = now;
-                    state.triggerHomeIncident(player, p, now);
-                    state.markDirty();
-                }
-            }
+            // Случайные нападения на дом отключены: вторжения возможны только после PvP-атаки или расследования полиции.
             if (p.networkHeat > 0 && now - p.lastNetworkActivityTick >= 1200) {
                 p.networkHeat = Math.max(0, p.networkHeat - 1);
                 p.lastNetworkActivityTick = now;
@@ -188,9 +189,9 @@ public final class ArenaState extends PersistentState {
     }
 
     private static boolean isInsideHome(ServerPlayerEntity player, PlayerProfile p) {
-        return p.homeBuilt && player.getBlockX() >= p.homeX - 3 && player.getBlockX() <= p.homeX + 3
-            && player.getBlockZ() >= p.homeZ - 3 && player.getBlockZ() <= p.homeZ + 3
-            && player.getY() >= p.homeY && player.getY() <= p.homeY + 6;
+        return p.homeBuilt && player.getBlockX() >= p.homeX - 5 && player.getBlockX() <= p.homeX + 5
+            && player.getBlockZ() >= p.homeZ - 5 && player.getBlockZ() <= p.homeZ + 5
+            && player.getY() >= p.homeY && player.getY() <= p.homeY + 7;
     }
 
     private void triggerHomeIncident(ServerPlayerEntity player, PlayerProfile p, long now) {
@@ -242,7 +243,7 @@ public final class ArenaState extends PersistentState {
     private void playerBreakFarm(ServerPlayerEntity player, PlayerProfile p) {
         if (!p.homeBuilt) return;
         ServerWorld world = player.getServer().getOverworld();
-        BlockPos machine = new BlockPos(p.homeX + 2, p.homeY + 1, p.homeZ - 2);
+        BlockPos machine = new BlockPos(p.homeX + 3, p.homeY + 1, p.homeZ - 3);
         world.setBlockState(machine, Blocks.AIR.getDefaultState());
         world.setBlockState(machine.up(), Blocks.AIR.getDefaultState());
         world.setBlockState(machine.up(2), Blocks.AIR.getDefaultState());
@@ -251,16 +252,17 @@ public final class ArenaState extends PersistentState {
     private void refreshHomeDisplays(ServerPlayerEntity player, PlayerProfile p) {
         if (!p.homeBuilt) return;
         ServerWorld w = player.getServer().getOverworld();
-        placeUpgradeDisplay(w, p, -2, -2, p.firewall, Blocks.IRON_BARS);
-        placeUpgradeDisplay(w, p, 0, -2, p.automation, Blocks.REDSTONE_LAMP);
-        placeUpgradeDisplay(w, p, 2, 0, p.stealth, Blocks.TINTED_GLASS);
-        placeUpgradeDisplay(w, p, -2, 0, p.extractor, Blocks.HOPPER);
-        placeUpgradeDisplay(w, p, 0, 0, p.cpu, Blocks.NOTE_BLOCK);
-        placeUpgradeDisplay(w, p, 2, 1, p.miningRig, Blocks.OBSERVER);
-        placeUpgradeDisplay(w, p, 0, 2, p.storage, Blocks.CHEST);
-        placeUpgradeDisplay(w, p, -2, 2, p.vpnOwned ? (p.vpnActive ? 2 : 1) : 0, Blocks.ENDER_CHEST);
-        placeUpgradeDisplay(w, p, 1, 2, p.breakerLevel, Blocks.LIGHTNING_ROD);
-        placeUpgradeDisplay(w, p, -1, 2, p.guardLevel, Blocks.IRON_BARS);
+        placeUpgradeDisplay(w, p, -4, -1, p.firewall, Blocks.IRON_BARS);
+        placeUpgradeDisplay(w, p, -2, -1, p.automation, Blocks.REDSTONE_LAMP);
+        placeUpgradeDisplay(w, p, 0, -1, p.stealth, Blocks.TINTED_GLASS);
+        placeUpgradeDisplay(w, p, 2, -1, p.extractor, Blocks.HOPPER);
+        placeUpgradeDisplay(w, p, 4, -1, p.cpu, Blocks.NOTE_BLOCK);
+        placeUpgradeDisplay(w, p, -4, 2, p.miningRig, Blocks.OBSERVER);
+        placeUpgradeDisplay(w, p, -2, 2, p.storage, Blocks.CHEST);
+        placeUpgradeDisplay(w, p, 0, 2, p.vpnOwned ? (p.vpnActive ? 2 : 1) : 0, Blocks.ENDER_CHEST);
+        placeUpgradeDisplay(w, p, 2, 2, p.breakerLevel, Blocks.LIGHTNING_ROD);
+        placeUpgradeDisplay(w, p, 4, 2, p.guardLevel, Blocks.IRON_BARS);
+        buildWorkstation(player, p);
         buildFarm(player, p);
     }
 
@@ -275,13 +277,35 @@ public final class ArenaState extends PersistentState {
         world.setBlockState(pos.up(), level >= 3 ? block.getDefaultState() : Blocks.AIR.getDefaultState());
     }
 
+    private void buildWorkstation(ServerPlayerEntity player, PlayerProfile p) {
+        if (!p.homeBuilt || p.stationHealth <= 0) return;
+        ServerWorld world = player.getServer().getOverworld();
+        BlockPos desk = new BlockPos(p.homeX - 3, p.homeY + 1, p.homeZ - 3);
+        world.setBlockState(desk, Blocks.OBSIDIAN.getDefaultState());
+        world.setBlockState(desk.up(), Blocks.COMPUTER.getDefaultState());
+        world.setBlockState(desk.add(1, 0, 0), Blocks.IRON_BLOCK.getDefaultState());
+        world.setBlockState(desk.add(1, 1, 0), Blocks.REDSTONE_LAMP.getDefaultState());
+    }
+
+    private void breakWorkstation(ServerPlayerEntity player, PlayerProfile p) {
+        if (!p.homeBuilt) return;
+        ServerWorld world = player.getServer().getOverworld();
+        BlockPos desk = new BlockPos(p.homeX - 3, p.homeY + 1, p.homeZ - 3);
+        world.setBlockState(desk, Blocks.AIR.getDefaultState());
+        world.setBlockState(desk.up(), Blocks.AIR.getDefaultState());
+        world.setBlockState(desk.add(1, 0, 0), Blocks.AIR.getDefaultState());
+        world.setBlockState(desk.add(1, 1, 0), Blocks.AIR.getDefaultState());
+    }
+
     private void buildFarm(ServerPlayerEntity player, PlayerProfile p) {
         if (!p.homeBuilt || p.farmLevel == 0 || p.farmHealth <= 0) return;
         ServerWorld world = player.getServer().getOverworld();
-        BlockPos machine = new BlockPos(p.homeX + 2, p.homeY + 1, p.homeZ - 2);
+        BlockPos machine = new BlockPos(p.homeX + 3, p.homeY + 1, p.homeZ - 3);
         world.setBlockState(machine, Blocks.IRON_BLOCK.getDefaultState());
         world.setBlockState(machine.up(), Blocks.BLAST_FURNACE.getDefaultState());
-        world.setBlockState(machine.up(2), Blocks.REDSTONE_LAMP.getDefaultState());
+        world.setBlockState(machine.up(2), p.farmLevel >= 3 ? Blocks.SEA_LANTERN.getDefaultState() : Blocks.REDSTONE_LAMP.getDefaultState());
+        if (p.farmLevel >= 4) world.setBlockState(machine.add(1, 0, 0), Blocks.COPPER_BLOCK.getDefaultState());
+        if (p.farmLevel >= 5) world.setBlockState(machine.add(-1, 0, 0), Blocks.IRON_BARS.getDefaultState());
     }
 
     public String farm(ServerPlayerEntity player, String action) {
@@ -618,7 +642,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
-            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
@@ -650,7 +674,7 @@ public final class ArenaState extends PersistentState {
             p.lastRaidTick = e.getLong("last_raid");
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
-            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
@@ -677,7 +701,9 @@ public final class ArenaState extends PersistentState {
         private int credits = 0, reputation = 0, dataShards = 0, firewall = 0, automation = 0, stealth = 0, extractor = 0, miningRig = 0, cpu = 0, storage = 0, alertLevel = 0;
         private int breakerLevel = 0, guardLevel = 0, breakerCharges = 0, guardCharges = 0;
         private int homeIndex = -1, homeX, homeY, homeZ; private boolean homeBuilt = false;
-        private int farmLevel = 0, farmHealth = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
+        private int farmLevel = 0, farmHealth = 0, stationHealth = 100, remoteStationLevel = 0, wantedLevel = 0, virtualIp = 42, networkStage = 0;
+        private String counterTarget = "";
+        private long counterUntilTick = 0;
         private String networkTarget = "", lastNetworkEvent = "нет";
         private int networkHeat = 0;
         private long lastNetworkActivityTick = 0;
