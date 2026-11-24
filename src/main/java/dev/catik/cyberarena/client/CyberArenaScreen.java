@@ -108,6 +108,7 @@ public final class CyberArenaScreen extends Screen {
     private final String query;
     private TextFieldWidget input;
     private int terminalScroll = 0;
+    private int browserScroll = 0;
     private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","HOME","DEFENSE","LOGS"};
 
     public CyberArenaScreen() { this(0, "", ""); }
@@ -178,10 +179,10 @@ public final class CyberArenaScreen extends Screen {
     @Override
     protected void init() {
         if (page == 1) { initTerminalFullScreen(); return; }
-        int panelWidth = Math.max(220, Math.min(520, this.width - 24));
-        int panelHeight = Math.max(250, Math.min(340, this.height - 20));
-        int left = (this.width - panelWidth) / 2;
-        int top = Math.max(10, (this.height - panelHeight) / 2);
+        int panelWidth = Math.max(220, this.width - 16);
+        int panelHeight = Math.max(180, this.height - 16);
+        int left = 8;
+        int top = 8;
         int tabGap = 5, tabWidth = (panelWidth - 28 - tabGap * 3) / 4;
         addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0)).dimensions(left + 12, top + 48, tabWidth, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1)).dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).build());
@@ -367,9 +368,9 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("ВЫПОЛНИТЬ NX"), b -> submitSiteConsole())
             .dimensions(left + 14, top + 134, (panelWidth - 36) / 2, 22)
             .tooltip(Tooltip.of(Text.literal("Выполнить команду с контекстом открытого сайта"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ САЙТА"), b -> runNex("PORTA " + selectedSite))
+        addDrawableChild(ButtonWidget.builder(Text.literal("ПРОФИЛЬ УЗЛА"), b -> runNex("WHO " + selectedSite))
             .dimensions(left + 22 + (panelWidth - 36) / 2, top + 134, (panelWidth - 36) / 2, 22)
-            .tooltip(Tooltip.of(Text.literal("Просмотреть службы текущего сайта"))).build());
+            .tooltip(Tooltip.of(Text.literal("Получить сведения об игровом узле через консоль"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ИЗВЛЕЧЕНИЕ"), b -> runNex("CRACK " + selectedSite))
             .dimensions(left + 14, top + 166, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Запустить игровое извлечение для текущего сайта"))).build());
@@ -477,14 +478,14 @@ public final class CyberArenaScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (page == 1) { renderTerminal(context, mouseX, mouseY, delta); return; }
         // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
-        int panelWidth = Math.max(220, Math.min(520, this.width - 24));
-        int panelHeight = Math.max(250, Math.min(340, this.height - 20));
-        int left = (this.width - panelWidth) / 2;
-        int top = Math.max(10, (this.height - panelHeight) / 2);
+        int panelWidth = Math.max(220, this.width - 16);
+        int panelHeight = Math.max(180, this.height - 16);
+        int left = 8;
+        int top = 8;
         context.fill(left, top, left + panelWidth, top + panelHeight, 0xEE101923);
         context.fill(left, top, left + panelWidth, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // ИГРОВАЯ СТАНЦИЯ"), left + 14, top + 13, 0xFF55E6D2);
-        context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНЫЙ МИР / ИГРОВЫЕ ДАННЫЕ"), left + 14, top + 29, 0xFFB8C8D8);
+        context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНАЯ СЕТЬ • ТОЛЬКО ИГРОВАЯ СИМУЛЯЦИЯ"), left + 14, top + 29, 0xFFB8C8D8);
 
         if (page == 6) {
             int idx = siteIndex(selectedSite);
@@ -509,14 +510,9 @@ public final class CyberArenaScreen extends Screen {
             drawWrapped(context, SITE_CONTENT[idx], left + 22, top + 184, panelWidth - 44, 0xFFB5D9C8);
             context.fill(left + 14, top + 224, left + panelWidth - 14, top + 245, 0xFF1B2D3A);
             context.drawTextWithShadow(textRenderer, Text.literal("ЗАЩИТА: " + translateRisk(RISKS[idx]) + "     •     СТАТУС: В СЕТИ"), left + 22, top + 231, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal("СЛУЖБЫ ИГРОВОГО САЙТА"), left + 14, top + 251, accent);
-            for (int i = 0; i < SERVICES.length; i++) {
-                int y = top + 267 + i * 13;
-                context.fill(left + 14, y - 2, left + panelWidth - 14, y + 10, 0xFF172634);
-                context.drawTextWithShadow(textRenderer, Text.literal(SERVICES[i].replace("OPEN", "ОТКРЫТА").replace("GUARDED", "ЗАЩИЩЕНА").replace("LOCKED", "ЗАКРЫТА")), left + 22, y, i == 0 ? 0xFF79E6A4 : 0xFFFFC66D);
-            }
+            context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
         } else if (page == 0 || page == 4 || page == 5) {
-            String heading = page == 4 ? "SAVED BOOKMARKS" : page == 5 ? "RECENTLY VISITED" : "VIRTUAL WEB DIRECTORY";
+            String heading = page == 4 ? "СОХРАНЁННЫЕ САЙТЫ" : page == 5 ? "ИСТОРИЯ ПОСЕЩЕНИЙ" : "КАТАЛОГ ВИРТУАЛЬНЫХ САЙТОВ";
             context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, top + 98, 0xFF70D8FF);
             List<String> sites = visibleSites();
             int rowY = top + (page == 0 ? 137 : 111);
@@ -532,9 +528,9 @@ public final class CyberArenaScreen extends Screen {
             if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("Пока пусто. Откройте сайт или измените запрос."), left + 18, rowY + 12, 0xFF8295A8);
         } else if (page == 1) {
             context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "FLEX > // ВТОРОЙ ИГРОВОЙ ЯЗЫК" : "NX > // ИГРОВАЯ ПСЕВДОКОНСОЛЬ"), left + 14, top + 78, 0xFF70D8FF);
-            String hints = voraSelected ? "LUMA help | KERI search | DORA services | NAVA map | MIRA status | TARA extract" : "MANU help | SEEK search | PORTA services | NODR map | STAT status | CRACK extract";
+            String hints = voraSelected ? "LUMA — справка | KERI — поиск | NAVA — карта | MIRA — статус | TARA — анализ" : "HELP — справка | SEEK — поиск | NODR — карта | STAT — статус | NET — сеть";
             drawWrapped(context, "NEXT COMMANDS: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
-            drawWrapped(context, voraSelected ? "FLEX — альтернативный словарь команд. Доступность расширенных функций зависит от игрового прогресса." : "NX — базовый язык игровых команд. Используй подсказки или справку MANU.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
+            drawWrapped(context, voraSelected ? "FLEX — альтернативный игровой язык команд. Все операции выполняются только внутри мира Cyber Arena." : "NX — язык игровых команд. Введи HELP, чтобы получить полный список команд и описание каждой операции.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
         } else if (page == 7) {
             context.drawTextWithShadow(textRenderer, Text.literal("NX // КОНСОЛЬ САЙТА: " + selectedSite), left + 14, top + 78, 0xFF70D8FF);
             drawWrapped(context, "Команды работают в контексте выбранного виртуального сайта. Обычная консоль остаётся отдельной вкладкой.", left + 14, top + 224, panelWidth - 28, 0xFFD0DCE6);
@@ -556,7 +552,7 @@ public final class CyberArenaScreen extends Screen {
         context.fill(left, top, left + width, top + height, 0xF20A1119);
         context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
-        context.drawTextWithShadow(textRenderer, Text.literal("SESSION: LOCAL SIMULATION     HOST: arena-node     STATUS: ONLINE"), left + 12, top + 56, 0xFF8295A8);
+        context.drawTextWithShadow(textRenderer, Text.literal("СЕАНС: ИГРОВАЯ СИМУЛЯЦИЯ     УЗЕЛ: ARENA     СТАТУС: АКТИВЕН"), left + 12, top + 56, 0xFF8295A8);
         int outputTop = top + 76, outputBottom = height - 62;
         context.fill(left + 8, outputTop, left + width - 8, outputBottom, 0xFF0D1720);
         int lineHeight = 12, maxLines = Math.max(1, (outputBottom - outputTop - 10) / lineHeight);
@@ -585,6 +581,8 @@ public final class CyberArenaScreen extends Screen {
         context.drawTextWithShadow(textRenderer, Text.literal("TAB: доп.  ↑/↓: история  CTRL+R: поиск  ENTER: выполнить"), left + width - 320, height - 23, 0xFF8295A8);
         super.render(context, mouseX, mouseY, delta);
     }
+
+    private String virtualSiteIp(int index) { return "198.51.100." + (20 + Math.floorMod(index * 17 + 31, 200)); }
 
     private int siteAccent(int index) {
         return switch (index % 10) {
@@ -683,6 +681,11 @@ public final class CyberArenaScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (page == 1) { terminalScroll = Math.max(0, Math.min(TERMINAL_OUTPUT.size(), terminalScroll + (verticalAmount > 0 ? 4 : -4))); return true; }
+        if (page == 3 || page == 6) { browserScroll = Math.max(0, Math.min(80, browserScroll + (verticalAmount < 0 ? 3 : -3))); return true; }
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
     @Override public boolean shouldPause() { return false; }
 }
