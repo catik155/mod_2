@@ -209,6 +209,7 @@ public final class NexEngine {
             case "ROUND" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).roundStatus(player);
             case "STATION" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).station(player, arg);
             case "COUNTER" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).counterAttack(player);
+            case "DUEL" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).duel(player, arg);
             case "NET", "NETWORK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).network(player, arg);
             case "SABOTAGE" -> error("OBSOLETE", "Прямой саботаж отключён. Используй NET DISCOVER → SCAN → ENUM → EXPLOIT.");
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
