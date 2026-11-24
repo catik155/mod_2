@@ -369,10 +369,10 @@ public final class CyberArenaScreen extends Screen {
             }
             if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("No entries yet. Open a site or change your search."), left + 18, rowY + 12, 0xFF8295A8);
         } else if (page == 1) {
-            context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "VORA > // SECOND FICTIONAL LANGUAGE" : "NEX > // PSEUDO-LANGUAGE CONSOLE"), left + 14, top + 78, 0xFF70D8FF);
+            context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "FLEX > // ВТОРОЙ ИГРОВОЙ ЯЗЫК" : "NX > // ИГРОВАЯ ПСЕВДОКОНСОЛЬ"), left + 14, top + 78, 0xFF70D8FF);
             String hints = voraSelected ? "LUMA help | KERI search | DORA services | NAVA map | MIRA status | TARA extract" : "MANU help | SEEK search | PORTA services | NODR map | STAT status | CRACK extract";
             drawWrapped(context, "NEXT COMMANDS: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
-            drawWrapped(context, "Type a command or use the quick buttons. Syntax hints remain visible.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
+            drawWrapped(context, voraSelected ? "FLEX — альтернативный словарь команд. Доступность расширенных функций зависит от игрового прогресса." : "NX — базовый язык игровых команд. Используй подсказки или справку MANU.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
         } else if (page == 7) {
             context.drawTextWithShadow(textRenderer, Text.literal("NX // КОНСОЛЬ САЙТА: " + selectedSite), left + 14, top + 78, 0xFF70D8FF);
             drawWrapped(context, "Команды работают в контексте выбранного виртуального сайта. Обычная консоль остаётся отдельной вкладкой.", left + 14, top + 224, panelWidth - 28, 0xFFD0DCE6);
