@@ -186,8 +186,8 @@ public final class NexEngine {
         String cmd = parts[0].toUpperCase(Locale.ROOT);
         String rawArg = parts.length > 1 ? unquote(parts[1].trim()) : "";
         String arg = rawArg.toLowerCase(Locale.ROOT);
-        if (player != null && ArenaState.get(player.getServer()).isPowerOut(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "REPAIR", "STATION", "AUTOM").contains(cmd)) return error("POWER_OFF", "Рабочая станция обесточена. Дождись восстановления или введи REPAIR.");
-        if (player != null && !ArenaState.get(player.getServer()).canUseWorkstation(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "STATION", "AUTOM").contains(cmd)) return error("STATION_OFFLINE", "Основная рабочая станция недоступна. Вернись домой, восстанови её командой STATION REPAIR или купи удалённый терминал: STATION REMOTE.");
+        if (player != null && ArenaState.get(player.getServer()).isPowerOut(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "REPAIR", "STATION", "AUTOM", "FLEX").contains(cmd)) return error("POWER_OFF", "Рабочая станция обесточена. Дождись восстановления или введи REPAIR.");
+        if (player != null && !ArenaState.get(player.getServer()).canUseWorkstation(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "STATION", "AUTOM", "FLEX").contains(cmd)) return error("STATION_OFFLINE", "Основная рабочая станция недоступна. Вернись домой, восстанови её командой STATION REPAIR или купи удалённый терминал: STATION REMOTE.");
         return switch (cmd) {
             case "MANU", "HELP", "?" -> manual();
             case "STAT", "STATUS" -> player == null ? "§aNX CORE ONLINE §7| §fExternal I/O: DISABLED" : status(player);
@@ -205,6 +205,20 @@ public final class NexEngine {
             case "AUTOM" -> player == null ? error("NO_OPERATOR", "Operator context required.")
                 : arg.equals("status") ? "§bAUTOMATION_LEVEL=" + ArenaState.get(player.getServer()).view(player).automation() + " §7| SERVER-AUTHORITATIVE"
                 : error("AUTOM_SYNTAX", "Use AUTOM STATUS.");
+            case "FLEX" -> {
+                if (player == null) yield error("NO_OPERATOR", "Operator context required.");
+                String[] flexParts = arg.split("\\s+", 2);
+                String flexAction = flexParts[0];
+                if (flexAction.equals("exec")) {
+                    if (!ArenaState.get(player.getServer()).flex(player, "status").contains("FLEX_OWNED=1"))
+                        yield error("FLEX_LOCKED", "FLEX is not purchased. Buy it in Improvements for 250 credits.");
+                    String payload = flexParts.length > 1 ? flexParts[1].trim() : "";
+                    if (payload.isBlank() || payload.toUpperCase(Locale.ROOT).startsWith("FLEX "))
+                        yield error("FLEX_SYNTAX", "FLEX EXEC requires one NX-compatible translated instruction.");
+                    yield execute(payload, player);
+                }
+                yield ArenaState.get(player.getServer()).flex(player, flexAction);
+            }
             case "REPAIR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).repairPower(player);
             case "FARM" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).farm(player, arg);
             case "VPN" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).vpn(player, arg);
@@ -245,6 +259,7 @@ public final class NexEngine {
             + "§fDEFEND TYPE/ROUTE/MOVE §7— решить консольное испытание (KERNEL/ROUTE/GRID) | DEFEND HELP §7— подсказка\n"
             + "§fCONTRACTS §7— список заказов | RUN <номер> §7— выполнить заказ\n"
             + "§fAUTOM STATUS §7— состояние модуля | FLOW <команда; команда> §7— сценарий до 6 шагов, требуется AUTOM | UPGR AUTOM §7— купить/улучшить модуль\n"
+            + "§fFLEX STATUS/BUY §7— премиальный язык за 250 кредитов | FLEX EXEC <команда> §7— выполнить команду через купленный FLEX\n"
             + "§7При отключении питания рабочая станция, сеть, команды и весь майнинг останавливаются. Доступны только HELP, STAT и REPAIR.\n"
             + "§7Все домены, IP-адреса, узлы, службы и операции вымышлены и существуют только внутри Minecraft.";
     }
