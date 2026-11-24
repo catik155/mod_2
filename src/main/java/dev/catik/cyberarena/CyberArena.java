@@ -3,6 +3,8 @@ package dev.catik.cyberarena;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
@@ -18,7 +20,7 @@ public final class CyberArena implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             dispatcher.register(CommandManager.literal("arena")
                 .then(CommandManager.literal("help").executes(c -> reply(c.getSource(),
-                    "§bCyber Arena\n§f/arena profile §7- profile and upgrades\n§f/arena contracts §7- starter contracts\n§f/arena contract <id> §7- complete a starter job\n§f/arena raid <player> §7- simulated PvP breach\n§f/arena upgrade <firewall|automation> §7- improve your system\n§f/arena site <shop.arena|news.arena|vault.arena> §7- resolve a fictional site incident\n§f/arena nex MANU §7- NEX pseudo-language manual")))
+                    "§bCyber Arena\n§f/arena profile §7- profile and upgrades\n§f/arena contracts §7- starter contracts\n§f/arena contract <id> §7- complete a starter job\n§f/arena raid <player> §7- simulated PvP breach\n§f/arena repair §7- restore power to your workstation\n§f/arena upgrade <module> §7- improve your system\n§f/arena site <shop.arena|news.arena|vault.arena> §7- resolve a fictional site incident\n§f/arena nex MANU §7- NEX pseudo-language manual")))
                 .then(CommandManager.literal("profile").executes(c -> {
                     ServerPlayerEntity p = c.getSource().getPlayerOrThrow();
                     ArenaState.ProfileView v = ArenaState.get(c.getSource().getServer()).view(p);
@@ -44,7 +46,7 @@ public final class CyberArena implements ModInitializer {
                     long now = attacker.getWorld().getTime();
                     return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).raid(attacker, target, now));
                 })))
-                .then(CommandManager.literal("upgrade").then(CommandManager.argument("type", StringArgumentType.word()).executes(c -> {
+                .then(CommandManager.literal("repair").executes(c -> {\n                    ServerPlayerEntity p = c.getSource().getPlayerOrThrow();\n                    return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).repairPower(p));\n                }))\n                .then(CommandManager.literal("upgrade").then(CommandManager.argument("type", StringArgumentType.word()).executes(c -> {
                     ServerPlayerEntity p = c.getSource().getPlayerOrThrow();
                     return reply(c.getSource(), ArenaState.get(c.getSource().getServer()).upgrade(p, StringArgumentType.getString(c, "type").toLowerCase()));
                 })))
