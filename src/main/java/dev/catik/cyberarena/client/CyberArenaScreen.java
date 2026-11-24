@@ -3,6 +3,7 @@ package dev.catik.cyberarena.client;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -131,6 +132,7 @@ public final class CyberArenaScreen extends Screen {
             context.drawCenteredTextWithShadow(renderer, getMessage(), getX()+width/2, getY()+(height-renderer.fontHeight)/2, active ? (hovered ? 0xFF72F7E2 : 0xFFE0F0F5) : 0xFF71808B);
         }
         @Override public void onClick(double mouseX, double mouseY) { if (active && action != null) action.accept(this); }
+        @Override protected void appendClickableNarrations(NarrationMessageBuilder builder) { }
         static final class Builder {
             private final Text label;
             private final java.util.function.Consumer<ButtonWidget> action;
