@@ -232,14 +232,14 @@ public final class ArenaState extends PersistentState {
                 return "§aVPN ПОДКЛЮЧЁН | Игровой адрес скрыт за виртуальным узлом.";
             }
             case "off" -> { p.vpnActive = false; markDirty(); return "§eVPN ОТКЛЮЧЁН | Будет виден твой игровой адрес."; }
-            case "status" -> { return "§bVPN | " + (p.vpnOwned ? "куплен" : "не куплен") + " | " + (p.vpnActive ? "§aподключён" : "§cотключён") + " | IP " + (p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : p.virtualIp); }
+            case "status" -> { return "§bVPN | " + (p.vpnOwned ? "куплен" : "не куплен") + " | " + (p.vpnActive ? "§aподключён" : "§cотключён") + " | IP " + (p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : "198.51.100." + (p.virtualIp % 200 + 20)); }
             default -> { return "§eVPN BUY | ON | OFF | STATUS"; }
         }
     }
 
     public String ipInfo(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
-        String ip = p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : p.virtualIp;
+        String ip = p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : "198.51.100." + (p.virtualIp % 200 + 20);
         return "§bARENA IP | " + ip + (p.vpnActive ? " §a(VPN)" : " §c(открытый игровой адрес)") + " | Зарезервированный фиктивный адрес.";
     }
 
@@ -411,7 +411,7 @@ public final class ArenaState extends PersistentState {
         return "§aSITE INCIDENT RESOLVED §7| §f" + site + " §7| §6+" + reward + " credits";
     }
 
-    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes, int breakerCharges, int guardCharges, long powerUntilTick, int farmLevel, int farmHealth, boolean vpnOwned, boolean vpnActive, int wantedLevel, String virtualIp) {}
+    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes, int breakerCharges, int guardCharges, long powerUntilTick, int farmLevel, int farmHealth, boolean vpnOwned, boolean vpnActive, int wantedLevel, int virtualIp) {}
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
