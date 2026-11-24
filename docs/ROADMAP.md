@@ -98,7 +98,7 @@
 - [x] Add wanted level, continuous simulated police review of suspicious network activity, VPN-adjusted detection, fines and patrol NPCs at high heat
 - [x] Add staged PvP network workflow: target discovery, virtual IP attribution, port scan, service enumeration and module-specific exploit outcomes
 - [x] Add terminal home sabotage: farm damage, power outage, supply theft, data theft, false alarm, station lock, false police call and raider diversion
-- [ ] Add physical block-break interception for farm machine with durability, ownership and protection checks
+- [ ] Add physical block-break interception for farm and workstation machines with durability, ownership and protection checks
 - [x] Police stakeout appears beside the identified player home; entering or remaining inside the home triggers arrest and round elimination
 - [ ] Add multiple farm models, cooling, power use, storage capacity, overheating and power-grid upgrades
 - [ ] Add police investigation missions, bribes, evidence cleanup, warrants, escape and reputation effects
@@ -107,12 +107,17 @@
 ## Home, raids and power sabotage
 - [x] Generate a personal starter house near world spawn and set the player's respawn point inside it
 - [x] Passive mining income is paid automatically while the player is online; MINER levels increase the payout
-- [x] Periodic home incidents: hostile pillagers can raid the house and power sabotage can disable the workstation
+- [x] Remove unsolicited random home raids; player attacks require an explicit simulated network exploit or PvP raid
 - [x] Workstation commands are blocked during a blackout except status/help/repair; emergency REPAIR costs credits
 - [x] Pause passive miner and home-farm income during a blackout, reset idle payout time, and show zero income in the HUD
 - [x] Consumable BREAKER and GUARD charges can each stop one matching incident; they are not permanent invulnerability
 - [x] Add more home sabotage events: workstation damage, stolen supplies, false alerts, station lock, data theft, false police calls and raider diversion
 - [x] Show purchased upgrades as physical stations and structures inside the personal home; refresh displays after purchases and on rejoin
+- [x] Expand starter home to an 11x11 interior with taller walls, windows, lighting, entry platform and separated equipment zones
+- [x] Put the physical workstation and mining farm inside the home; farm upgrade tiers visibly add machine details
+- [x] Add workstation durability, breakage, paid repair and an optional remote terminal upgrade
+- [x] Add a 10-second counterattack window after a direct player raid or home sabotage
+- [x] Police stakeout can remain a threat; random non-player house attacks are disabled
 - [ ] Add settings for incident frequency and safe-start protection on new servers
 
 ## Progression / economy / automation
