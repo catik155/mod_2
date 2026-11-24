@@ -292,6 +292,16 @@ public final class CyberArenaScreen extends Screen {
     }
 
     /** Consume the server-authoritative automation level sent by AUTOM STATUS. */
+    public static void resetServerState() {
+        automationStatusKnown = false;
+        automationStatusRequested = false;
+        automationLevel = 0;
+        flexStatusKnown = false;
+        flexStatusRequested = false;
+        flexOwned = false;
+        voraSelected = false;
+    }
+
     public static boolean handleFlexStatus(String message) {
         if (message == null) return false;
         int marker = message.indexOf("FLEX_OWNED=");
@@ -479,11 +489,11 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initAutomation(int left, int top, int panelWidth) {
-        if (!flexStatusKnown && !flexStatusRequested && client != null && client.getNetworkHandler() != null) {
+        if (!flexStatusRequested && client != null && client.getNetworkHandler() != null) {
             flexStatusRequested = true;
             client.getNetworkHandler().sendChatCommand("arena nex FLEX STATUS");
         }
-        if (!automationStatusKnown && !automationStatusRequested && client != null && client.getNetworkHandler() != null) {
+        if (!automationStatusRequested && client != null && client.getNetworkHandler() != null) {
             automationStatusRequested = true;
             client.getNetworkHandler().sendChatCommand("arena nex AUTOM STATUS");
         }
@@ -501,12 +511,12 @@ public final class CyberArenaScreen extends Screen {
 
         if (automationLevel == 0) return;
         input = new TextFieldWidget(textRenderer, left + 14, top + 110, panelWidth - 28, 20, Text.literal("Сценарий автоматизации"));
-        input.setMaxLength(240);
-        input.setPlaceholder(Text.literal("SEEK vault; PORTA vault.arena; STAT"));
+        input.setMaxLength(voraSelected ? 480 : 240);
+        input.setPlaceholder(Text.literal(voraSelected ? "FLEX: до 12 игровых шагов через ;" : "SEEK vault; PORTA vault.arena; STAT"));
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПУСТИТЬ СВОЙ СЦЕНАРИЙ"), b -> submit("arena nex FLOW "))
             .dimensions(left + 14, top + 138, panelWidth - 28, 22)
-            .tooltip(Tooltip.of(Text.literal("До 6 разрешённых игровых команд. Сценарий выполняется сервером."))).build());
+            .tooltip(Tooltip.of(Text.literal(voraSelected ? "FLEX: до 12 шагов и расширенный набор игровых команд." : "NX: до 6 разрешённых игровых команд."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: ОБЗОР СЕТИ"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
             .dimensions(left + 14, top + 174, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Поиск виртуальных сайтов, карта узлов и состояние профиля."))).build());
