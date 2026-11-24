@@ -27,7 +27,7 @@
 - [ ] Finish responsive layout for short screens: stack controls, scale spacing, and prevent any clipped widgets at all GUI scales
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
-- [ ] Add site-specific sample posts, recipes, catalog entries, NPC profiles, bulletin boards, maps, schedules and fake transactions
+- [x] Expand browser directory from 30 to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
 - [ ] Site actions should yield site-themed loot/payloads, clues, contract objectives and upgrade resources
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
@@ -83,7 +83,7 @@
 - [x] Add staged PvP network workflow: target discovery, virtual IP attribution, port scan, service enumeration and module-specific exploit outcomes
 - [x] Add terminal home sabotage: farm damage, power outage, supply theft, data theft, false alarm, station lock, false police call and raider diversion
 - [ ] Add physical block-break interception for farm machine with durability, ownership and protection checks
-- [ ] Add police station buildings and patrol routes; current response patrols spawn inside the investigated player’s home
+- [x] Police stakeout appears beside the identified player home; entering or remaining inside the home triggers arrest and round elimination
 - [ ] Add multiple farm models, cooling, power use, storage capacity, overheating and power-grid upgrades
 - [ ] Add police investigation missions, bribes, evidence cleanup, warrants, escape and reputation effects
 - [ ] Add VPN node selection, rotating virtual endpoints, bandwidth and temporary VPN outages
@@ -95,7 +95,7 @@
 - [x] Workstation commands are blocked during a blackout except status/help/repair; emergency REPAIR costs credits
 - [x] Consumable BREAKER and GUARD charges can each stop one matching incident; they are not permanent invulnerability
 - [x] Add more home sabotage events: workstation damage, stolen supplies, false alerts, station lock, data theft, false police calls and raider diversion
-- [ ] Add repairable house devices and a clear home defense panel with remaining charges and incident history
+- [x] Show purchased upgrades as physical stations and structures inside the personal home; refresh displays after purchases and on rejoin
 - [ ] Add settings for incident frequency and safe-start protection on new servers
 
 ## Progression / economy / automation
@@ -110,7 +110,7 @@
 - [ ] Make FLEX the premium, purchased language with more advanced scripting features than NX (variables, reusable routines and expanded control flow, subject to implementation)
 - [ ] Module prerequisite tree, specialized builds and skill perks
 - [ ] Unique tools/programs that unlock new simulated actions
-- [ ] Balance economy and rewards against risk and time investment
+- [x] Round objective: reach 10,000 credits to win; police arrest at the home eliminates the player
 
 ## Defense / multiplayer
 - [x] Raid success influenced by attacker upgrades and target firewall
