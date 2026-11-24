@@ -192,6 +192,8 @@ public final class NexEngine {
         if (script.length() > 240) return error("FLOW_LIMIT", "Routine limit is 240 characters.");
         String[] steps = script.split(";", -1);
         if (steps.length > 6) return error("FLOW_LIMIT", "Maximum 6 instructions per routine.");
+        if (ArenaState.get(player.getServer()).view(player).automation() < 1)
+            return error("AUTOMATION_LOCKED", "Automation is locked. Purchase AUTOM module first: UPGR AUTOM (35 credits).");
         StringBuilder result = new StringBuilder("§bNEX FLOW // ").append(steps.length).append(" STEPS");
         Set<String> allowed = Set.of("SEEK","WHO","PING","PORTA","PORTS","FILES","LS","READ","VIEW","CRACK","MINE","UPGR","SELR","SCAN","STAT","NODR","MAPA","CONTRACTS","JOBS");
         for (int i = 0; i < steps.length; i++) {
