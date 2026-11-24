@@ -124,6 +124,7 @@ public final class CyberArenaScreen extends Screen {
 
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 1) initTerminal(left, top, panelWidth);
+        else if (page == 7) initSiteConsole(left, top, panelWidth);
         else initAutomation(left, top, panelWidth);
     }
 
@@ -185,6 +186,10 @@ public final class CyberArenaScreen extends Screen {
     private void initSitePage(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> navigate(0))
             .dimensions(left + 14, top + 78, 90, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("NX КОНСОЛЬ САЙТА"), b -> {
+            if (client != null) client.setScreen(new CyberArenaScreen(7, selectedSite, ""));
+        }).dimensions(left + 110, top + 78, 118, 20)
+            .tooltip(Tooltip.of(Text.literal("Открыть отдельную NX-консоль, привязанную к этому сайту"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
@@ -198,6 +203,40 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("ФАЙЛЫ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
         }).dimensions(left + 30 + third * 2, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Открыть список файлов и читать игровые записи"))).build());
+    }
+
+    private void initSiteConsole(int left, int top, int panelWidth) {
+        addDrawableChild(ButtonWidget.builder(Text.literal("← К САЙТУ"), b -> openSite(selectedSite))
+            .dimensions(left + 14, top + 76, 105, 20)
+            .tooltip(Tooltip.of(Text.literal("Вернуться к странице сайта"))).build());
+        input = new TextFieldWidget(textRenderer, left + 14, top + 105, panelWidth - 28, 20, Text.literal("NX-команда сайта"));
+        input.setMaxLength(160);
+        input.setPlaceholder(Text.literal("PORTA / CRACK / FILES / SCAN ..."));
+        addDrawableChild(input);
+        addDrawableChild(ButtonWidget.builder(Text.literal("ВЫПОЛНИТЬ NX"), b -> submitSiteConsole())
+            .dimensions(left + 14, top + 134, (panelWidth - 36) / 2, 22)
+            .tooltip(Tooltip.of(Text.literal("Выполнить команду с контекстом открытого сайта"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ САЙТА"), b -> runNex("PORTA " + selectedSite))
+            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 134, (panelWidth - 36) / 2, 22)
+            .tooltip(Tooltip.of(Text.literal("Просмотреть службы текущего сайта"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ИЗВЛЕЧЕНИЕ"), b -> runNex("CRACK " + selectedSite))
+            .dimensions(left + 14, top + 166, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Запустить игровое извлечение для текущего сайта"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ФАЙЛЫ САЙТА"), b -> { if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, "")); })
+            .dimensions(left + 14, top + 194, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Открыть игровые записи этого сайта"))).build());
+    }
+    private void submitSiteConsole() {
+        String value = input == null ? "" : input.getText().trim();
+        if (value.isEmpty()) return;
+        String command = value;
+        String head = value.split("\\s+", 2)[0].toUpperCase();
+        if (List.of("PORTA", "CRACK", "FILES", "SCAN").contains(head) && !value.toLowerCase().contains(selectedSite.toLowerCase())) command += " " + selectedSite;
+        else if (head.equals("READ") && !value.toLowerCase().contains(selectedSite.toLowerCase())) {
+            String[] parts = value.split("\\s+", 2);
+            command = "READ " + selectedSite + (parts.length > 1 ? " " + parts[1] : "");
+        }
+        send("arena nex " + command);
     }
 
     private void initFilePage(int left, int top, int panelWidth) {
@@ -331,6 +370,9 @@ public final class CyberArenaScreen extends Screen {
             String hints = voraSelected ? "LUMA help | KERI search | DORA services | NAVA map | MIRA status | TARA extract" : "MANU help | SEEK search | PORTA services | NODR map | STAT status | CRACK extract";
             drawWrapped(context, "NEXT COMMANDS: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
             drawWrapped(context, "Type a command or use the quick buttons. Syntax hints remain visible.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
+        } else if (page == 7) {
+            context.drawTextWithShadow(textRenderer, Text.literal("NX // КОНСОЛЬ САЙТА: " + selectedSite), left + 14, top + 78, 0xFF70D8FF);
+            drawWrapped(context, "Команды работают в контексте выбранного виртуального сайта. Обычная консоль остаётся отдельной вкладкой.", left + 14, top + 224, panelWidth - 28, 0xFFD0DCE6);
         } else {
             context.drawTextWithShadow(textRenderer, Text.literal("АВТОМАТИЗАЦИЯ // ГОТОВЫЕ СЦЕНАРИИ"), left + 14, top + 78, 0xFF70D8FF);
             context.drawTextWithShadow(textRenderer, Text.literal("Команды разделяются ; | До 6 шагов за запуск"), left + 14, top + 258, 0xFFD0DCE6);
