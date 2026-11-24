@@ -17,7 +17,7 @@ public final class CyberArenaClient implements ClientModInitializer {
         openWorkstation = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.cyber_arena.open_workstation",
             InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_K,
+            GLFW.GLFW_KEY_O,
             "category.cyber_arena"
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
