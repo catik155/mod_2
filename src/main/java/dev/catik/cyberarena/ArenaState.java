@@ -401,18 +401,25 @@ public final class ArenaState extends PersistentState {
         PlayerProfile p = profile(defender);
         long now = defender.getServer().getOverworld().getTime();
         if (p.counterTarget.isBlank() || now > p.counterUntilTick) {
-            p.counterTarget = "";
-            markDirty();
-            return "§eОкно контратаки закрыто. Контратаковать можно только сразу после нападения.";
+            p.counterTarget = ""; p.counterBonus = 0; markDirty();
+            return "§eОкно контратаки закрыто. Оно появляется только после победы в консольном противостоянии.";
         }
         String targetName = p.counterTarget;
         ServerPlayerEntity attacker = defender.getServer().getPlayerManager().getPlayerList().stream()
             .filter(other -> other.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
-        p.counterTarget = "";
-        p.counterUntilTick = 0;
+        int bonus = p.counterBonus;
+        p.counterTarget = ""; p.counterUntilTick = 0; p.counterBonus = 0;
         markDirty();
         if (attacker == null) return "§eПротивник уже не в сети. Контратака отменена.";
-        return "§6КОНТРАТАКА §7| §fОтветный рейд на " + targetName + "\n" + raid(defender, attacker, now);
+        PlayerProfile a = profile(defender), d = profile(attacker);
+        int attack = attackPower(a) + bonus, defense = defensePower(d);
+        int chance = Math.max(5, Math.min(95, 50 + (attack - defense) * 5));
+        boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
+        if (!success) return "§cКОНТРАТАКА НЕ ПРОШЛА §7| Атака " + attack + " / защита " + defense + ". Бонус +"+bonus+" потрачен.";
+        int stolen = Math.min(d.credits, Math.max(1, d.credits / 5));
+        d.credits -= stolen; a.credits += stolen; a.reputation += 1;
+        markDirty();
+        return "§6КОНТРАТАКА УДАЛАСЬ §7| Бонус атаки +" + bonus + " §7| Перехвачено " + stolen + " кредитов.";
     }
 
     public String sabotage(ServerPlayerEntity attacker, ServerPlayerEntity target, String action) {
@@ -426,114 +433,13 @@ public final class ArenaState extends PersistentState {
         if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
         if (blocked) {
             d.alertLevel = Math.min(5, d.alertLevel + 1);
-            openCounterWindow(target, attacker, d, now);
             markDirty();
-            return "§aАТАКА ОТРАЖЕНА §7| Защита " + defense + " против атаки " + attack
-                + " §7| Шанс блока " + blockChance + "% §7| §6ОКНО КОНТРАТАКИ: 10 секунд. COUNTER."
+            return "§aАВТОЗАЩИТА ОТРАЗИЛА АТАКУ §7| Блокировка " + blockChance + "%. Консольное противостояние не потребовалось."
                 + (traced ? " §cТвой след обнаружен." : "");
         }
-        String result = switch (action.toLowerCase()) {
-            case "station" -> {
-                if (d.stationHealth <= 0) yield "§eРабочая станция уже разрушена.";
-                int damage = Math.min(40, d.stationHealth); d.stationHealth -= damage;
-                if (d.stationHealth == 0) breakWorkstation(target, d);
-                yield "§cРАБОЧАЯ СТАНЦИЯ ПОВРЕЖДЕНА | -" + damage + "% прочности. При 0% консоль недоступна до ремонта.";
-            }
-            case "farm" -> {
-                if (d.farmLevel == 0 || d.farmHealth == 0) yield "§eУ цели нет работающей фермы.";
-                if (d.guardCharges > 0) { d.guardCharges--; yield "§aОХРАНА ЗАЩИТИЛА ФЕРМУ | Потрачен один заряд охраны."; }
-                int damage = Math.min(45, d.farmHealth); d.farmHealth -= damage;
-                if (d.farmHealth == 0) playerBreakFarm(target, d);
-                yield "§cСАБОТАЖ ФЕРМЫ | -" + damage + "% прочности | Доход остановлен до ремонта.";
-            }
-            case "power" -> {
-                if (d.breakerCharges > 0) { d.breakerCharges--; yield "§aЭЛЕКТРОЩИТОК ВЫДЕРЖАЛ | Потрачен один заряд защиты."; }
-                d.powerUntilTick = now + 1200; yield "§cОТКЛЮЧЕНИЕ ПИТАНИЯ | Станция цели отключена на 60 секунд.";
-            }
-            case "supplies" -> {
-                int stolen = Math.min(d.credits, 20 + a.extractor * 5);
-                d.credits -= stolen; a.credits += stolen;
-                yield "§eКРАЖА ЗАПАСОВ | Перенесено " + stolen + " игровых кредитов.";
-            }
-            case "alarm" -> { d.alertLevel = Math.min(5, d.alertLevel + 2); yield "§6ЛОЖНАЯ ТРЕВОГА | Сигнализация цели перегружена."; }
-            case "lock" -> { d.powerUntilTick = now + 600; yield "§cБЛОКИРОВКА СТАНЦИИ | Терминал цели заблокирован на 30 секунд."; }
-            case "data" -> {
-                int stolen = Math.min(d.dataShards, 2 + a.extractor);
-                d.dataShards -= stolen; a.dataShards += stolen;
-                yield "§bКРАЖА ДАННЫХ | Перенесено " + stolen + " осколков.";
-            }
-            case "falsecall" -> { d.wantedLevel = Math.min(5, d.wantedLevel + 2); yield "§cЛОЖНЫЙ ВЫЗОВ ПОЛИЦИИ | Уровень розыска цели повышен."; }
-            case "raiders" -> {
-                BlockPos home = new BlockPos(d.homeX, d.homeY + 1, d.homeZ);
-                for (int i = 0; i < 2; i++) {
-                    var raider = EntityType.PILLAGER.spawn(target.getServerWorld(), home.add(i == 0 ? -2 : 2, 0, 1), SpawnReason.EVENT);
-                    if (raider != null) { raider.setPersistent(); raider.setTarget(target); }
-                }
-                yield "§cПОДСТАВНОЙ НАЛЁТ | В дом цели проникли два рейдера.";
-            }
-            default -> "§cВарианты: FARM, POWER, SUPPLIES, DATA, ALARM, LOCK, FALSECALL, RAIDERS.";
-        };
         markDirty();
-        if (traced) attacker.sendMessage(Text.literal("§c[ПОЛИЦИЯ] §fТвой виртуальный след обнаружен. Розыск +" + 1 + "."), false);
-        target.sendMessage(Text.literal("§c[ДОМ] §fОбнаружена попытка саботажа: " + action.toUpperCase()), false);
-        return "§cАТАКА ПРОШЛА §7| Сила атаки " + attack + " против защиты " + defense + "\n" + result + (traced ? " §c| След обнаружен, розыск " + a.wantedLevel + "/5." : " §a| След не обнаружен.");
-    }
-
-    private void recordNetworkActivity(ServerPlayerEntity player, PlayerProfile profile, String action, String targetName) {
-        int intensity = switch (action) { case "DISCOVER" -> 1; case "SCAN" -> 2; case "ENUM" -> 2; case "EXPLOIT" -> 3; default -> 1; };
-        profile.networkHeat = Math.min(10, profile.networkHeat + Math.max(1, intensity - (profile.vpnActive ? 1 : 0)));
-        profile.lastNetworkActivityTick = player.getServer().getOverworld().getTime();
-        profile.lastNetworkEvent = action + " / " + targetName;
-        markDirty();
-    }
-
-    public String network(ServerPlayerEntity attacker, String instruction) {
-        PlayerProfile a = profile(attacker);
-        String[] parts = instruction.trim().split("\\s+", 3);
-        if (parts.length < 2) return "§eNET DISCOVER <игрок> | SCAN <игрок> | ENUM <игрок> | EXPLOIT <игрок> <FARM|POWER|DATA|SUPPLIES|ALARM|LOCK|FALSECALL|RAIDERS>";
-        String action = parts[0].toUpperCase();
-        String targetName = parts[1];
-        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayerList().stream().filter(p -> p.getGameProfile().getName().equalsIgnoreCase(targetName)).findFirst().orElse(null);
-        if (target == null) return "§cNET/NO_HOST | Игрок должен быть онлайн в этом мире.";
-        if (target.getUuid().equals(attacker.getUuid())) return "§cNET/SELF | Нельзя выбирать собственную сеть.";
-        PlayerProfile d = profile(target);
-        switch (action) {
-            case "DISCOVER" -> {
-                recordNetworkActivity(attacker, a, action, targetName);
-                a.networkTarget = target.getGameProfile().getName(); a.networkStage = 1;
-                String address = d.vpnActive ? "203.0.113." + (d.virtualIp % 200 + 20) + " (VPN-узел)" : "198.51.100." + (d.virtualIp % 200 + 20);
-                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 22;
-                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
-                markDirty();
-                return "§bARENA DISCOVERY §7| §f" + targetName + "\n§fВиртуальный адрес: " + address + "\n§aУзел найден. Далее: NET SCAN " + targetName + (traced ? "\n§cПолиция заметила поисковый запрос." : "");
-            }
-            case "SCAN" -> {
-                recordNetworkActivity(attacker, a, action, targetName);
-                if (a.networkStage < 1 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER для этой цели.";
-                a.networkStage = 2; int fw = d.firewall;
-                boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < 32;
-                if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
-                markDirty();
-                return "§bPORT SCAN REPORT §7| §f" + targetName + "\n§e021/WEB-GATE §7" + (fw >= 4 ? "FILTERED" : "OPEN") + "\n§e044/DATA-RELAY §7" + (fw >= 2 ? "FILTERED" : "OPEN") + "\n§e071/ADMIN-CORE §7" + (fw >= 3 ? "FILTERED" : "OPEN") + "\n§7FIREWALL " + fw + "/5\n§aДалее: NET ENUM " + targetName + (traced ? "\n§cСканирование попало в журнал полиции." : "");
-            }
-            case "ENUM" -> {
-                recordNetworkActivity(attacker, a, action, targetName);
-                if (a.networkStage < 2 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала SCAN для этой цели.";
-                a.networkStage = 3; markDirty();
-                return "§bSERVICE ENUMERATION §7| §f" + targetName + "\n§f021 WEB-GATE: публичный портал\n§f044 DATA-RELAY: хранилище ресурсов\n§f071 ADMIN-CORE: управление домом\n§7Сервисы вымышлены; внешних подключений нет.\n§aДалее: NET EXPLOIT " + targetName + " FARM";
-            }
-            case "EXPLOIT" -> {
-                recordNetworkActivity(attacker, a, action, targetName);
-                if (parts.length < 3) return "§eУкажи игровой модуль: FARM, POWER, DATA, SUPPLIES, ALARM, LOCK, FALSECALL или RAIDERS.";
-                if (a.networkStage < 3 || !a.networkTarget.equalsIgnoreCase(targetName)) return "§cNET/ORDER | Сначала DISCOVER, SCAN и ENUM.";
-                long now = attacker.getServer().getOverworld().getTime();
-                a.lastNetworkActionTick = now; a.networkStage = 0;
-                String result = sabotage(attacker, target, parts[2].toLowerCase());
-                markDirty();
-                return "§bEXPLOIT SIMULATION §7| §f" + targetName + " / " + parts[2].toUpperCase() + "\n" + result;
-            }
-            default -> { return "§eNET DISCOVER | SCAN | ENUM | EXPLOIT"; }
-        }
+        return startDuel(attacker, target, action.toLowerCase(), now)
+            + (traced ? " §cТвой след обнаружен, розыск " + a.wantedLevel + "/5." : "");
     }
 
     public String station(ServerPlayerEntity player, String action) {
@@ -625,10 +531,121 @@ public final class ArenaState extends PersistentState {
         attacker.sendMessage(Text.literal("§c[СИСТЕМА] §fТвоя атака отражена. Защитный контур перегружен, окно уязвимости открыто."), false);
     }
 
+    private int attackPower(PlayerProfile p) {
+        return p.automation * 2 + p.stealth + p.extractor + p.cpu * 2 + (p.vpnActive ? 1 : 0);
+    }
+
+    private int defensePower(PlayerProfile p) {
+        return p.firewall * 2 + p.guardLevel * 2 + p.cpu * 2 + p.alertLevel;
+    }
+
+    private void clearDuel(PlayerProfile a, PlayerProfile d) {
+        a.duelOpponent = ""; a.duelAction = ""; a.duelMove = ""; a.duelRole = "";
+        d.duelOpponent = ""; d.duelAction = ""; d.duelMove = ""; d.duelRole = "";
+    }
+
+    private String startDuel(ServerPlayerEntity attacker, ServerPlayerEntity defender, String action, long now) {
+        PlayerProfile a = profile(attacker), d = profile(defender);
+        if (!a.duelOpponent.isBlank() || !d.duelOpponent.isBlank()) return "§eОдин из игроков уже участвует в сетевом противостоянии.";
+        a.duelOpponent = defender.getGameProfile().getName(); a.duelAction = action; a.duelRole = "ATTACK"; a.duelMove = ""; a.duelUntilTick = now + 600;
+        d.duelOpponent = attacker.getGameProfile().getName(); d.duelAction = action; d.duelRole = "DEFEND"; d.duelMove = ""; d.duelUntilTick = now + 600;
+        attacker.sendMessage(Text.literal("§c[КОНСОЛЬНЫЙ ПОЕДИНОК] §fАвтозащита не удержала периметр. Выбери тактику: DUEL BURST / FEINT / OVERRIDE. У тебя 30 секунд."), false);
+        defender.sendMessage(Text.literal("§6[ТРЕВОГА] §fАвтозащита не остановила вторжение! Срочно выбери: DUEL PATCH / DECOY / TRACE. У тебя 30 секунд."), false);
+        markDirty();
+        return "§cАВТОЗАЩИТА ПРОБИТА §7| Началось консольное противостояние с " + defender.getGameProfile().getName()
+            + ". Выбери тактику: DUEL BURST, FEINT или OVERRIDE. Исход операции пока не определён.";
+    }
+
+    public String duel(ServerPlayerEntity player, String move) {
+        PlayerProfile p = profile(player);
+        long now = player.getServer().getOverworld().getTime();
+        if (p.duelOpponent.isBlank() || now > p.duelUntilTick) {
+            p.duelOpponent = ""; p.duelAction = ""; p.duelMove = ""; p.duelRole = ""; markDirty();
+            return "§eАктивного противостояния нет или время выбора истекло.";
+        }
+        String choice = move.trim().toUpperCase();
+        Set<String> allowed = p.duelRole.equals("ATTACK") ? Set.of("BURST", "FEINT", "OVERRIDE") : Set.of("PATCH", "DECOY", "TRACE");
+        if (!allowed.contains(choice)) return p.duelRole.equals("ATTACK")
+            ? "§eТактики атаки: BURST, FEINT, OVERRIDE." : "§eТактики защиты: PATCH, DECOY, TRACE.";
+        p.duelMove = choice;
+        ServerPlayerEntity opponent = player.getServer().getPlayerManager().getPlayerList().stream()
+            .filter(other -> other.getGameProfile().getName().equalsIgnoreCase(p.duelOpponent)).findFirst().orElse(null);
+        if (opponent == null) return "§cПротивник отключился. Противостояние отменено.";
+        PlayerProfile o = profile(opponent);
+        opponent.sendMessage(Text.literal("§b[ПРОТИВОСТОЯНИЕ] §fПротивник выбрал тактику. Введи DUEL <тактика>."), false);
+        if (o.duelMove.isBlank()) {
+            markDirty();
+            return "§bТАКТИКА ПРИНЯТА §7| Ожидаем выбор противника. Его ход ещё не раскрыт.";
+        }
+        ServerPlayerEntity attacker = p.duelRole.equals("ATTACK") ? player : opponent;
+        ServerPlayerEntity defender = p.duelRole.equals("DEFEND") ? player : opponent;
+        PlayerProfile a = profile(attacker), d = profile(defender);
+        String attackMove = a.duelMove, defenseMove = d.duelMove;
+        int attackScore = switch (attackMove) {
+            case "BURST" -> a.automation * 2 + a.cpu + ThreadLocalRandom.current().nextInt(1, 7);
+            case "FEINT" -> a.stealth * 2 + (a.vpnActive ? 2 : 0) + ThreadLocalRandom.current().nextInt(1, 7);
+            default -> a.extractor * 2 + a.cpu + ThreadLocalRandom.current().nextInt(1, 7);
+        };
+        int defenseScore = switch (defenseMove) {
+            case "PATCH" -> d.firewall * 2 + d.cpu + ThreadLocalRandom.current().nextInt(1, 7);
+            case "DECOY" -> d.guardLevel * 2 + d.stealth + ThreadLocalRandom.current().nextInt(1, 7);
+            default -> d.guardLevel + d.firewall * 2 + ThreadLocalRandom.current().nextInt(1, 7);
+        };
+        String report;
+        if (defenseScore >= attackScore) {
+            d.counterTarget = attacker.getGameProfile().getName(); d.counterUntilTick = now + 200; d.counterBonus = 6;
+            report = "§aЗАЩИТНИК ПОБЕДИЛ §7| Атака " + attackScore + " / защита " + defenseScore
+                + " §7| Контур атаки вскрыт. У защищавшегося есть 10 секунд на COUNTER с бонусом +6 к силе атаки.";
+            defender.sendMessage(Text.literal(report), false);
+            attacker.sendMessage(Text.literal("§c[ПОРАЖЕНИЕ] §fТвоя операция отражена. Противник получил окно контратаки."), false);
+        } else {
+            report = "§cАТАКУЮЩИЙ ПОБЕДИЛ §7| Атака " + attackScore + " / защита " + defenseScore
+                + " §7| Защита перегружена. Основной эффект операции выполнен.";
+            String effect = applyCombatEffect(attacker, defender, a.duelAction, now);
+            report += "\n" + effect;
+            attacker.sendMessage(Text.literal(report), false);
+            defender.sendMessage(Text.literal("§c[ЗАЩИТА ПРОБИТА] §f" + report), false);
+        }
+        clearDuel(a, d);
+        markDirty();
+        return report;
+    }
+
+    private String applyCombatEffect(ServerPlayerEntity attacker, ServerPlayerEntity target, String action, long now) {
+        PlayerProfile a = profile(attacker), d = profile(target);
+        if (action.equals("RAID")) {
+            int credits = Math.min(d.credits, Math.max(1, d.credits / 4));
+            int shards = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
+            d.credits -= credits; a.credits += credits; d.dataShards -= shards; a.dataShards += shards + 1; a.reputation += 2;
+            return "§6ДОБЫЧА РЕЙДА §7| +" + credits + " кредитов, +" + (shards + 1) + " фрагментов данных.";
+        }
+        return switch (action.toLowerCase()) {
+            case "station" -> {
+                if (d.stationHealth <= 0) yield "§eРабочая станция уже разрушена.";
+                int damage = Math.min(40, d.stationHealth); d.stationHealth -= damage;
+                if (d.stationHealth == 0) breakWorkstation(target, d);
+                yield "§cСТАНЦИЯ ПОВРЕЖДЕНА §7| -" + damage + "% прочности.";
+            }
+            case "farm" -> {
+                if (d.farmLevel == 0 || d.farmHealth <= 0) yield "§eУ цели нет работающей фермы.";
+                int damage = Math.min(45, d.farmHealth); d.farmHealth -= damage;
+                if (d.farmHealth == 0) playerBreakFarm(target, d);
+                yield "§cФЕРМА ПОВРЕЖДЕНА §7| -" + damage + "% прочности.";
+            }
+            case "power" -> { d.powerUntilTick = now + 1200; yield "§cПИТАНИЕ ОТКЛЮЧЕНО НА 60 СЕКУНД."; }
+            case "supplies" -> { int stolen = Math.min(d.credits, 20 + a.extractor * 5); d.credits -= stolen; a.credits += stolen; yield "§eПЕРЕХВАЧЕНО " + stolen + " КРЕДИТОВ."; }
+            case "data" -> { int stolen = Math.min(d.dataShards, 2 + a.extractor); d.dataShards -= stolen; a.dataShards += stolen; yield "§bПЕРЕХВАЧЕНО " + stolen + " ФРАГМЕНТОВ ДАННЫХ."; }
+            case "alarm" -> { d.alertLevel = Math.min(5, d.alertLevel + 2); yield "§6СИГНАЛИЗАЦИЯ ПЕРЕГРУЖЕНА."; }
+            case "lock" -> { d.powerUntilTick = now + 600; yield "§cСТАНЦИЯ ЗАБЛОКИРОВАНА НА 30 СЕКУНД."; }
+            case "falsecall" -> { d.wantedLevel = Math.min(5, d.wantedLevel + 2); yield "§cУРОВЕНЬ РОЗЫСКА ЦЕЛИ ПОВЫШЕН."; }
+            case "raiders" -> "§eСИМУЛЯЦИЯ НАЛЁТА: операция завершена, тревога повышена.";
+            default -> "§eОперация не распознана.";
+        };
+    }
+
     public String raid(ServerPlayerEntity attacker, ServerPlayerEntity target, long now) {
         if (attacker.getUuid().equals(target.getUuid())) return "§cНельзя атаковать собственную сеть.";
-        PlayerProfile a = profile(attacker);
-        PlayerProfile d = profile(target);
+        PlayerProfile a = profile(attacker), d = profile(target);
         int attack = attackPower(a), defense = defensePower(d);
         int blockChance = Math.max(5, Math.min(95, 50 + (defense - attack) * 5));
         boolean blocked = ThreadLocalRandom.current().nextInt(100) < blockChance;
@@ -636,23 +653,12 @@ public final class ArenaState extends PersistentState {
             a.wantedLevel = Math.min(5, a.wantedLevel + 1);
         if (blocked) {
             d.alertLevel = Math.min(5, d.alertLevel + 1);
-            a.reputation = Math.max(0, a.reputation - 1);
-            openCounterWindow(target, attacker, d, now);
             markDirty();
-            return "§aЗАЩИТА УДЕРЖАЛА УЗЕЛ §7| Защита " + defense + " против атаки " + attack
-                + " §7| Шанс блокировки " + blockChance + "% §7| §6ОКНО КОНТРАТАКИ: 10 секунд. Введи COUNTER.";
+            return "§aАВТОЗАЩИТА ОТРАЗИЛА АТАКУ §7| Сила защиты " + defense + ", сила атаки " + attack
+                + " §7| Шанс автоматического блока " + blockChance + "%. Противостояние не потребовалось.";
         }
-        int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
-        int shardsTaken = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
-        d.credits -= creditsTaken;
-        a.credits += creditsTaken;
-        d.dataShards -= shardsTaken;
-        a.dataShards += shardsTaken + 1;
-        a.reputation += 2;
-        d.alertLevel = Math.min(5, d.alertLevel + 1);
         markDirty();
-        return "§cСЕТЬ ПРОНИКНОВЕНА §7| Атака " + attack + " против защиты " + defense
-            + " §7| Защитный контур пробит §7| §6+" + creditsTaken + " кредитов §7| §b+" + (shardsTaken + 1) + " фрагментов данных.";
+        return startDuel(attacker, target, "RAID", now);
     }
 
     public String breachSite(ServerPlayerEntity player, String site) {
@@ -742,7 +748,7 @@ public final class ArenaState extends PersistentState {
             e.putLong("last_raid", p.lastRaidTick); e.putLong("last_site_raid", p.lastSiteRaidTick); e.putLong("last_mine", p.lastMineTick);
             e.putLong("last_passive_income", p.lastPassiveIncomeTick); e.putLong("last_incident", p.lastIncidentTick); e.putLong("last_incident_check", p.lastIncidentCheckTick); e.putLong("power_until", p.powerUntilTick);
             e.putInt("breaker_level", p.breakerLevel); e.putInt("guard_level", p.guardLevel); e.putInt("breaker_charges", p.breakerCharges); e.putInt("guard_charges", p.guardCharges);
-            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
+            e.putInt("farm_level", p.farmLevel); e.putInt("farm_health", p.farmHealth); e.putInt("station_health", p.stationHealth); e.putInt("remote_station", p.remoteStationLevel); e.putString("counter_target", p.counterTarget); e.putLong("counter_until", p.counterUntilTick); e.putInt("counter_bonus", p.counterBonus); e.putString("duel_opponent", p.duelOpponent); e.putString("duel_action", p.duelAction); e.putString("duel_move", p.duelMove); e.putString("duel_role", p.duelRole); e.putLong("duel_until", p.duelUntilTick); e.putBoolean("vpn_owned", p.vpnOwned); e.putBoolean("vpn_active", p.vpnActive); e.putInt("wanted", p.wantedLevel); e.putInt("virtual_ip", p.virtualIp); e.putLong("last_police_check", p.lastPoliceCheckTick);
             e.putString("network_target", p.networkTarget); e.putInt("network_stage", p.networkStage); e.putLong("last_network_action", p.lastNetworkActionTick);
             e.putInt("network_heat", p.networkHeat); e.putLong("last_network_activity", p.lastNetworkActivityTick); e.putString("last_network_event", p.lastNetworkEvent);
             e.putBoolean("police_stakeout", p.policeStakeout); e.putBoolean("eliminated", p.eliminated); e.putBoolean("round_won", p.roundWon);
@@ -774,7 +780,7 @@ public final class ArenaState extends PersistentState {
             p.lastRaidTick = e.getLong("last_raid");
             p.lastPassiveIncomeTick = e.contains("last_passive_income") ? e.getLong("last_passive_income") : -1; p.lastIncidentTick = e.getLong("last_incident"); p.lastIncidentCheckTick = e.getLong("last_incident_check"); p.powerUntilTick = e.getLong("power_until");
             p.breakerLevel = clamp(e.getInt("breaker_level"), 0, 5); p.guardLevel = clamp(e.getInt("guard_level"), 0, 5); p.breakerCharges = clamp(e.getInt("breaker_charges"), 0, 5); p.guardCharges = clamp(e.getInt("guard_charges"), 0, 5);
-            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
+            p.farmLevel = clamp(e.getInt("farm_level"), 0, 5); p.farmHealth = clamp(e.getInt("farm_health"), 0, 100); p.stationHealth = e.contains("station_health") ? clamp(e.getInt("station_health"), 0, 100) : 100; p.remoteStationLevel = clamp(e.getInt("remote_station"), 0, 1); p.counterTarget = e.getString("counter_target"); p.counterUntilTick = e.getLong("counter_until"); p.counterBonus = e.getInt("counter_bonus"); p.duelOpponent = e.getString("duel_opponent"); p.duelAction = e.getString("duel_action"); p.duelMove = e.getString("duel_move"); p.duelRole = e.getString("duel_role"); p.duelUntilTick = e.getLong("duel_until"); p.vpnOwned = e.getBoolean("vpn_owned"); p.vpnActive = e.getBoolean("vpn_active"); p.wantedLevel = clamp(e.getInt("wanted"), 0, 5); p.virtualIp = e.contains("virtual_ip") ? clamp(e.getInt("virtual_ip"), 20, 219) : Math.floorMod(e.getUuid("uuid").hashCode(), 200) + 20; p.lastPoliceCheckTick = e.getLong("last_police_check");
             p.networkTarget = e.getString("network_target"); p.networkStage = clamp(e.getInt("network_stage"), 0, 3); p.lastNetworkActionTick = e.getLong("last_network_action");
             p.networkHeat = clamp(e.getInt("network_heat"), 0, 10); p.lastNetworkActivityTick = e.getLong("last_network_activity");
             p.lastNetworkEvent = e.contains("last_network_event") ? e.getString("last_network_event") : "нет";
