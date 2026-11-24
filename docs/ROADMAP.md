@@ -79,9 +79,11 @@
 - [x] Upgrade and repair the mining farm through the NX terminal
 - [x] Add fictional per-player IP addresses using documentation-only TEST-NET ranges
 - [x] Add a purchasable in-game VPN that masks the displayed fictional IP and reduces trace chance
-- [x] Add wanted level and simulated police patrols, fines and hostile patrol NPCs at high heat
+- [x] Add wanted level, continuous simulated police review of suspicious network activity, VPN-adjusted detection, fines and patrol NPCs at high heat
+- [x] Add staged PvP network workflow: target discovery, virtual IP attribution, port scan, service enumeration and module-specific exploit outcomes
 - [x] Add terminal home sabotage: farm damage, power outage, supply theft, data theft, false alarm, station lock, false police call and raider diversion
 - [ ] Add physical block-break interception for farm machine with durability, ownership and protection checks
+- [ ] Add police station buildings and patrol routes; current response patrols spawn inside the investigated player’s home
 - [ ] Add multiple farm models, cooling, power use, storage capacity, overheating and power-grid upgrades
 - [ ] Add police investigation missions, bribes, evidence cleanup, warrants, escape and reputation effects
 - [ ] Add VPN node selection, rotating virtual endpoints, bandwidth and temporary VPN outages
