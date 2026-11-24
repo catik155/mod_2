@@ -135,10 +135,13 @@
 - [x] Round objective: reach 10,000 credits to win; police arrest at the home eliminates the player
 
 ## Defense / multiplayer
-- [x] Raid success resolved by a PvP attack-vs-defense power contest using attacker upgrades (AUTOM, STEALTH, EXTRACT, CPU, VPN) against defender upgrades (FIREWALL, GUARD, CPU)
-- [x] Attacks can be initiated at any time without a global raid or network-exploit cooldown; attack availability does not depend on being attacked first
-- [x] A counterattack window opens only when the defender successfully blocks an attack; the defender gets 10 seconds to use COUNTER against the exposed attacker
-- [x] Failed attacks do not grant a counterattack window to the attacker; successful attacks do not grant one to the defender
+- [x] Automatic defense first calculates a block chance from attack power versus firewall/guard/CPU upgrades
+- [x] If automatic defense blocks the attack, the event ends without a console duel
+- [x] If automatic defense fails, both players receive a simultaneous console duel with role-specific tactics
+- [x] Attacker tactics: BURST, FEINT, OVERRIDE; defender tactics: PATCH, DECOY, TRACE; scores include relevant upgrades and a random 1–6 factor
+- [x] Duel winner determines whether the attack payload resolves or the defender earns a 10-second counterattack window
+- [x] A successful defender counterattack receives +6 attack power for its follow-up strike
+- [x] Attacks can be initiated at any time without a global raid or network-exploit cooldown
 - [ ] Defense dashboard, honeypots, backup/recovery and incident notifications
 - [ ] NPC rivals, factions, teams, tournaments and seasonal leaderboards
 - [ ] Multiplayer contract sync and authoritative validation for all actions
