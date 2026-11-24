@@ -169,7 +169,15 @@ public final class ArenaState extends PersistentState {
                         BlockPos patrolPos = new BlockPos(p.homeX + 5, p.homeY + 1, p.homeZ + 5);
                         var officer = EntityType.IRON_GOLEM.spawn(player.getServerWorld(), patrolPos, SpawnReason.EVENT);
                         if (officer != null) { officer.setPersistent(); officer.setCustomName(Text.literal("§cПОЛИЦИЯ ARENA")); officer.setCustomNameVisible(true); }
-                        player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fТвой адрес установлен. Патруль занял позицию у дома. Если войдёшь внутрь — задержание и выбывание из раунда."), false);
+                        // При обыске полиция повреждает инфраструктуру, но не создаёт случайные PvP-налёты.
+                        p.stationHealth = Math.max(0, p.stationHealth - 25);
+                        if (p.stationHealth == 0) state.breakWorkstation(player, p);
+                        if (p.farmLevel > 0 && p.farmHealth > 0) {
+                            p.farmHealth = Math.max(0, p.farmHealth - 20);
+                            if (p.farmHealth == 0) state.playerBreakFarm(player, p);
+                        }
+                        state.refreshHomeDisplays(player, p);
+                        player.sendMessage(Text.literal("§c[ПОЛИЦИЯ ARENA] §fТвой адрес установлен. Патруль занял позицию у дома и повредил инфраструктуру: станция -" + (p.stationHealth == 0 ? "25% (разрушена)" : "25%") + ", ферма " + p.farmHealth + "%. Если войдёшь внутрь — задержание и выбывание из раунда."), false);
                     } else {
                         player.sendMessage(Text.literal("§6[ПОЛИЦИЯ ARENA] §fСетевые журналы показывают подозрительную активность: " + p.lastNetworkEvent + ". " + (attributed ? "Источник частично установлен." : "VPN скрыл источник, но событие осталось в журнале.")), false);
                     }
