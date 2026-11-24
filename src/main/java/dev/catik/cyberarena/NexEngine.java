@@ -24,7 +24,7 @@ public final class NexEngine {
         Map.entry("campus-12.arena", "CAMPUS NODE"),
         Map.entry("tower-13.arena", "SKY TOWER"),
         Map.entry("garden-14.arena", "GREEN NODE"),
-        Map.entry("deep-15.arena", "DEEP ARCHIVE"),
+        Map.entry("deep-15.arena", "DEEP ARCHIVE")
     );
     private static final Map<String, String> SITES = Map.ofEntries(
         Map.entry("shop.arena", "MARKET / TRADE / EASY"),
@@ -56,7 +56,7 @@ public final class NexEngine {
         Map.entry("food.arena", "PANTRY / DELIVERY / EASY"),
         Map.entry("power.arena", "VOLTAGE / POWER / HARD"),
         Map.entry("sports.arena", "ARENA SPORTS / EVENTS / MEDIUM"),
-        Map.entry("social.arena", "SOCIAL BYTE / COMMUNITY / HARD"),
+        Map.entry("social.arena", "SOCIAL BYTE / COMMUNITY / HARD")
     );
     private static final Map<String, Integer> DIFFICULTY = Map.ofEntries(
         Map.entry("shop.arena",1), Map.entry("news.arena",2), Map.entry("grid.arena",3),
@@ -65,7 +65,11 @@ public final class NexEngine {
         Map.entry("clinic.arena",3), Map.entry("factory.arena",4), Map.entry("museum.arena",1),
         Map.entry("uni.arena",2), Map.entry("port.arena",3), Map.entry("security.arena",5),
         Map.entry("casino.arena",4), Map.entry("farm.arena",1), Map.entry("media.arena",2),
-        Map.entry("space.arena",5), Map.entry("auction.arena",4)
+        Map.entry("space.arena",5), Map.entry("auction.arena",4),
+        Map.entry("craft.arena",1), Map.entry("music.arena",2), Map.entry("travel.arena",1),
+        Map.entry("legal.arena",4), Map.entry("archive2.arena",3), Map.entry("robot.arena",5),
+        Map.entry("food.arena",1), Map.entry("power.arena",4), Map.entry("sports.arena",2),
+        Map.entry("social.arena",4)
     );
     private static final Map<String, List<String>> FILES = Map.ofEntries(
         Map.entry("shop.arena", List.of("catalog.idx", "offers.dat", "ledger.log")),
@@ -97,7 +101,7 @@ public final class NexEngine {
         Map.entry("food.arena", List.of("recipes.idx", "supply.dat", "orders.log")),
         Map.entry("power.arena", List.of("plants.map", "energy.dat", "load.log")),
         Map.entry("sports.arena", List.of("leagues.idx", "matches.dat", "events.log")),
-        Map.entry("social.arena", List.of("groups.idx", "posts.dat", "reputation.log")),
+        Map.entry("social.arena", List.of("groups.idx", "posts.dat", "reputation.log"))
     );
     private static final Map<String, List<String>> PORTS = Map.ofEntries(
         Map.entry("shop.arena", List.of("021|WEB-GATE|OPEN|Public storefront", "044|TRADE-VAULT|GUARDED|Offer records", "071|OWNER-CORE|LOCKED|Owner controls", "088|CACHE-NODE|OPEN|Public cache")),
@@ -139,7 +143,7 @@ public final class NexEngine {
         Map.entry("food.arena", List.of("021|PANTRY-WEB|OPEN|Public recipes", "032|DELIVERY-FEED|OPEN|Delivery listings", "044|SUPPLY-DB|GUARDED|Supply metadata", "071|KITCHEN-CORE|LOCKED|Kitchen control")),
         Map.entry("power.arena", List.of("021|VOLT-WEB|OPEN|Public power status", "044|ENERGY-DB|GUARDED|Energy records", "071|PLANT-CORE|LOCKED|Plant control", "099|GRID-VAULT|LOCKED|Backup energy archive")),
         Map.entry("sports.arena", List.of("021|SPORTS-WEB|OPEN|Public league board", "032|MATCH-FEED|OPEN|Match reports", "044|EVENT-DB|GUARDED|Event records", "071|LEAGUE-CORE|LOCKED|League management")),
-        Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation")),
+        Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation"))
     );
 
 
