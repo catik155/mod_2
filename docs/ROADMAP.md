@@ -34,6 +34,17 @@
 - [ ] Site-to-site clue chains and recurring NPC/organizations
 - [ ] More varied content generation with deterministic seed and multiplayer consistency
 
+## Terminal UI (Linux / GNU Readline inspired)
+- [x] Full-screen terminal view with persistent output pane and bottom command prompt
+- [x] Route server command responses into the terminal while it is open
+- [x] Dynamic command and subcommand suggestions while typing
+- [x] TAB completion cycles through matching suggestions
+- [x] Up/down command history and Ctrl+R substring search
+- [ ] Cursor-aware completion in the middle of a command line
+- [ ] Argument suggestions from live player, site, discovered host and file data
+- [ ] Scrollback selection, copy, clear and persistent per-player command history
+- [ ] Syntax highlighting and inline diagnostics without executing a command
+
 ## NX (formerly NEX) language — planned full programming language
 - [x] Existing command vocabulary and command manual (current baseline)
 - [x] FLOW routine: up to six whitelisted instructions; server validates actions
