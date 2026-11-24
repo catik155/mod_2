@@ -169,14 +169,14 @@ public final class NexEngine {
     }
 
     private static String manual() {
-        return "§bNEX // OPERATOR MANUAL 2.1\n"
-            + "§fSEEK <word> §7search directory | WHO <site> §7host profile | PING <site> §7simulated response\n"
-            + "§fPORTA <site> [slot] §7service slots | FILES <site> §7file index | READ <site> <file> §7record info\n"
-            + "§fCRACK <site> §7game data extraction | SCAN <node> §7map node | NODR §7node map\n"
-            + "§fMINE §7virtual mining | SELR §7exchange shards | UPGR <module> §7buy module\n"
-            + "§fCONTRACTS §7job board | RUN <id> §7complete job | FLOW <a; b> §7safe routine (6 steps max)\n"
-            + "§7Aliases: HELP=?, PORTS=PORTA, LS=FILES, VIEW=READ, JOBS=CONTRACTS.\n"
-            + "§7Syntax: OPCODE argument. Quotes are optional. Everything is fictional game data.";
+        return "§bNX // СПРАВОЧНИК ОПЕРАТОРА 2.1\\n"
+            + "§fSEEK <слово> §7поиск каталога | WHO <сайт> §7профиль | PING <сайт> §7виртуальный отклик\\n"
+            + "§fPORTA <сайт> [слот] §7службы | FILES <сайт> §7список файлов | READ <сайт> <файл> §7описание записи\\n"
+            + "§fCRACK <сайт> §7игровое извлечение | SCAN <узел> §7скан игровой карты | NODR §7карта узлов\\n"
+            + "§fMINE §7виртуальная добыча | SELR §7обмен осколков | UPGR <модуль> §7улучшение\\n"
+            + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\\n"
+            + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\\n"
+            + "§7Все цели и данные вымышлены и существуют только внутри Cyber Arena.";
     }
 
     private static String error(String code, String message) { return "§cNEX/" + code + " §7| §f" + message; }
