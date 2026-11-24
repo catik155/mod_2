@@ -102,7 +102,7 @@ public final class CyberArenaScreen extends Screen {
     private TextFieldWidget input;
     private int terminalScroll = 0;
     private int browserScroll = 0;
-    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","HOME","DEFENSE","LOGS"};
+    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","DUEL","COUNTER","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","HOME","DEFENSE","LOGS"};
 
     public CyberArenaScreen() { this(0, "", ""); }
     public CyberArenaScreen(int initialPage) { this(initialPage, "", ""); }
