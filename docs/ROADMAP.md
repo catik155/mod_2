@@ -124,8 +124,8 @@
 - [x] Seven core upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE\n- [x] Add consumable BREAKER and GUARD defense upgrades
 - [x] Credits, data shards, extraction rewards and cooldowns
 - [x] Safe routine runner (up to six whitelisted instructions)
-- [x] Add a dedicated Improvements tab with purchase buttons for all seven upgrade modules; purchases are validated and charged by the server\n- [ ] Automation tab must remain purchase-gated: before AUTOM is bought, show only the price and locked state; after purchase, reveal presets and FLOW
-- [ ] Once purchased, unlock ready-made unattended automation presets and custom FLOW scripts (bounded, game-only actions); automation can run without manual command-by-command player input
+- [x] Add a dedicated Improvements tab with purchase buttons for all seven upgrade modules; purchases are validated and charged by the server\n- [x] Automation tab is server-state gated: before AUTOM is bought, show only the locked state and price; after purchase, reveal presets and FLOW
+- [x] Once purchased, unlock ready-made automation presets and custom FLOW scripts (bounded, game-only actions); each preset runs without manual command-by-command input
 - [ ] FLEX is a separate premium language purchase in the Improvements shop, with more capabilities than NX; clearly explain price and unlocked feature tiers
 - [ ] Saved scripts and reusable automation presets
 - [ ] Automation triggers, schedule and bounded repeat behavior
