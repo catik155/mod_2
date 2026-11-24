@@ -310,7 +310,7 @@ public final class NexEngine {
             + "\\n§6Кредиты: " + p.credits() + " §7| §dREP: " + p.reputation() + " §7| §bОсколки: " + p.dataShards()
             + "\\n§eFIREWALL " + p.firewall() + "/5 §7| AUTOM " + p.automation() + "/5 §7| STEALTH " + p.stealth() + "/5"
             + "\\n§dEXTRACT " + p.extractor() + "/5 §7| MINER " + p.miningRig() + "/5 §7| CPU " + p.cpu() + "/5 §7| STORAGE " + p.storage() + "/5"
-            + "\\n§cЩиток: " + p.breakerCharges() + " зарядов §7| §aОхрана: " + p.guardCharges() + " зарядов";
+            + "\\n§cЩиток: " + p.breakerCharges() + " зарядов §7| §aОхрана: " + p.guardCharges() + " зарядов"\n            + "\\n§bФерма: " + p.farmLevel() + "/5 (" + p.farmHealth() + "%) §7| VPN " + (p.vpnActive() ? "ON" : "OFF") + " §7| Розыск " + p.wantedLevel() + "/5"\n            + "\\n§7Игровой IP: " + (p.vpnActive() ? "203.0.113." : "198.51.100.") + (p.virtualIp() % 200 + 20);
     }
 
     private static String raidPlayer(ServerPlayerEntity attacker, String targetName) {
