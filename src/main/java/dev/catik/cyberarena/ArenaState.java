@@ -72,14 +72,16 @@ public final class ArenaState extends PersistentState {
         boolean success = ThreadLocalRandom.current().nextInt(100) < chance;
         if (success) {
             int creditsTaken = Math.min(d.credits, Math.max(1, d.credits / 4));
+            int shardsTaken = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
             d.credits -= creditsTaken;
             a.credits += creditsTaken;
-            a.dataShards += 1;
+            d.dataShards -= shardsTaken;
+            a.dataShards += shardsTaken + 1;
             a.reputation += 2;
             d.alertLevel = Math.min(5, d.alertLevel + 1);
             markDirty();
             return "§aSIMULATED BREACH SUCCESS §7| §f" + target.getName().getString()
-                + " §7| §6+" + creditsTaken + " credits §7| §b+1 data shard §7| §cTarget alert " + d.alertLevel + "/5";
+                + " §7| §6+" + creditsTaken + " credits §7| §b+" + (shardsTaken + 1) + " data shards §7| §cTarget alert " + d.alertLevel + "/5";
         }
         d.alertLevel = Math.min(5, d.alertLevel + 1);
         a.reputation = Math.max(0, a.reputation - 1);
