@@ -139,13 +139,18 @@
 - [x] If automatic defense blocks the attack, the event ends without a console duel
 - [x] If automatic defense fails, both players receive a simultaneous console duel with role-specific tactics
 - [x] Attacker tactics: BURST, FEINT, OVERRIDE; defender tactics: PATCH, DECOY, TRACE; scores include relevant upgrades and a random 1–6 factor
-- [x] Duel winner determines whether the attack payload resolves or the defender earns a 10-second counterattack window
+- [x] Replace defender tactic selection with a timed, three-attempt code-repetition mini-game played entirely in the NX/FLEX terminal; attacker still selects a tactic
 - [x] A successful defender counterattack receives +6 attack power for its follow-up strike
 - [x] Attacks can be initiated at any time without a global raid or network-exploit cooldown
 - [ ] Defense dashboard, honeypots, backup/recovery and incident notifications
 - [ ] NPC rivals, factions, teams, tournaments and seasonal leaderboards
 - [ ] Multiplayer contract sync and authoritative validation for all actions
 - [ ] Anti-grief, rate limits, audit trail and clear consent rules for PvP\n- [ ] Add an explicit opt-in PvP setting and configurable protection for new players
+
+## Console defense mini-game
+- [x] Timed code-interception challenge runs entirely through terminal commands; no separate GUI or mouse interaction
+- [x] Exact-case code entry, three attempts, 30-second window and persisted challenge state
+- [ ] Add additional terminal puzzles: route tracing and grid rearrangement
 
 ## UI / polish
 - [ ] Add a compact competition/leaderboard panel at the upper-left: player skins or faces, names, and earned points
