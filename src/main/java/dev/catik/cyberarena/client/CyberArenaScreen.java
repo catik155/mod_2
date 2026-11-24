@@ -279,6 +279,7 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal("ARENA:// " + selectedSite), left + 14, top + 116, 0xFF70D8FF);
             context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 14, top + 139, 0xFFBDEBFF);
             drawWrapped(context, DESCRIPTIONS[idx], left + 14, top + 160, panelWidth - 28, 0xFFD0DCE6);
+            drawWrapped(context, SITE_CONTENT[idx], left + 14, top + 183, panelWidth - 28, 0xFF9BD4A8);
             context.drawTextWithShadow(textRenderer, Text.literal("SECURITY CLASS: " + RISKS[idx]), left + 14, top + 207, 0xFFFFC66D);
             context.drawTextWithShadow(textRenderer, Text.literal("SIMULATED SERVICE SLOTS"), left + 14, top + 218, 0xFF70D8FF);
             for (int i = 0; i < SERVICES.length; i++)
