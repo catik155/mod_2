@@ -73,8 +73,18 @@
 - [ ] Events: timed competitions, site refreshes, incidents, bonus objectives
 - [ ] Mission narrative, choices, optional objectives and multiple reward types
 
+## Home, raids and power sabotage
+- [x] Generate a personal starter house near world spawn and set the player's respawn point inside it
+- [x] Passive mining income is paid automatically while the player is online; MINER levels increase the payout
+- [x] Periodic home incidents: hostile pillagers can raid the house and power sabotage can disable the workstation
+- [x] Workstation commands are blocked during a blackout except status/help/repair; emergency REPAIR costs credits
+- [x] Consumable BREAKER and GUARD charges can each stop one matching incident; they are not permanent invulnerability
+- [ ] Add more sabotage events: workstation damage, stolen supplies, false alerts, temporary network isolation and NPC informants
+- [ ] Add repairable house devices and a clear home defense panel with remaining charges and incident history
+- [ ] Add settings for incident frequency and safe-start protection on new servers
+
 ## Progression / economy / automation
-- [x] Seven upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE
+- [x] Seven core upgrade modules: FIREWALL, AUTOM, STEALTH, EXTRACT, MINER, CPU, STORAGE\n- [x] Add consumable BREAKER and GUARD defense upgrades
 - [x] Credits, data shards, extraction rewards and cooldowns
 - [x] Safe routine runner (up to six whitelisted instructions)
 - [x] Add a dedicated Improvements tab with purchase buttons for all seven upgrade modules; purchases are validated and charged by the server\n- [ ] Automation tab must remain purchase-gated: before AUTOM is bought, show only the price and locked state; after purchase, reveal presets and FLOW
