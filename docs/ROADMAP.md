@@ -17,12 +17,13 @@
 - [x] Site actions for simulated service inspection and data extraction
 - [x] In-browser fictional file manager with per-site record lists
 - [x] NEX FILES and READ commands for read-only fictional metadata
-- [x] Expanded virtual web directory to 20 sites with browser pagination
-- [x] Ten fictional nodes in the NODR/MAPA network map
-- [x] Seventy fictional service slots across the twenty sites
-- [x] Sixty fictional file records with per-site indexes
+- [x] Expanded virtual web directory to 30 sites with browser pagination
+- [x] Fifteen fictional nodes in the NODR/MAPA network map
+- [x] One hundred ten fictional service slots across thirty sites
+- [x] Ninety fictional file records with per-site indexes
 - [x] NEX 2.1 host profiles, simulated PING, aliases and quoted search terms
 - [x] Concise language reference in docs/NEX_LANGUAGE.md
+- [x] Ten additional fully indexed websites with descriptions, file lists and services
 - [ ] Unlockable protected record payloads and file recovery missions
 
 ## Progression and automation
