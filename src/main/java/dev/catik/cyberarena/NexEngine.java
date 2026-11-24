@@ -156,6 +156,7 @@ public final class NexEngine {
             case "FILES", "LS" -> files(arg);
             case "READ", "VIEW" -> readFile(arg);
             case "CRACK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).breachSite(player, arg);
+            case "RAID" -> player == null ? error("NO_OPERATOR", "Operator context required.") : raidPlayer(player, arg);
             case "MINE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).mine(player);
             case "UPGR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).upgrade(player, arg);
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
@@ -172,7 +173,7 @@ public final class NexEngine {
         return "§bNX // СПРАВОЧНИК ОПЕРАТОРА 2.1\n"
             + "§fSEEK <слово> §7поиск каталога | WHO <сайт> §7профиль | PING <сайт> §7виртуальный отклик\n"
             + "§fPORTA <сайт> [слот] §7службы | FILES <сайт> §7список файлов | READ <сайт> <файл> §7описание записи\n"
-            + "§fCRACK <сайт> §7игровое извлечение | SCAN <узел> §7скан игровой карты | NODR §7карта узлов\n"
+            + "§fCRACK <сайт> §7игровое извлечение | RAID <игрок> §7PvP-рейд и кража ресурсов | SCAN <узел> §7скан узла | NODR §7карта узлов\n"
             + "§fMINE §7виртуальная добыча | SELR §7обмен осколков | UPGR <модуль> §7улучшение\n"
             + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\n"
             + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\n"
@@ -290,6 +291,13 @@ public final class NexEngine {
             default -> "Fictional public metadata record. No real personal data is stored.";
         };
         return "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
+    }
+
+    private static String raidPlayer(ServerPlayerEntity attacker, String targetName) {
+        if (targetName == null || targetName.isBlank()) return error("RAID_SYNTAX", "Use RAID <online_player>.");
+        ServerPlayerEntity target = attacker.getServer().getPlayerManager().getPlayer(targetName);
+        if (target == null) return error("RAID_TARGET", "Player must be online on this server.");
+        return ArenaState.get(attacker.getServer()).raid(attacker, target, attacker.getWorld().getTime());
     }
 
     private static String scan(String id, ServerPlayerEntity player) {
