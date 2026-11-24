@@ -29,37 +29,6 @@ public final class CyberArenaScreen extends Screen {
         "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH",
         "LOW", "MEDIUM", "LOW", "HIGH", "MEDIUM", "EXPERT", "LOW", "HIGH", "MEDIUM", "HIGH"
     };
-    package dev.catik.cyberarena.client;
-
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-/** Client-only fictional web browser and NEX workstation. */
-public final class CyberArenaScreen extends Screen {
-    private static final String[] SITES = {
-        "shop.arena", "news.arena", "grid.arena", "vault.arena", "labs.arena", "forum.arena", "bank.arena", "metro.arena", "weather.arena", "clinic.arena", "factory.arena", "museum.arena", "uni.arena", "port.arena", "security.arena", "casino.arena", "farm.arena", "media.arena", "space.arena", "auction.arena",
-        "craft.arena", "music.arena", "travel.arena", "legal.arena", "archive2.arena", "robot.arena", "food.arena", "power.arena", "sports.arena", "social.arena"
-    };
-    private static final String[] TITLES = {
-        "NEX MARKET", "ARENA DAILY", "GRID CONTROL", "VAULT ARCHIVE", "NEX LABS", "OPEN FORUM", "ARENA BANK", "METRO LINK", "SKYCAST", "CIVIC CLINIC", "FACTORIUM", "DIGITAL MUSEUM", "ARENA CAMPUS", "HARBOR CONTROL", "SENTINEL", "LUCKY BYTE", "GREENFIELD", "PIXEL PRESS", "STARLAB", "BIDNET",
-        "PIXEL CRAFT", "SONIC ARCHIVE", "VOYAGER", "LEXICON", "MEMORY BANK", "AUTOMATA", "PANTRY", "VOLTAGE", "ARENA SPORTS", "SOCIAL BYTE"
-    };
-    private static final String[] DESCRIPTIONS = {
-        "Public exchange storefront and market bulletins.", "Public news relay, contracts and security bulletins.", "Energy grid control and infrastructure telemetry.", "Encrypted archive with high-value protected data.", "Research laboratory and experimental records.", "Community message board with public threads.", "Fictional finance exchange and protected ledgers.", "Transit network with station maps and timetables.", "Weather simulation with forecasts and alerts.", "Medical research portal and supply manifests.", "Industrial production, robotics and assembly records.", "Public cultural archive and exhibit catalog.", "Education network, courses and library records.", "Logistics hub with cargo manifests and berth schedules.", "Advanced defense simulation with sensors and decoys.", "Entertainment network with games and simulated payouts.", "Agriculture network with harvest and storage reports.", "Media studio with stories and broadcast schedules.", "Space research with orbital telemetry and mission archives.", "Auction exchange with lots, bids and settlements.",
-        "Crafting recipes, build catalogs and guild projects.", "Fictional tracks, sound packs and audio event schedules.", "Travel destinations, routes and expedition reports.", "Court cases, public rules and simulated legal records.", "Historical records, timelines and recovered fragments.", "Robotics research, machine profiles and test schedules.", "Food supply, recipe index and delivery orders.", "Power plant simulator, energy schedules and load records.", "League standings, match reports and event calendars.", "Profiles of fictional NPC groups, posts and reputation boards."
-    };
-    private static final String[] RISKS = {
-        "LOW", "LOW", "MEDIUM", "HIGH", "EXPERT", "LOW", "HIGH", "MEDIUM", "LOW", "MEDIUM", "HIGH", "LOW", "MEDIUM", "MEDIUM", "EXPERT", "HIGH", "LOW", "MEDIUM", "EXPERT", "HIGH",
-        "LOW", "MEDIUM", "LOW", "HIGH", "MEDIUM", "EXPERT", "LOW", "HIGH", "MEDIUM", "HIGH"
-    };
     private static final String[][] FILE_NAMES = {
         {"catalog.idx", "offers.dat", "ledger.log"},
         {"bulletins.txt", "dispatch.log", "public.key"},
