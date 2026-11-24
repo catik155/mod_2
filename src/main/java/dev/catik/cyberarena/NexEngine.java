@@ -145,6 +145,7 @@ public final class NexEngine {
         String[] parts = raw.trim().split("\\s+", 2);
         String cmd = parts[0].toUpperCase(Locale.ROOT);
         String arg = parts.length > 1 ? unquote(parts[1].trim().toLowerCase(Locale.ROOT)) : "";
+        if (player != null && ArenaState.get(player.getServer()).isPowerOut(player) && !Set.of("STAT", "STATUS", "MANU", "HELP", "?", "REPAIR").contains(cmd)) return error("POWER_OFF", "Рабочая станция обесточена. Дождись восстановления или введи REPAIR.");
         return switch (cmd) {
             case "MANU", "HELP", "?" -> manual();
             case "STAT", "STATUS" -> player == null ? "§aNX CORE ONLINE §7| §fExternal I/O: DISABLED" : status(player);
@@ -175,8 +176,9 @@ public final class NexEngine {
             + "§fSEEK <слово> §7поиск каталога | WHO <сайт> §7профиль | PING <сайт> §7виртуальный отклик\n"
             + "§fPORTA <сайт> [слот] §7службы | FILES <сайт> §7список файлов | READ <сайт> <файл> §7описание записи\n"
             + "§fCRACK <сайт> §7игровое извлечение | RAID <игрок> §7PvP-рейд и кража ресурсов | SCAN <узел> §7скан узла | NODR §7карта узлов\n"
-            + "§fMINE §7виртуальная добыча | SELR §7обмен осколков | UPGR <модуль> §7улучшение\n"
+            + "§fMINE §7проверка майнера (доход идёт автоматически) | SELR §7обмен осколков | UPGR <модуль> §7улучшение\n"
             + "§fCONTRACTS §7заказы | RUN <id> §7завершить заказ | FLOW <a; b> §7сценарий (до 6 шагов)\n"
+            + "§fREPAIR §7аварийное питание | UPGR BREAKER/GUARD §7одноразовая защита от саботажа\n"
             + "§7Команды: HELP, PORTS, LS, VIEW, JOBS. FLOW требует модуль AUTOM.\n"
             + "§7Все цели и данные вымышлены и существуют только внутри Cyber Arena.";
     }
