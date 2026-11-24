@@ -236,8 +236,8 @@ public final class CyberArenaScreen extends Screen {
         if (List.of("PORTA", "PORTS", "CRACK", "FILES", "LS", "WHO", "WHOIS", "PING").contains(head)) {
             if (args.isEmpty()) command = head + " " + selectedSite;
         } else if (head.equals("READ") && !args.isEmpty()) {
-            String[] readParts = args.split("\\s+", 2);
-            if (readParts.length == 1 && !readParts[0].equalsIgnoreCase(selectedSite)) command = "READ " + selectedSite + " " + readParts[0];
+            if (!args.regionMatches(true, 0, selectedSite, 0, selectedSite.length()))
+                command = "READ " + selectedSite + " " + args;
         }
         send("arena nex " + command);
     }
@@ -279,14 +279,15 @@ public final class CyberArenaScreen extends Screen {
     private String translateVora(String text) {
         if (!voraSelected) return text;
         String[] p = text.trim().split("\\s+", 2);
-        String head = p[0].toUpperCase();
+        String head = p[0].toUpperCase(java.util.Locale.ROOT);
         String mapped = switch (head) {
             case "LUMA" -> "MANU"; case "KERI" -> "SEEK"; case "DORA" -> "PORTA";
             case "NAVA" -> "NODR"; case "MIRA" -> "STAT"; case "TARA" -> "CRACK";
             case "DARA" -> "MINE"; case "SELI" -> "SELR"; case "UPRA" -> "UPGR";
             case "JOBS" -> "CONTRACTS"; case "RUNA" -> "RUN"; case "SAVA" -> "SCAN";
             case "PIRA" -> "PING"; case "FILA" -> "FILES"; case "REVA" -> "READ";
-            case "WORA" -> "WHO"; default -> head;
+            case "WORA" -> "WHO"; case "FENA" -> "FLOW"; case "VESA" -> "SITE";
+            default -> head;
         };
         return mapped + (p.length > 1 ? " " + p[1] : "");
     }
