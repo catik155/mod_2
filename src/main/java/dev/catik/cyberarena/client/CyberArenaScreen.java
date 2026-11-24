@@ -147,16 +147,19 @@ public final class CyberArenaScreen extends Screen {
 
     @Override
     protected void init() {
-        int panelWidth = Math.min(520, this.width - 24);
+        int panelWidth = Math.max(220, Math.min(520, this.width - 24));
+        int panelHeight = Math.max(250, Math.min(340, this.height - 20));
         int left = (this.width - panelWidth) / 2;
-        int top = Math.max(18, (this.height - 340) / 2);
-        int tabWidth = (panelWidth - 36) / 3;
+        int top = Math.max(10, (this.height - panelHeight) / 2);
+        int scaleY = panelHeight < 300 ? 1 : 1;
+        int tabGap = 5;
+        int tabWidth = (panelWidth - 28 - tabGap * 2) / 3;
         addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0))
             .dimensions(left + 12, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть виртуальные сайты, поиск, закладки и историю"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1))
-            .dimensions(left + 18 + tabWidth, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть консоль и вводить команды на NX или FLEX"))).build());
+            .dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Открыть консоль и вводить команды на NX или FLEX"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2))
-            .dimensions(left + 24 + tabWidth * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль: приобретите AUTOM за 35 кредитов, чтобы открыть готовые сценарии и FLOW"))).build());
+            .dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).tooltip(Tooltip.of(Text.literal("Покупаемый модуль: приобретите AUTOM за 35 кредитов, чтобы открыть готовые сценарии и FLOW"))).build());
 
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 1) initTerminal(left, top, panelWidth);
@@ -166,11 +169,11 @@ public final class CyberArenaScreen extends Screen {
 
     private void initBrowser(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("КАТАЛОГ"), b -> navigate(0))
-            .dimensions(left + 14, top + 76, 105, 19).tooltip(Tooltip.of(Text.literal("Вернуться к списку сайтов"))).build());
+            .dimensions(left + 14, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Вернуться к списку сайтов"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ЗАКЛАДКИ " + BOOKMARKS.size()), b -> navigate(4))
-            .dimensions(left + 125, top + 76, 105, 19).tooltip(Tooltip.of(Text.literal("Показать сайты, сохранённые в закладки"))).build());
+            .dimensions(left + 22 + (panelWidth - 36) / 3, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Показать сайты, сохранённые в закладки"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ИСТОРИЯ"), b -> navigate(5))
-            .dimensions(left + 236, top + 76, 105, 19).tooltip(Tooltip.of(Text.literal("Показать недавно открытые сайты"))).build());
+            .dimensions(left + 30 + 2 * (panelWidth - 36) / 3, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Показать недавно открытые сайты"))).build());
 
         if (page == 3) {
             initSitePage(left, top, panelWidth);
@@ -213,10 +216,9 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void contextlessSiteRow(int left, int panelWidth, int y, String site, int index) {
-        addDrawableChild(ButtonWidget.builder(Text.literal("ОТКРЫТЬ"), b -> openSite(site))
-            .dimensions(left + panelWidth - 184, y, 76, 20).tooltip(Tooltip.of(Text.literal("Открыть страницу сайта"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ"), b -> runNex("PORTA " + site))
-            .dimensions(left + panelWidth - 102, y, 88, 20).tooltip(Tooltip.of(Text.literal("Посмотреть игровые службы сайта через консоль"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР"), b -> openSite(site))
+            .dimensions(left + panelWidth - Math.min(104, panelWidth / 3), y, Math.min(104, panelWidth / 3), 20)
+            .tooltip(Tooltip.of(Text.literal("Только открыть и просмотреть страницу"))).build());
     }
 
     private void openAdjacentSite(int direction) {
@@ -228,10 +230,6 @@ public final class CyberArenaScreen extends Screen {
     private void initSitePage(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> navigate(0))
             .dimensions(left + 14, top + 78, 90, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("NX КОНСОЛЬ САЙТА"), b -> {
-            if (client != null) client.setScreen(new CyberArenaScreen(7, selectedSite, ""));
-        }).dimensions(left + panelWidth - 126, top + 78, 112, 20)
-            .tooltip(Tooltip.of(Text.literal("Открыть отдельную NX-консоль, привязанную к этому сайту"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
@@ -244,14 +242,11 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕДУЮЩИЙ САЙТ →"), b -> openAdjacentSite(1))
             .dimensions(left + 22 + navHalf, top + 229, navHalf, 18)
             .tooltip(Tooltip.of(Text.literal("Перейти к следующему сайту каталога"))).build());
-        int third = (panelWidth - 36) / 3;
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ"), b -> runNex("PORTA " + selectedSite))
-            .dimensions(left + 14, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Просмотреть виртуальные службы сайта"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("ИЗВЛЕЧЬ"), b -> runNex("CRACK " + selectedSite))
-            .dimensions(left + 22 + third, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Запустить игровое извлечение данных с сайта"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("ФАЙЛЫ"), b -> {
+
+        addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
-        }).dimensions(left + 30 + third * 2, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Открыть список файлов и читать игровые записи"))).build());
+        }).dimensions(left + 14, top + 292, panelWidth - 28, 22)
+            .tooltip(Tooltip.of(Text.literal("Просмотреть открытые описания записей. Игровые действия выполняются в консоли."))).build());
     }
 
     private void initSiteConsole(int left, int top, int panelWidth) {
@@ -298,8 +293,7 @@ public final class CyberArenaScreen extends Screen {
         for (int i = 0; i < FILE_NAMES[idx].length; i++) {
             final String file = FILE_NAMES[idx][i];
             int y = top + 143 + i * 43;
-            addDrawableChild(ButtonWidget.builder(Text.literal("ЧИТАТЬ"), b -> runNex("READ " + selectedSite + " " + file))
-                .dimensions(left + panelWidth - 94, y, 80, 22).build());
+
         }
     }
 
@@ -381,10 +375,11 @@ public final class CyberArenaScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
-        int panelWidth = Math.min(520, this.width - 24);
+        int panelWidth = Math.max(220, Math.min(520, this.width - 24));
+        int panelHeight = Math.max(250, Math.min(340, this.height - 20));
         int left = (this.width - panelWidth) / 2;
-        int top = Math.max(18, (this.height - 340) / 2);
-        context.fill(left, top, left + panelWidth, top + 340, 0xEE101923);
+        int top = Math.max(10, (this.height - panelHeight) / 2);
+        context.fill(left, top, left + panelWidth, top + panelHeight, 0xEE101923);
         context.fill(left, top, left + panelWidth, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // ИГРОВАЯ СТАНЦИЯ"), left + 14, top + 13, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНЫЙ МИР / ИГРОВЫЕ ДАННЫЕ"), left + 14, top + 29, 0xFFB8C8D8);
@@ -447,7 +442,7 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal("Только игровые команды. Внешние команды запрещены."), left + 14, top + 274, 0xFF8295A8);
         }
         super.render(context, mouseX, mouseY, delta);
-        context.drawTextWithShadow(textRenderer, Text.literal("Все сайты, файлы и службы — вымышленные игровые данные."), left + 14, top + 321, 0xFF8295A8);
+        if (panelHeight >= 300) context.drawTextWithShadow(textRenderer, Text.literal("Сайты предназначены только для просмотра. Команды — в консоли."), left + 14, top + panelHeight - 16, 0xFF8295A8);
     }
 
     private int siteAccent(int index) {
