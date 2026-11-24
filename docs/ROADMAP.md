@@ -126,7 +126,7 @@
 - [x] Safe routine runner (up to six whitelisted instructions)
 - [x] Add a dedicated Improvements tab with purchase buttons for all seven upgrade modules; purchases are validated and charged by the server\n- [x] Automation tab is server-state gated: before AUTOM is bought, show only the locked state and price; after purchase, reveal presets and FLOW
 - [x] Once purchased, unlock ready-made automation presets and custom FLOW scripts (bounded, game-only actions); each preset runs without manual command-by-command input
-- [ ] FLEX is a separate premium language purchase in the Improvements shop, with more capabilities than NX; clearly explain price and unlocked feature tiers
+- [x] FLEX is a separate premium language purchase in the Improvements shop (250 credits), with a dedicated shell, server-validated execution, 12-step routines and an expanded safe game-command set
 - [ ] Saved scripts and reusable automation presets
 - [ ] Automation triggers, schedule and bounded repeat behavior
 - [ ] Make FLEX the premium, purchased language with more advanced scripting features than NX (variables, reusable routines and expanded control flow, subject to implementation)
