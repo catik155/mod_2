@@ -4,7 +4,7 @@ A fictional multiplayer cyber-competition mod for Minecraft 1.21.1 (Fabric), bui
 
 ## Workstation
 
-Press **K** in-game to open the Cyber Arena workstation. It combines a NEX command terminal with quick actions for the fictional .arena web index, service-port reports, virtual data extraction, mining and upgrades. The workstation sends NEX instructions to the server; the server validates and applies every game action.
+Press **K** in-game to open the Cyber Arena workstation. It combines a fictional browser with themed .arena pages (market, recipes, media, travel, sports and more), plus a terminal that can switch between NEX and VORA command languages. Both languages show command hints and translate into the same safe game actions. The workstation sends NEX instructions to the server; the server validates and applies every game action.
 
 ## NEX quick reference
 
