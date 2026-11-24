@@ -183,6 +183,102 @@ public final class ArenaState extends PersistentState {
         return profile(player).powerUntilTick > player.getServer().getOverworld().getTime();
     }
 
+
+    public String farm(ServerPlayerEntity player, String action) {
+        PlayerProfile p = profile(player);
+        switch (action.toLowerCase()) {
+            case "buy" -> {
+                if (p.farmLevel > 0) return "§eМайнинг-ферма уже установлена. Используй FARM UPGRADE.";
+                if (p.credits < 120) return "§cНужно 120 кредитов для покупки фермы.";
+                p.credits -= 120; p.farmLevel = 1; p.farmHealth = 100; markDirty();
+                return "§aФЕРМА УСТАНОВЛЕНА | Уровень 1 | Прочность 100% | Доход +8 кредитов/мин.";
+            }
+            case "upgrade" -> {
+                if (p.farmLevel == 0) return "§cСначала купи ферму: FARM BUY.";
+                if (p.farmLevel >= 5) return "§eФерма уже максимального 5 уровня.";
+                int cost = 100 + p.farmLevel * 90;
+                if (p.credits < cost) return "§cУлучшение фермы стоит " + cost + " кредитов.";
+                p.credits -= cost; p.farmLevel++; p.farmHealth = Math.min(100, p.farmHealth + 20); markDirty();
+                return "§aФЕРМА УЛУЧШЕНА | Уровень " + p.farmLevel + "/5 | Доход +" + (5 + p.farmLevel * 3) + "/мин.";
+            }
+            case "repair" -> {
+                if (p.farmLevel == 0) return "§cФермы нет. Используй FARM BUY.";
+                if (p.farmHealth >= 100) return "§aФерма полностью исправна.";
+                int cost = Math.max(10, (100 - p.farmHealth) / 2);
+                if (p.credits < cost) return "§cРемонт фермы стоит " + cost + " кредитов.";
+                p.credits -= cost; p.farmHealth = 100; markDirty();
+                return "§aФЕРМА ОТРЕМОНТИРОВАНА | 100% | -" + cost + " кредитов.";
+            }
+            case "status" -> {
+                return "§bМАЙНИНГ-ФЕРМА | " + (p.farmLevel == 0 ? "не куплена" : "уровень " + p.farmLevel + "/5")
+                    + " | Прочность " + p.farmHealth + "% | Доход " + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин";
+            }
+            default -> { return "§eFARM BUY | UPGRADE | REPAIR | STATUS"; }
+        }
+    }
+
+    public String vpn(ServerPlayerEntity player, String action) {
+        PlayerProfile p = profile(player);
+        switch (action.toLowerCase()) {
+            case "buy" -> {
+                if (p.vpnOwned) return "§eVPN уже приобретён.";
+                if (p.credits < 90) return "§cVPN-модуль стоит 90 кредитов.";
+                p.credits -= 90; p.vpnOwned = true; markDirty();
+                return "§aVPN-МОДУЛЬ КУПЛЕН. Включи его: VPN ON.";
+            }
+            case "on" -> {
+                if (!p.vpnOwned) return "§cСначала купи VPN: VPN BUY.";
+                p.vpnActive = true; p.wantedLevel = Math.max(0, p.wantedLevel - 1); markDirty();
+                return "§aVPN ПОДКЛЮЧЁН | Игровой адрес скрыт за виртуальным узлом.";
+            }
+            case "off" -> { p.vpnActive = false; markDirty(); return "§eVPN ОТКЛЮЧЁН | Будет виден твой игровой адрес."; }
+            case "status" -> { return "§bVPN | " + (p.vpnOwned ? "куплен" : "не куплен") + " | " + (p.vpnActive ? "§aподключён" : "§cотключён") + " | IP " + (p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : p.virtualIp); }
+            default -> { return "§eVPN BUY | ON | OFF | STATUS"; }
+        }
+    }
+
+    public String ipInfo(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        String ip = p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : p.virtualIp;
+        return "§bARENA IP | " + ip + (p.vpnActive ? " §a(VPN)" : " §c(открытый игровой адрес)") + " | Зарезервированный фиктивный адрес.";
+    }
+
+    public String policeStatus(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        return "§cПОЛИЦИЯ ARENA | Розыск " + p.wantedLevel + "/5 | "
+            + (p.wantedLevel >= 4 ? "патруль ищет твой игровой адрес" : p.wantedLevel >= 2 ? "подозрение" : "ты не в розыске")
+            + " | VPN " + (p.vpnActive ? "активен" : "неактивен");
+    }
+
+    public String sabotage(ServerPlayerEntity attacker, ServerPlayerEntity target, String action) {
+        if (attacker.getUuid().equals(target.getUuid())) return "§cНельзя саботировать собственный дом.";
+        PlayerProfile a = profile(attacker), d = profile(target);
+        long now = attacker.getServer().getOverworld().getTime();
+        if (now - a.lastRaidTick < 1200) return "§eПодлянки на перезарядке.";
+        a.lastRaidTick = now;
+        boolean traced = !a.vpnActive && ThreadLocalRandom.current().nextInt(100) < Math.max(15, 65 - a.stealth * 8);
+        if (traced) a.wantedLevel = Math.min(5, a.wantedLevel + 1);
+        String result = switch (action.toLowerCase()) {
+            case "farm" -> {
+                if (d.farmLevel == 0 || d.farmHealth == 0) yield "§eУ цели нет работающей фермы.";
+                int damage = Math.min(45, d.farmHealth); d.farmHealth -= damage;
+                yield "§cСАБОТАЖ ФЕРМЫ | -" + damage + "% прочности | Доход остановлен до ремонта.";
+            }
+            case "power" -> { d.powerUntilTick = now + 1200; yield "§cОТКЛЮЧЕНИЕ ПИТАНИЯ | Станция цели отключена на 60 секунд."; }
+            case "supplies" -> {
+                int stolen = Math.min(d.credits, 20 + a.extractor * 5);
+                d.credits -= stolen; a.credits += stolen;
+                yield "§eКРАЖА ЗАПАСОВ | Перенесено " + stolen + " игровых кредитов.";
+            }
+            case "alarm" -> { d.alertLevel = Math.min(5, d.alertLevel + 2); yield "§6ЛОЖНАЯ ТРЕВОГА | Сигнализация цели перегружена."; }
+            default -> "§cВарианты: FARM, POWER, SUPPLIES, ALARM.";
+        };
+        markDirty();
+        if (traced) attacker.sendMessage(Text.literal("§c[ПОЛИЦИЯ] §fТвой виртуальный след обнаружен. Розыск +" + 1 + "."), false);
+        target.sendMessage(Text.literal("§c[ДОМ] §fОбнаружена попытка саботажа: " + action.toUpperCase()), false);
+        return result + (traced ? " §c| След обнаружен, розыск " + a.wantedLevel + "/5." : " §a| След не обнаружен.");
+    }
+
     public String repairPower(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         if (p.powerUntilTick <= player.getServer().getOverworld().getTime()) return "§aПитание уже работает.";
@@ -315,7 +411,7 @@ public final class ArenaState extends PersistentState {
         return "§aSITE INCIDENT RESOLVED §7| §f" + site + " §7| §6+" + reward + " credits";
     }
 
-    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes, int breakerCharges, int guardCharges, long powerUntilTick) {}
+    public record ProfileView(int credits, int reputation, int dataShards, int firewall, int automation, int stealth, int extractor, int miningRig, int cpu, int storage, int alertLevel, int completedContracts, int discoveredNodes, int breakerCharges, int guardCharges, long powerUntilTick, int farmLevel, int farmHealth, boolean vpnOwned, boolean vpnActive, int wantedLevel, String virtualIp) {}
 
     @Override
     public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
