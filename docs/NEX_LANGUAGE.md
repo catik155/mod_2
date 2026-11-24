@@ -157,3 +157,8 @@ end
 - Strict instruction/time/iteration limits, recursion depth cap, bounded memory.
 - Server-side validation of any credit, extraction, upgrade, contract or PvP effect.
 - Scripts may be previewed; shared scripts are validated and sandboxed.
+
+
+## Premium FLEX / automation unlock direction
+
+FLEX is planned as the more capable premium language, unlocked through in-game credits or a contract reward. NX remains the simpler free/basic language. FLEX will provide richer scripting constructs, named saved routines, parameters, scheduling and event triggers, more advanced data structures, and better debugging tools as features are implemented. The Automation module (AUTOM) is separately purchaseable; its first level unlocks ready-made routines and custom FLOW. Preset automation should be usable without typing a script, while custom routines require player-authored input. These are planned features; the current prototype does not yet implement all of them.
