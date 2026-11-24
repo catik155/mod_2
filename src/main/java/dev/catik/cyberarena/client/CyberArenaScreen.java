@@ -181,9 +181,9 @@ public final class CyberArenaScreen extends Screen {
             return;
         }
         if (page == 0) {
-            input = new TextFieldWidget(textRenderer, left + 14, top + 113, panelWidth - 128, 20, Text.literal("Search"));
+            input = new TextFieldWidget(textRenderer, left + 14, top + 113, panelWidth - 128, 20, Text.literal("Поиск"));
             input.setMaxLength(48);
-            input.setPlaceholder(Text.literal("Search fictional .arena sites..."));
+            input.setPlaceholder(Text.literal("Поиск вымышленных сайтов .arena..."));
             input.setText(query);
             addDrawableChild(input);
             addDrawableChild(ButtonWidget.builder(Text.literal("НАЙТИ"), b -> {
@@ -213,7 +213,7 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void contextlessSiteRow(int left, int panelWidth, int y, String site, int index) {
-        addDrawableChild(ButtonWidget.builder(Text.literal("OPEN"), b -> openSite(site))
+        addDrawableChild(ButtonWidget.builder(Text.literal("ОТКРЫТЬ"), b -> openSite(site))
             .dimensions(left + panelWidth - 184, y, 76, 20).tooltip(Tooltip.of(Text.literal("Открыть страницу сайта"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ"), b -> runNex("PORTA " + site))
             .dimensions(left + panelWidth - 102, y, 88, 20).tooltip(Tooltip.of(Text.literal("Посмотреть игровые службы сайта через консоль"))).build());
@@ -298,7 +298,7 @@ public final class CyberArenaScreen extends Screen {
         for (int i = 0; i < FILE_NAMES[idx].length; i++) {
             final String file = FILE_NAMES[idx][i];
             int y = top + 143 + i * 43;
-            addDrawableChild(ButtonWidget.builder(Text.literal("READ"), b -> runNex("READ " + selectedSite + " " + file))
+            addDrawableChild(ButtonWidget.builder(Text.literal("ЧИТАТЬ"), b -> runNex("READ " + selectedSite + " " + file))
                 .dimensions(left + panelWidth - 94, y, 80, 22).build());
         }
     }
@@ -308,7 +308,7 @@ public final class CyberArenaScreen extends Screen {
             voraSelected = !voraSelected;
             if (client != null) client.setScreen(new CyberArenaScreen(1, "", ""));
         }).dimensions(left + 14, top + 76, panelWidth - 28, 20).build());
-        input = new TextFieldWidget(textRenderer, left + 14, top + 103, panelWidth - 28, 20, Text.literal("Command"));
+        input = new TextFieldWidget(textRenderer, left + 14, top + 103, panelWidth - 28, 20, Text.literal("Команда"));
         input.setMaxLength(160);
         input.setPlaceholder(Text.literal(voraSelected ? "LUMA / KERI vault / DORA vault.arena ..." : "MANU / SEEK vault / PORTA vault.arena ..."));
         addDrawableChild(input);
@@ -400,14 +400,24 @@ public final class CyberArenaScreen extends Screen {
             }
         } else if (page == 3) {
             int idx = siteIndex(selectedSite);
-            context.drawTextWithShadow(textRenderer, Text.literal("ARENA:// " + selectedSite), left + 14, top + 116, 0xFF70D8FF);
-            context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 14, top + 139, 0xFFBDEBFF);
-            drawWrapped(context, DESCRIPTIONS[idx], left + 14, top + 160, panelWidth - 28, 0xFFD0DCE6);
-            drawWrapped(context, SITE_CONTENT[idx], left + 14, top + 183, panelWidth - 28, 0xFF9BD4A8);
-            context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + RISKS[idx]), left + 14, top + 207, 0xFFFFC66D);
-            context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНЫЕ СЛУЖБЫ"), left + 14, top + 218, 0xFF70D8FF);
-            for (int i = 0; i < SERVICES.length; i++)
-                context.drawTextWithShadow(textRenderer, Text.literal(SERVICES[i]), left + 22, top + 255 + i * 13, i == 0 ? 0xFF79E6A4 : 0xFFFFC66D);
+            int accent = siteAccent(idx);
+            String category = siteCategory(idx);
+            // Каждая вымышленная площадка получает собственную цветовую тему и шапку.
+            context.fill(left + 10, top + 105, left + panelWidth - 10, top + 222, 0xFF142431);
+            context.fill(left + 10, top + 105, left + panelWidth - 10, top + 109, accent);
+            context.fill(left + 10, top + 105, left + 14, top + 222, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  ARENA:// " + selectedSite), left + 22, top + 116, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, top + 139, 0xFFF0F6FA);
+            drawWrapped(context, DESCRIPTIONS[idx], left + 22, top + 160, panelWidth - 44, 0xFFD0DCE6);
+            drawWrapped(context, SITE_CONTENT[idx], left + 22, top + 184, panelWidth - 44, 0xFFB5D9C8);
+            context.fill(left + 14, top + 224, left + panelWidth - 14, top + 245, 0xFF1B2D3A);
+            context.drawTextWithShadow(textRenderer, Text.literal("ЗАЩИТА: " + translateRisk(RISKS[idx]) + "     •     СТАТУС: В СЕТИ"), left + 22, top + 231, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal("СЛУЖБЫ ИГРОВОГО САЙТА"), left + 14, top + 251, accent);
+            for (int i = 0; i < SERVICES.length; i++) {
+                int y = top + 267 + i * 13;
+                context.fill(left + 14, y - 2, left + panelWidth - 14, y + 10, 0xFF172634);
+                context.drawTextWithShadow(textRenderer, Text.literal(SERVICES[i].replace("OPEN", "ОТКРЫТА").replace("GUARDED", "ЗАЩИЩЕНА").replace("LOCKED", "ЗАКРЫТА")), left + 22, y, i == 0 ? 0xFF79E6A4 : 0xFFFFC66D);
+            }
         } else if (page == 0 || page == 4 || page == 5) {
             String heading = page == 4 ? "SAVED BOOKMARKS" : page == 5 ? "RECENTLY VISITED" : "VIRTUAL WEB DIRECTORY";
             context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, top + 98, 0xFF70D8FF);
@@ -422,7 +432,7 @@ public final class CyberArenaScreen extends Screen {
                 context.drawTextWithShadow(textRenderer, Text.literal(sites.get(i) + " / " + RISKS[idx]), left + 22, y + 1, 0xFFBDEBFF);
                 context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, y + 14, 0xFF8295A8);
             }
-            if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("No entries yet. Open a site or change your search."), left + 18, rowY + 12, 0xFF8295A8);
+            if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("Пока пусто. Откройте сайт или измените запрос."), left + 18, rowY + 12, 0xFF8295A8);
         } else if (page == 1) {
             context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "FLEX > // ВТОРОЙ ИГРОВОЙ ЯЗЫК" : "NX > // ИГРОВАЯ ПСЕВДОКОНСОЛЬ"), left + 14, top + 78, 0xFF70D8FF);
             String hints = voraSelected ? "LUMA help | KERI search | DORA services | NAVA map | MIRA status | TARA extract" : "MANU help | SEEK search | PORTA services | NODR map | STAT status | CRACK extract";
@@ -438,6 +448,37 @@ public final class CyberArenaScreen extends Screen {
         }
         super.render(context, mouseX, mouseY, delta);
         context.drawTextWithShadow(textRenderer, Text.literal("Все сайты, файлы и службы — вымышленные игровые данные."), left + 14, top + 321, 0xFF8295A8);
+    }
+
+    private int siteAccent(int index) {
+        return switch (index % 10) {
+            case 0 -> 0xFFFFB84D; case 1 -> 0xFF65C8FF; case 2 -> 0xFF62E6B5;
+            case 3 -> 0xFFB58CFF; case 4 -> 0xFFFF7E9D; case 5 -> 0xFF70D8FF;
+            case 6 -> 0xFF7DE0A3; case 7 -> 0xFFFFA66B; case 8 -> 0xFF8CB8FF;
+            default -> 0xFFE4C96B;
+        };
+    }
+
+    private String siteCategory(int index) {
+        return switch (index) {
+            case 0, 19, 20, 26 -> "МАГАЗИНЫ И ТОРГОВЛЯ";
+            case 1, 17, 21 -> "НОВОСТИ И МЕДИА";
+            case 2, 9, 10, 27 -> "ИНФРАСТРУКТУРА";
+            case 3, 6, 14, 15 -> "ЗАЩИЩЁННЫЕ СИСТЕМЫ";
+            case 4, 12, 18, 25 -> "НАУКА И ОБРАЗОВАНИЕ";
+            case 5, 29 -> "СООБЩЕСТВА";
+            case 7, 22 -> "ТРАНСПОРТ И ПУТЕШЕСТВИЯ";
+            case 8, 16 -> "ПОГОДА И ПРИРОДА";
+            case 11, 24 -> "КУЛЬТУРА И АРХИВЫ";
+            default -> "СПРАВОЧНЫЙ ПОРТАЛ";
+        };
+    }
+
+    private String translateRisk(String risk) {
+        return switch (risk) {
+            case "LOW" -> "НИЗКИЙ"; case "MEDIUM" -> "СРЕДНИЙ";
+            case "HIGH" -> "ВЫСОКИЙ"; default -> "ЭКСПЕРТНЫЙ";
+        };
     }
 
     private void drawWrapped(DrawContext context, String value, int x, int y, int width, int color) {
