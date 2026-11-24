@@ -14,7 +14,7 @@
 - [x] Simulated player-vs-player raids and alerts
 
 ## Browser / fictional websites
-- [x] Browser workstation opened with K; separate Browser, ordinary Console, and Automation tabs
+- [x] Browser workstation opened with O; separate Browser, ordinary Console (P), and Automation tabs
 - [x] Browser has a dedicated top-right “NX консоль сайта” shortcut on each opened .arena page; it opens a site-context console without replacing the ordinary Console tab
 - [x] Keep the regular Console independent of the browser site context; the player can switch to it at any time
 - [x] Site-context NX console: selected site context is applied to targeted commands, has site-specific quick buttons, and a clear “current site” indicator
@@ -22,6 +22,11 @@
 - [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
 - [x] Fictional service panels and site record index (110 service entries, 90 records)
 - [ ] Give every site a distinct layout module (header, navigation, cards, content sections, footer) rather than the same generic page
+- [x] Browser is view-only: no service scan, extraction, or hacking buttons on site pages; all gameplay actions go through NX/FLEX console
+- [x] Browser panel width and tab widths now adapt to available screen width; continue testing small resolutions and vertical overflow
+- [ ] Finish responsive layout for short screens: stack controls, scale spacing, and prevent any clipped widgets at all GUI scales
+- [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
+- [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [ ] Add site-specific sample posts, recipes, catalog entries, NPC profiles, bulletin boards, maps, schedules and fake transactions
 - [ ] Site actions should yield site-themed loot/payloads, clues, contract objectives and upgrade resources
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
@@ -90,6 +95,10 @@
 - [ ] Anti-grief, rate limits, audit trail and clear consent rules for PvP
 
 ## UI / polish
+- [ ] Add a compact competition/leaderboard panel at the upper-left: player skins or faces, names, and earned points
+- [x] Browser pages are informational only; gameplay commands are kept in the separate NX/FLEX console
+- [x] Start adapting browser tabs and controls to available screen width
+- [ ] Finish full width-and-height responsive layout, including narrow windows and mobile-like GUI scales
 - [ ] Terminal autocomplete, command suggestions and contextual help
 - [ ] Show next-command hints while typing, including example arguments
 - [ ] Separate editor/console/output/log panes and resizable layout
