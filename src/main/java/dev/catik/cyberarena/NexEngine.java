@@ -133,7 +133,7 @@ public final class NexEngine {
         Map.entry("food.arena", List.of("021|PANTRY-WEB|OPEN|Public recipes", "032|DELIVERY-FEED|OPEN|Delivery listings", "044|SUPPLY-DB|GUARDED|Supply metadata", "071|KITCHEN-CORE|LOCKED|Kitchen control")),
         Map.entry("power.arena", List.of("021|VOLT-WEB|OPEN|Public power status", "044|ENERGY-DB|GUARDED|Energy records", "071|PLANT-CORE|LOCKED|Plant control", "099|GRID-VAULT|LOCKED|Backup energy archive")),
         Map.entry("sports.arena", List.of("021|SPORTS-WEB|OPEN|Public league board", "032|MATCH-FEED|OPEN|Match reports", "044|EVENT-DB|GUARDED|Event records", "071|LEAGUE-CORE|LOCKED|League management")),
-        Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation")),
+        Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation"))
     );
 
 
