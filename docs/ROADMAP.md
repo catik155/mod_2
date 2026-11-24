@@ -12,7 +12,7 @@
 - [x] Searchable fictional .arena site directory with per-site actions
 - [x] Simulated service-port reports and virtual data extraction
 - [x] NEX FLOW routines with semicolon-separated, server-validated steps
-- [x] Individual fictional site pages with descriptions and simulated security classes
+- [x] Individual fictional site pages with descriptions, themed mini-content and simulated security classes
 - [x] Browser navigation between directory, site pages, bookmarks and recent history
 - [x] Site actions for simulated service inspection and data extraction
 - [x] In-browser fictional file manager with per-site record lists
@@ -22,6 +22,7 @@
 - [x] One hundred ten fictional service slots across thirty sites
 - [x] Ninety fictional file records with per-site indexes
 - [x] NEX 2.1 host profiles, simulated PING, aliases and quoted search terms
+- [x] Second fictional command language VORA with switch button and always-visible syntax hints
 - [x] Concise language reference in docs/NEX_LANGUAGE.md
 - [x] Ten additional fully indexed websites with descriptions, file lists and services
 - [ ] Unlockable protected record payloads and file recovery missions
