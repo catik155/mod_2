@@ -215,6 +215,12 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + panelWidth - 102, y, 88, 20).tooltip(Tooltip.of(Text.literal("Посмотреть игровые службы сайта через консоль"))).build());
     }
 
+    private void openAdjacentSite(int direction) {
+        int current = siteIndex(selectedSite);
+        int next = Math.floorMod(current + direction, SITES.length);
+        openSite(SITES[next]);
+    }
+
     private void initSitePage(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> navigate(0))
             .dimensions(left + 14, top + 78, 90, 20).build());
@@ -227,6 +233,13 @@ public final class CyberArenaScreen extends Screen {
             else BOOKMARKS.add(selectedSite);
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + 110, top + 78, 118, 20).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
+        int navHalf = (panelWidth - 36) / 2;
+        addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕДЫДУЩИЙ САЙТ"), b -> openAdjacentSite(-1))
+            .dimensions(left + 14, top + 229, navHalf, 18)
+            .tooltip(Tooltip.of(Text.literal("Перейти к предыдущему сайту каталога"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕДУЮЩИЙ САЙТ →"), b -> openAdjacentSite(1))
+            .dimensions(left + 22 + navHalf, top + 229, navHalf, 18)
+            .tooltip(Tooltip.of(Text.literal("Перейти к следующему сайту каталога"))).build());
         int third = (panelWidth - 36) / 3;
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛУЖБЫ"), b -> runNex("PORTA " + selectedSite))
             .dimensions(left + 14, top + 292, third, 22).tooltip(Tooltip.of(Text.literal("Просмотреть виртуальные службы сайта"))).build());
