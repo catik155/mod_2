@@ -226,7 +226,9 @@ public final class ArenaState extends PersistentState {
         String power = p.powerUntilTick > now ? "§cПИТАНИЕ ОТКЛЮЧЕНО " + ((p.powerUntilTick - now + 19) / 20) + "с" : "§aПИТАНИЕ: ВКЛ";
         player.sendMessage(Text.literal("§bCYBER §7| §6" + p.credits + " кр. §7| §dREP " + p.reputation
             + " §7| §eMINER +" + (2 + p.miningRig * 2) + "/мин §7| " + power
-            + " §7| §bФерма +" + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин" + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel), true);
+            + " §7| §bФерма +" + (p.farmLevel > 0 && p.farmHealth > 0 ? 5 + p.farmLevel * 3 : 0) + "/мин" + " §7| §fЩиток " + p.breakerCharges + " §7| Охрана " + p.guardCharges + " §7| §bФерма " + p.farmHealth + "% §7| §cРозыск " + p.wantedLevel
+            + " §7| §aЦель 10k: " + Math.min(100, p.credits / 100) + "%"
+            + (p.policeStakeout ? " §c| ПАТРУЛЬ У ДОМА" : "")), true);
     }
 
     public boolean isPowerOut(ServerPlayerEntity player) {
@@ -336,6 +338,17 @@ public final class ArenaState extends PersistentState {
         PlayerProfile p = profile(player);
         String ip = p.vpnActive ? "203.0.113." + (p.virtualIp % 200 + 20) : "198.51.100." + (p.virtualIp % 200 + 20);
         return "§bARENA IP | " + ip + (p.vpnActive ? " §a(VPN)" : " §c(открытый игровой адрес)") + " | Зарезервированный фиктивный адрес.";
+    }
+
+    public String roundStatus(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        if (p.eliminated) return "§cРАУНД ОКОНЧЕН | Ты задержан полицией и выбыл.";
+        if (p.roundWon) return "§aПОБЕДА | Цель 10 000 кредитов достигнута.";
+        return "§bЦЕЛЬ РАУНДА: 10 000 КРЕДИТОВ\n§fБаланс: " + p.credits + "/10 000"
+            + " §7| Осталось: " + Math.max(0, 10000 - p.credits)
+            + "\n§fПрогресс: " + Math.min(100, p.credits / 100) + "%"
+            + "\n§fПолиция: " + (p.policeStakeout ? "§cпатруль ждёт у дома — не возвращайся" : "§aактивное наблюдение: " + p.wantedLevel + "/5")
+            + "\n§7Достигни цели раньше, чем полиция установит твой адрес.";
     }
 
     public String policeStatus(ServerPlayerEntity player) {
