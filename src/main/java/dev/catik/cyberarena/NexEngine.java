@@ -56,6 +56,16 @@ public final class NexEngine {
         Map.entry("food.arena", "PANTRY / DELIVERY / EASY"),
         Map.entry("power.arena", "VOLTAGE / POWER / HARD"),
         Map.entry("sports.arena", "ARENA SPORTS / EVENTS / MEDIUM"),
+        Map.entry("code.arena", "CODE FORGE / DEVELOPMENT / MEDIUM"),
+        Map.entry("docks.arena", "DOCKYARD / SHIPPING / HARD"),
+        Map.entry("museum2.arena", "ARTIFACT / ANTIQUES / EASY"),
+        Map.entry("energy.arena", "FUSION / POWER RESEARCH / EXPERT"),
+        Map.entry("weather2.arena", "CLIMANET / CLIMATE DATA / MEDIUM"),
+        Map.entry("jobs.arena", "WORKLINK / EMPLOYMENT / EASY"),
+        Map.entry("housing.arena", "HOMESTEAD / PROPERTY / MEDIUM"),
+        Map.entry("transit.arena", "RAILNET / TRANSPORT / HARD"),
+        Map.entry("wildlife.arena", "WILDLIFE / ECOLOGY / EASY"),
+        Map.entry("archive3.arena", "DEEP VAULT / HISTORY / EXPERT"),
         Map.entry("social.arena", "SOCIAL BYTE / COMMUNITY / HARD")
     );
     private static final Map<String, Integer> DIFFICULTY = Map.ofEntries(
@@ -69,6 +79,16 @@ public final class NexEngine {
         Map.entry("craft.arena",1), Map.entry("music.arena",2), Map.entry("travel.arena",1),
         Map.entry("legal.arena",4), Map.entry("archive2.arena",3), Map.entry("robot.arena",5),
         Map.entry("food.arena",1), Map.entry("power.arena",4), Map.entry("sports.arena",2),
+        Map.entry("code.arena",3),
+        Map.entry("docks.arena",4),
+        Map.entry("museum2.arena",1),
+        Map.entry("energy.arena",5),
+        Map.entry("weather2.arena",3),
+        Map.entry("jobs.arena",1),
+        Map.entry("housing.arena",2),
+        Map.entry("transit.arena",4),
+        Map.entry("wildlife.arena",1),
+        Map.entry("archive3.arena",5),
         Map.entry("social.arena",4)
     );
     private static final Map<String, List<String>> FILES = Map.ofEntries(
@@ -101,6 +121,16 @@ public final class NexEngine {
         Map.entry("food.arena", List.of("recipes.idx", "supply.dat", "orders.log")),
         Map.entry("power.arena", List.of("plants.map", "energy.dat", "load.log")),
         Map.entry("sports.arena", List.of("leagues.idx", "matches.dat", "events.log")),
+        Map.entry("code.arena", List.of("projects.idx", "packages.dat", "builds.log", "contributors.db", "issues.enc")),
+        Map.entry("docks.arena", List.of("vessels.map", "cargo.db", "crew.idx", "berths.log", "customs.enc")),
+        Map.entry("museum2.arena", List.of("artifacts.idx", "provenance.db", "restoration.log", "donors.enc", "gallery.map")),
+        Map.entry("energy.arena", List.of("reactors.cfg", "output.dat", "safety.log", "isotopes.enc", "grid.map")),
+        Map.entry("weather2.arena", List.of("climate.idx", "stormtracks.map", "sensors.db", "warnings.log", "models.enc")),
+        Map.entry("jobs.arena", List.of("vacancies.idx", "profiles.db", "contracts.dat", "interviews.log", "payroll.enc")),
+        Map.entry("housing.arena", List.of("listings.idx", "owners.db", "mortgages.enc", "repairs.log", "districts.map")),
+        Map.entry("transit.arena", List.of("routes.map", "tickets.db", "fleet.idx", "delays.log", "signals.enc")),
+        Map.entry("wildlife.arena", List.of("species.idx", "habitats.map", "tracking.db", "rangers.log", "reserves.enc")),
+        Map.entry("archive3.arena", List.of("relics.idx", "fragments.db", "chronology.map", "expeditions.log", "vault.enc")),
         Map.entry("social.arena", List.of("groups.idx", "posts.dat", "reputation.log"))
     );
     private static final Map<String, List<String>> PORTS = Map.ofEntries(
@@ -133,6 +163,16 @@ public final class NexEngine {
         Map.entry("food.arena", List.of("021|PANTRY-WEB|OPEN|Public recipes", "032|DELIVERY-FEED|OPEN|Delivery listings", "044|SUPPLY-DB|GUARDED|Supply metadata", "071|KITCHEN-CORE|LOCKED|Kitchen control")),
         Map.entry("power.arena", List.of("021|VOLT-WEB|OPEN|Public power status", "044|ENERGY-DB|GUARDED|Energy records", "071|PLANT-CORE|LOCKED|Plant control", "099|GRID-VAULT|LOCKED|Backup energy archive")),
         Map.entry("sports.arena", List.of("021|SPORTS-WEB|OPEN|Public league board", "032|MATCH-FEED|OPEN|Match reports", "044|EVENT-DB|GUARDED|Event records", "071|LEAGUE-CORE|LOCKED|League management")),
+        Map.entry("code.arena", List.of("021|CODE-HOME|OPEN|Project directory", "032|PACKAGE-FEED|OPEN|Release feed", "044|BUILD-DB|GUARDED|Build metadata", "071|MAINTAINER-CORE|LOCKED|Repository simulation")),
+        Map.entry("docks.arena", List.of("021|HARBOR-VIEW|OPEN|Vessel board", "032|CARGO-FEED|OPEN|Cargo notices", "044|MANIFEST-DB|GUARDED|Cargo manifests", "071|PORT-CORE|LOCKED|Port authority simulation")),
+        Map.entry("museum2.arena", List.of("021|GALLERY-WEB|OPEN|Artifact catalog", "032|EXHIBIT-FEED|OPEN|Exhibition feed", "044|PROVENANCE-DB|GUARDED|Artifact records", "071|CURATOR-CORE|LOCKED|Museum archive simulation")),
+        Map.entry("energy.arena", List.of("021|FUSION-INFO|OPEN|Public reactor status", "044|OUTPUT-DB|GUARDED|Energy telemetry", "071|REACTOR-CORE|LOCKED|Reactor control simulation", "099|SAFETY-VAULT|LOCKED|Safety archive")),
+        Map.entry("weather2.arena", List.of("021|CLIMATE-WEB|OPEN|Climate overview", "032|STORM-FEED|OPEN|Storm notices", "044|SENSOR-DB|GUARDED|Sensor records", "071|MODEL-CORE|LOCKED|Forecast model simulation")),
+        Map.entry("jobs.arena", List.of("021|WORK-BOARD|OPEN|Vacancy board", "032|CAREER-FEED|OPEN|Career notices", "044|PROFILE-DB|GUARDED|Candidate records", "071|HR-CORE|LOCKED|Recruitment simulation")),
+        Map.entry("housing.arena", List.of("021|HOME-BOARD|OPEN|Property listings", "032|DISTRICT-FEED|OPEN|District notices", "044|OWNER-DB|GUARDED|Owner records", "071|PROPERTY-CORE|LOCKED|Property registry simulation")),
+        Map.entry("transit.arena", List.of("021|RAIL-MAP|OPEN|Route map", "032|TICKET-FEED|OPEN|Service notices", "044|FLEET-DB|GUARDED|Fleet records", "071|SIGNAL-CORE|LOCKED|Rail control simulation")),
+        Map.entry("wildlife.arena", List.of("021|ECO-WEB|OPEN|Species index", "032|RANGER-FEED|OPEN|Ranger notices", "044|TRACK-DB|GUARDED|Tracking records", "071|RESERVE-CORE|LOCKED|Reserve simulation")),
+        Map.entry("archive3.arena", List.of("021|RELIC-GATE|OPEN|Public relic catalog", "032|FRAGMENT-FEED|OPEN|Archive fragments", "044|CHRONICLE-DB|GUARDED|Chronology records", "071|DEEP-CORE|LOCKED|Archive control", "099|VAULT-STORE|LOCKED|Protected vault")),
         Map.entry("social.arena", List.of("021|SOCIAL-WEB|OPEN|Public community page", "032|POST-FEED|OPEN|Public posts", "044|GROUP-DB|GUARDED|Group profiles", "071|SOCIAL-CORE|LOCKED|Community admin simulation"))
     );
 
