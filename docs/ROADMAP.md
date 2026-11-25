@@ -41,7 +41,7 @@
 - [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
 - [x] Add persistent collectible file inventory, value calculation, and sale of files by site/name or ALL (CI-confirmed)
 - [~] Add readable lore and file-type details to virtual records; unique content expanded for selected sites, broad coverage still in progress
-- [ ] Site actions should yield site-themed loot/payloads, contract objectives and upgrade resources
+- [~] Site actions yield credits/shards, persistent collectible files and breach rewards; campaign objectives/reward hooks are now implemented, more site-specific loot still planned
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
