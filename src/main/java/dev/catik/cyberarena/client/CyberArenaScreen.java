@@ -111,7 +111,7 @@ public final class CyberArenaScreen extends Screen {
     private TextFieldWidget input;
     private int terminalScroll = 0;
     private int browserScroll = 0;
-    private static final String[] NX_COMMANDS = {"MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","DUEL","DEFEND","COUNTER","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","FLEX","HOME","DEFENSE","LOGS"};
+    private static final String[] NX_COMMANDS = {"CLEAR","CLS","MANU","STAT","HELP","SEEK","NODR","PORTA","CRACK","FILES","READ","WHO","WHOIS","PING","MINE","SELR","UPGR","FLOW","SITE","RAID","DUEL","DEFEND","COUNTER","FARM","VPN","IP","POLICE","NET","SABOTAGE","CONTRACTS","AUTOM","FLEX","HOME","DEFENSE","LOGS"};
 
     public CyberArenaScreen() { this(0, "", ""); }
     public CyberArenaScreen(int initialPage) { this(initialPage, "", ""); }
@@ -274,6 +274,13 @@ public final class CyberArenaScreen extends Screen {
         if (input == null) return;
         String value = input.getText().trim();
         if (value.isEmpty()) return;
+        if (value.equalsIgnoreCase("CLEAR") || value.equalsIgnoreCase("CLS")) {
+            TERMINAL_OUTPUT.clear();
+            terminalScroll = 0;
+            input.setText("");
+            historyCursor = -1;
+            return;
+        }
         String command = translateVora(value);
         if (voraSelected) command = "FLEX EXEC " + command;
         TERMINAL_OUTPUT.add("§a" + (voraSelected ? "flex" : "nx") + "@arena:~$ §f" + value);
@@ -290,7 +297,16 @@ public final class CyberArenaScreen extends Screen {
     }
     public static void appendOutput(String message) {
         if (message == null || message.isBlank()) return;
-        TERMINAL_OUTPUT.add(message);
+        for (String rawLine : message.split("\\R", -1)) {
+            String line = rawLine;
+            while (line.length() > 68) {
+                int split = line.lastIndexOf(' ', 68);
+                if (split < 20) split = 68;
+                TERMINAL_OUTPUT.add(line.substring(0, split));
+                line = line.substring(split).stripLeading();
+            }
+            TERMINAL_OUTPUT.add(line);
+        }
         while (TERMINAL_OUTPUT.size() > 250) TERMINAL_OUTPUT.remove(0);
     }
 
