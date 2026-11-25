@@ -720,6 +720,13 @@ public final class CyberArenaScreen extends Screen {
             int contentHeight = Math.max(72, contentBottom - contentTop);
             int contentOffset = browserScroll * 8;
             context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
+            // Compact site status strip: only simulation-local site metadata, never real host status.
+            int stripY = top + 110;
+            int stripRight = left + panelWidth - 10;
+            context.fill(left + 10, stripY, stripRight, stripY + 22, 0xFF1B2D3B);
+            context.fill(left + 10, stripY, left + 13, stripY + 22, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal("РИСК: " + translateRisk(RISKS[idx])), left + 18, stripY + 4, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal("УЗЕЛ: ДОСТУПЕН  •  " + (BOOKMARKS.contains(selectedSite) ? "В ЗАКЛАДКАХ" : "НЕ СОХРАНЁН")), left + 120, stripY + 4, 0xFFB8C8D8);
             context.enableScissor(left + 10, contentTop, left + panelWidth - 10, contentBottom);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + contentHeight - contentOffset, 0xFF142431);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + 4 - contentOffset, accent);
