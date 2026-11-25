@@ -37,7 +37,7 @@
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [x] Expand browser directory to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
-- [~] Sites contain filler content: article cards, themed descriptions, catalogs and mini illustrations; unique lore expanded for major site records, full site-by-site content still needed
+- [~] Sites contain filler content: article cards, themed descriptions, catalogs and mini illustrations; file lore now expanded across many site/file combinations, but full unique article bodies and layouts still needed
 - [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
 - [x] Add persistent collectible file inventory, value calculation, and sale of files by site/name or ALL (CI-confirmed)\n- [~] Add readable lore and file-type details to virtual records; unique content expanded for selected sites, broad coverage still in progress
 - [ ] Site actions should yield site-themed loot/payloads, contract objectives and upgrade resources
