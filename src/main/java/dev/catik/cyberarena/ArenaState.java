@@ -583,7 +583,7 @@ public final class ArenaState extends PersistentState {
         PlayerProfile p = profile(player);
         List<String> files = p.completedContracts.stream().filter(v -> v.startsWith("vfile:")).toList();
         if (files.isEmpty()) return "§eКоллекция файлов пуста.";
-        String selector = requested == null ? "" : requested.trim().toLowerCase(java.util.Locale.ROOT);
+        String selector = requested == null ? "" : requested.trim().toLowerCase(java.util.Locale.ROOT).replace("/", "|");
         List<String> selected = files.stream().filter(v -> selector.isBlank() || selector.equals("all") || v.substring(6).startsWith(selector + "|")).toList();
         if (selected.isEmpty()) return "§cФайл не найден. Используй FSELL <site.arena>/<file> или FSELL ALL.";
         int total = 0;
