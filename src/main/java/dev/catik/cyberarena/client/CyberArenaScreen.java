@@ -156,10 +156,7 @@ public final class CyberArenaScreen extends Screen {
             int fill = !active ? 0xFF141D26 : hovered ? 0xFF1C303A : 0xFF16242E;
             int border = !active ? 0xFF34434D : hovered ? 0xFF55E6D2 : 0xFF263C46;
             context.fill(getX(), getY(), getX()+width, getY()+height, fill);
-            context.fill(getX(), getY(), getX()+width, getY()+1, border);
-            context.fill(getX(), getY()+height-1, getX()+width, getY()+height, border);
-            context.fill(getX(), getY(), getX()+1, getY()+height, border);
-            context.fill(getX()+width-1, getY(), getX()+width, getY()+height, border);
+            if (hovered || !active) context.fill(getX(), getY(), getX()+2, getY()+height, border);
             net.minecraft.client.font.TextRenderer renderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
             context.drawCenteredTextWithShadow(renderer, getMessage(), getX()+width/2, getY()+(height-renderer.fontHeight)/2, active ? (hovered ? 0xFF72F7E2 : 0xFFE0F0F5) : 0xFF71808B);
         }
