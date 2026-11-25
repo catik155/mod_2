@@ -197,7 +197,9 @@ public final class NexEngine {
             case "PING" -> ping(arg);
             case "PORTA", "PORTS" -> ports(arg);
             case "FILES", "LS" -> files(arg);
-            case "READ", "VIEW" -> readFile(arg);
+            case "READ", "VIEW" -> readFile(arg, player);
+            case "FINV", "FILEINV" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).virtualFileInventory(player);
+            case "FSELL" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellVirtualFiles(player, arg);
             case "CRACK" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).breachSite(player, arg);
             case "RAID" -> player == null ? error("NO_OPERATOR", "Operator context required.") : raidPlayer(player, arg);
             case "MINE" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).mine(player);
@@ -253,8 +255,8 @@ public final class NexEngine {
             + "§eБРАУЗЕР И СЕТЬ\n"
             + "§fSEEK <слово> §7— найти вымышленный сайт | WHO <сайт> §7— сведения об узле | PING <сайт> §7— проверить отклик\n"
             + "§fNODR §7— карта виртуальных узлов | SCAN <узел> §7— анализ узла | NET DISCOVER/SCAN/ENUM/EXPLOIT §7— этапы сетевой операции\n"
-            + "§fPORTA <сайт> [номер] §7— список игровых служб | FILES <сайт> §7— список записей | READ <сайт> <файл> §7— прочитать запись\n"
-            + "§fCRACK <сайт> §7— игровое испытание по извлечению данных | SELR §7— обмен игровых осколков\n"
+            + "§fPORTA <сайт> [номер] §7— список игровых служб | FILES <сайт> §7— список записей | READ <сайт> <файл> §7— прочитать и сохранить файл\n"
+            + "§fFINV §7— коллекция файлов | FSELL <сайт>/<файл> или ALL §7— продать файлы | CRACK <сайт> §7— игровое испытание | SELR §7— обмен осколков\n"
             + "§eЗАЩИТА И ОБСЛУЖИВАНИЕ\n"
             + "§fUPGR <модуль> §7— улучшить защиту, скрытность, процессор или хранилище | VPN BUY/ON/OFF/STATUS §7— управление игровым VPN\n"
             + "§fIP §7— показать вымышленный адрес | POLICE §7— уровень розыска и патруль | REPAIR §7— восстановить питание\n"
@@ -372,7 +374,7 @@ public final class NexEngine {
             + String.join("\n§f", entries) + "\n§7Use READ " + site + " <file>.";
     }
 
-    private static String readFile(String args) {
+    private static String readFile(String args, ServerPlayerEntity player) {
         String[] parts = args.split("\\s+", 2);
         if (parts.length != 2) return error("READ_SYNTAX", "Use READ <site.arena> <file>.");
         List<String> entries = FILES.get(parts[0]);
@@ -394,7 +396,9 @@ public final class NexEngine {
             : file.endsWith(".map") ? "Карта хранит схематичные игровые зоны, маршруты или связи между объектами."
             : "Это обычный внутриигровой справочный файл с описанием раздела и тематическими заметками.";
         String description = topic + "\n\n" + recordType + "\n\nСводка: " + file + " — часть коллекции сайта " + parts[0] + ". Чтение не запускает действий, не обращается к реальным устройствам и не содержит внешних данных.";
-        return "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
+        String output = "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
+        if (player != null) output += ArenaState.get(player.getServer()).collectVirtualFile(player, parts[0], file);
+        return output;
     }
 
     private static String status(ServerPlayerEntity player) {
