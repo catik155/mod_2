@@ -226,6 +226,7 @@ public final class CyberArenaScreen extends Screen {
 
     @Override
     protected void init() {
+        loadBookmarks();
         if (page == 1) { initTerminalFullScreen(); return; }
         int panelWidth = Math.max(1, this.width - 10);
         int panelHeight = Math.max(1, this.height - 10);
