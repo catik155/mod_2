@@ -6,7 +6,7 @@
 - [ ] Use Grey Hack/Bitburner inspiration for a deeper sandbox and custom scripting—adapted into safe, fully fictional Minecraft systems
 - [ ] Use EXAPUNKS inspiration for optional puzzle challenges that reward optimization and creativity
 - [ ] Use Cyber Manhunt inspiration for investigation missions, cross-site clues, NPC stories and data verification
-- [x] Review Welcome to the Game III as inspiration for investigation tension, clue verification, false leads and time pressure; keep mechanics abstracted and wholly fictional, without copying its systems wholesale
+- [x] Keep only broad danger/pressure inspiration from Welcome to the Game III; no investigation, information-search gameplay or clue chains
 - [ ] Keep all systems strictly simulated: no real network, real addresses, OS commands, real data, or actionable real intrusion tooling
 
 ## Core
@@ -36,10 +36,11 @@
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [x] Expand browser directory from 30 to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
 - [ ] Site actions should yield site-themed loot/payloads, clues, contract objectives and upgrade resources
+- [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
-- [ ] Site-to-site clue chains and recurring NPC/organizations
-- [ ] Investigation-inspired gameplay loop: gather clues, cross-check sources, manage rising fictional alert pressure and timed objectives; adapt only broad mechanics from Welcome to the Game III while preserving Cyber Arena's multiplayer arena/economy identity
+- [ ] More competition-focused content: PvP hacker battles, team rivalries, danger events and escalating arena pressure
+- [x] Keep investigation/search mechanics out of the design; focus on hacker competition, attacks, defense, PvP and danger events
 - [ ] More varied content generation with deterministic seed and multiplayer consistency
 
 ## Terminal UI (Linux / GNU Readline inspired)
