@@ -96,9 +96,9 @@
 - [ ] Site-specific missions and protected data payloads with optional story fragments
 - [ ] Recipe/crafting, travel, media, legal, sports, social and research themed site content (primarily filler; only some tied to missions)
 - [ ] NPC clients and organizations, reputation and rival responses
-- [ ] Dynamic contracts with risk/reward previews and cooldowns
+- [~] Starter contracts now have real requirements (discover 3 nodes, buy AUTOM, collect 2 files), progress display and claim rewards; dynamic risk previews and cooldowns still pending
 - [ ] Events: timed competitions, site refreshes, incidents, bonus objectives
-- [ ] Mission narrative, choices, optional objectives and multiple reward types
+- [~] Operator campaign added with 5 milestone tasks, persistent completion and automatic credit/reputation rewards; deeper narrative choices and optional objectives pending
 
 ## Home economy, mining farm, VPN and police
 - [x] Buy a physical mining-farm machine inside the personal house; farm level increases passive credits per minute
