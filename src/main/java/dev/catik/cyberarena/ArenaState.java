@@ -560,7 +560,7 @@ public final class ArenaState extends PersistentState {
         {"breach", "Успешно пройди испытание сайта: CRACK", "30"}
     };
 
-    private String campaignStatus(ServerPlayerEntity player) {
+    public String campaignStatus(ServerPlayerEntity player) {
         PlayerProfile p = profile(player);
         StringBuilder out = new StringBuilder("§bКАРЬЕРА ОПЕРАТОРА // ПЕРВЫЕ ШАГИ\n");
         int done = 0;
