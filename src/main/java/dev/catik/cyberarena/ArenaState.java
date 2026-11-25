@@ -566,7 +566,7 @@ public final class ArenaState extends PersistentState {
         int value = 20 + Math.floorMod((site + "|" + file).hashCode(), 65) + (file.endsWith(".enc") ? 35 : 0);
         p.completedContracts.add(prefix + value);
         markDirty();
-        return "\n§aФайл сохранён в коллекции §7| §eоценка " + value + " кредитов. Продай через FSELL.";
+        return "\n§aФайл сохранён §7| " + fileRarity(value) + " §7| §e" + value + " кредитов. FINV — коллекция, FSELL — продажа.";
     }
 
     public String virtualFileInventory(ServerPlayerEntity player) {
@@ -581,7 +581,7 @@ public final class ArenaState extends PersistentState {
             int value;
             try { value = Integer.parseInt(parts[2]); } catch (NumberFormatException ignored) { value = 0; }
             total += value;
-            out.append("§f").append(parts[0]).append("/").append(parts[1]).append(" §7— §6").append(value).append(" кр.\n");
+            out.append(fileRarity(value)).append(" §f").append(parts[0]).append("/").append(parts[1]).append(" §7— §6").append(value).append(" кр.\n");
         }
         return out.append("§eОбщая оценка: ").append(total).append(" кредитов §7| FSELL для продажи").toString();
     }
