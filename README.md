@@ -4,11 +4,11 @@ A fictional multiplayer cyber-competition mod for Minecraft 1.21.1 (Fabric), bui
 
 ## Workstation
 
-Press **K** in-game to open the Cyber Arena workstation. It combines a fictional browser with themed .arena pages (market, recipes, media, travel, sports and more), plus a terminal that can switch between NEX and VORA command languages. Both languages show command hints and translate into the same safe game actions. The workstation sends NEX instructions to the server; the server validates and applies every game action.
+Press **K** in-game to open the Cyber Arena workstation. It combines a fictional browser with themed .arena pages (market, recipes, media, travel, sports and more), plus a terminal that can switch between NX (legacy NEX aliases) and FLEX (legacy VORA aliases) command languages. Both languages show command hints and translate into the same safe game actions. The workstation sends NEX instructions to the server; the server validates and applies every game action.
 
-## NEX quick reference
+## NX quick reference
 
-The full concise language reference, including syntax, aliases, all instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The virtual directory currently contains 30 sites, 15 nodes, 110 simulated service slots and 90 fictional file records.
+The concise language reference, including aliases, instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The fictional directory contains 40 .arena sites, 15 nodes, simulated service slots and collectible file records. Player file inventory is persistent: READ collects, FINV lists, FSELL sells explicitly; files do not generate passive credits.
 
 | Instruction | Function |
 |---|---|
@@ -27,7 +27,7 @@ The full concise language reference, including syntax, aliases, all instructions
 | `NODR` | List mapped virtual nodes |
 | `SCAN <node.arena>` | Discover a fictional network node |
 
-Use `/arena nex MANU` or open the workstation with **K**. The server command form is `/arena nex <instruction>`.
+Use `/arena nex MANU` or open the workstation with **K**. The server command form is `/arena nex <instruction>`. File commands: `FINV`, `FSELL ALL`, or `FSELL <site.arena>/<file>`.
 
 ## Progression
 
