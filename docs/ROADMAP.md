@@ -44,7 +44,7 @@
 - [~] Add readable lore and file-type details to virtual records; unique content now expanded across many additional records, remaining entries still need bespoke lore
 - [~] Site actions yield credits/shards, persistent collectible files and breach rewards; collected files are stored as inventory only and earn no passive income, more site-specific loot still planned
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
-- [~] Browser back/forward navigation now uses an actual browsing stack; internal site links and per-site pagination still pending, bookmarks remain session-local
+- [~] Browser back/forward navigation now uses an actual browsing stack; internal site links and per-site pagination still pending, bookmarks are saved to config/cyberarena/bookmarks.txt
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
 - [ ] More competition-focused content: PvP hacker battles, team rivalries, danger events and escalating arena pressure
 - [x] Keep investigation/search mechanics out; focus on hacker competition, attacks, defense, PvP and danger events
