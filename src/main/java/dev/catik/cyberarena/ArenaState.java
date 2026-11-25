@@ -643,6 +643,15 @@ public final class ArenaState extends PersistentState {
         return "§aФАЙЛЫ ПРОДАНЫ §7| §f" + selected.size() + " шт. §6+" + total + " кредитов";
     }
 
+    public String contractBoard(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        long fileCount = p.completedContracts.stream().filter(v -> v.startsWith("vfile:")).count();
+        return "§bNEX // ДОСКА ЗАКАЗОВ\n"
+            + (p.completedContracts.contains("site-audit") ? "§a✓ " : "§7○ ") + "§fsite-audit §7— открой 3 узла (" + p.discoveredNodes.size() + "/3) §6/ 40 кр.\n"
+            + (p.completedContracts.contains("patch-rush") ? "§a✓ " : "§7○ ") + "§fpatch-rush §7— купи AUTOM (" + p.automation + "/1) §6/ 55 кр.\n"
+            + (p.completedContracts.contains("data-recovery") ? "§a✓ " : "§7○ ") + "§fdata-recovery §7— сохрани 2 файла (" + fileCount + "/2) §6/ 70 кр.\n§7Выполнить готовый заказ: RUN <id>";
+    }
+
     public String completeContract(ServerPlayerEntity player, String contractId) {
         PlayerProfile p = profile(player);
         int reward = switch (contractId) {
@@ -652,6 +661,14 @@ public final class ArenaState extends PersistentState {
             default -> -1;
         };
         if (reward < 0) return "§cUnknown contract. Available: site-audit, patch-rush, data-recovery.";
+        if (p.completedContracts.contains(contractId)) return "§eContract already completed. Contracts are one-time starter jobs.";
+        String requirement = switch (contractId) {
+            case "site-audit" -> p.discoveredNodes.size() >= 3 ? "" : "§7Цель: открыть 3 узла через NODR/SCAN. Сейчас " + p.discoveredNodes.size() + "/3.";
+            case "patch-rush" -> p.automation >= 1 ? "" : "§7Цель: купить модуль автоматизации UPGR AUTOM.";
+            case "data-recovery" -> p.completedContracts.stream().filter(v -> v.startsWith("vfile:")).count() >= 2 ? "" : "§7Цель: сохранить 2 виртуальных файла через READ.";
+            default -> "";
+        };
+        if (!requirement.isBlank()) return "§eЗАКАЗ НЕ ГОТОВ §7| " + requirement;
         if (!p.completedContracts.add(contractId)) return "§eContract already completed. Contracts are one-time starter jobs.";
         p.credits += reward;
         p.reputation += 3;
