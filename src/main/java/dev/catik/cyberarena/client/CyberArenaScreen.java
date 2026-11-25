@@ -992,6 +992,7 @@ public final class CyberArenaScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (page == 1 && input != null) {
+            if (keyCode == 76 && Screen.hasControlDown()) { TERMINAL_OUTPUT.clear(); terminalScroll = 0; return true; }
             if (keyCode == 258 && input.isFocused()) {
                 if (!COMPLETION_MATCHES.isEmpty()) {
                     String value = input.getText();
