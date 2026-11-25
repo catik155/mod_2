@@ -193,7 +193,7 @@ All nodes, sites, services, records, scripts, extraction, mining and attacks are
 
 ## Next implementation batch
 - [ ] Add hidden-site unlock conditions tied to campaign milestones, without exposing hidden domains in the public directory
-- [~] Browser history stack with back/forward buttons implemented; bookmarks and local page pagination still need persistence/implementation
+- [~] Browser history stack with back/forward buttons and file-list pagination/READ buttons implemented; in-game testing pending, bookmarks remain session-local, and internal site article pagination still pending
 - [ ] Replace remaining generic file read fallback with deterministic, per-file lore snippets for the remaining record types
 - [ ] Track source/provenance labels for collected files (earned, raid-looted) in inventory and keep this metadata persistent
 - [ ] Add overflow/scroll regression checks for workstation, browser, console and automation tabs at compact GUI sizes
