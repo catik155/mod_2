@@ -626,6 +626,38 @@ public final class CyberArenaScreen extends Screen {
                 context.fill(left + 18, contentTop + 170 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF182B39);
                 context.drawTextWithShadow(textRenderer, Text.literal("КОРОТКО"), left + 26, contentTop + 176 - contentOffset, 0xFF70D8FF);
                 drawWrapped(context, "Вечером ожидается запуск общественного транспорта по обновлённому маршруту.", left + 26, contentTop + 190 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+            } else if (idx == 0) {
+                // Dedicated marketplace layout: offer tiles and seller notices.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF3B2A19);
+                context.drawTextWithShadow(textRenderer, Text.literal("АРЕНА MARKET  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFFFFC86B);
+                context.drawTextWithShadow(textRenderer, Text.literal("ВИТРИНА / ОБНОВЛЕНИЕ 08"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                int tileW = Math.max(62, (panelWidth - 58) / 2);
+                context.fill(left + 18, contentTop + 66 - contentOffset, left + 26 + tileW, contentTop + 112 - contentOffset, 0xFF30271E);
+                context.drawTextWithShadow(textRenderer, Text.literal("ИНСТРУМЕНТЫ"), left + 26, contentTop + 73 - contentOffset, 0xFFFFB84D);
+                drawWrapped(context, "Модули и детали станции", left + 26, contentTop + 88 - contentOffset, tileW - 14, 0xFFF0F5FA);
+                context.fill(left + 30 + tileW, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 112 - contentOffset, 0xFF30271E);
+                context.drawTextWithShadow(textRenderer, Text.literal("РЕСУРСЫ"), left + 38 + tileW, contentTop + 73 - contentOffset, 0xFFFFB84D);
+                drawWrapped(context, "Пакеты данных и игровые жетоны", left + 38 + tileW, contentTop + 88 - contentOffset, tileW - 14, 0xFFF0F5FA);
+                context.fill(left + 18, contentTop + 122 - contentOffset, left + panelWidth - 18, contentTop + 164 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПРЕДЛОЖЕНИЕ ДНЯ"), left + 26, contentTop + 130 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Поставщики обновили каталог. Все покупки совершаются за внутриигровые кредиты.", left + 26, contentTop + 144 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+                context.fill(left + 18, contentTop + 172 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF213545);
+                context.drawTextWithShadow(textRenderer, Text.literal("ДОВЕРЕННЫЕ ПРОДАВЦЫ"), left + 26, contentTop + 180 - contentOffset, 0xFFFFC86B);
+                drawWrapped(context, "Проверяйте карточки лотов и репутацию продавца перед сделкой.", left + 26, contentTop + 192 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+            } else if (idx == 6) {
+                // Dedicated bank dashboard with account and transaction summaries.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF16372B);
+                context.drawTextWithShadow(textRenderer, Text.literal("ARENA FINANCE  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFF72E6B4);
+                context.drawTextWithShadow(textRenderer, Text.literal("ОБЗОР СЧЁТА / ЗАЩИЩЁННЫЙ ПОРТАЛ"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                context.fill(left + 18, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 112 - contentOffset, 0xFF1E342C);
+                context.drawTextWithShadow(textRenderer, Text.literal("СВОДКА БАЛАНСА"), left + 26, contentTop + 73 - contentOffset, 0xFF72E6B4);
+                drawWrapped(context, "Счета, история переводов и игровые финансовые уведомления.", left + 26, contentTop + 88 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+                context.fill(left + 18, contentTop + 122 - contentOffset, left + panelWidth - 18, contentTop + 164 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("КУРСЫ И ОБМЕН"), left + 26, contentTop + 130 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Внутриигровые жетоны и кредиты; значения обновляются по правилам сервера.", left + 26, contentTop + 144 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+                context.fill(left + 18, contentTop + 172 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF213545);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПОСЛЕДНИЕ ОПОВЕЩЕНИЯ"), left + 26, contentTop + 180 - contentOffset, 0xFF72E6B4);
+                drawWrapped(context, "Плановые проверки и уведомления о работе игрового финансового сервиса.", left + 26, contentTop + 192 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
             } else {
                 context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + SITE_BRANDS[idx]), left + 22, contentTop + 12 - contentOffset, accent);
                 context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
