@@ -20,6 +20,9 @@ public final class CyberArenaScreen extends Screen {
         "craft.arena", "music.arena", "travel.arena", "legal.arena", "archive2.arena", "robot.arena", "food.arena", "power.arena", "sports.arena", "social.arena",
         "code.arena", "docks.arena", "museum2.arena", "energy.arena", "weather2.arena", "jobs.arena", "housing.arena", "transit.arena", "wildlife.arena", "archive3.arena"
     };
+    private static final String[] SITE_BRANDS = {
+        "Торговый ряд", "Городская лента", "Энергокарта", "Старый архив", "Научный центр", "Общий форум", "Финансовый дом", "Метрополитен", "Метеослужба", "Медицинский центр", "Промышленный узел", "Галерея истории", "Университетский портал", "Портовые службы", "Центр охраны", "Клуб развлечений", "Зелёная долина", "Медиацентр", "Орбитальная станция", "Торговый зал", "Мастерская", "Музыкальная библиотека", "Путеводитель", "Правовой портал", "Хранилище памяти", "Робототехника", "Кухня и доставка", "Энергокомпания", "Спортивный портал", "Сообщество", "Кодовая база", "Морская верфь", "Музей реликвий", "Лаборатория синтеза", "Климатический архив", "Биржа вакансий", "Жилищный каталог", "Железнодорожный портал", "Заповедник", "Архив экспедиций"
+    };
     private static final String[] TITLES = {
         "РЫНОК АРЕНЫ", "ЕЖЕДНЕВНЫЕ НОВОСТИ", "УПРАВЛЕНИЕ СЕТЬЮ", "АРХИВ ХРАНИЛИЩА", "ЛАБОРАТОРИЯ", "ОТКРЫТЫЙ ФОРУМ", "БАНК АРЕНЫ", "МЕТРО СВЯЗЬ", "ПРОГНОЗ ПОГОДЫ", "ГОРОДСКАЯ КЛИНИКА",
         "ЗАВОД", "ЦИФРОВОЙ МУЗЕЙ", "УНИВЕРСИТЕТ", "ПОРТОВЫЙ УЗЕЛ", "СТРАЖ", "ИГРОВОЙ КЛУБ", "ЗЕЛЁНАЯ ФЕРМА", "ПИКСЕЛЬНЫЕ НОВОСТИ", "КОСМИЧЕСКАЯ ЛАБОРАТОРИЯ", "АУКЦИОН",
@@ -609,7 +612,7 @@ public final class CyberArenaScreen extends Screen {
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + contentHeight - contentOffset, 0xFF142431);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + 4 - contentOffset, accent);
             context.fill(left + 10, contentTop - contentOffset, left + 14, contentTop + contentHeight - contentOffset, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + selectedSite), left + 22, contentTop + 12 - contentOffset, accent);
+            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + SITE_BRANDS[idx]), left + 22, contentTop + 12 - contentOffset, accent);
             context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
             drawWrapped(context, DESCRIPTIONS[idx], left + 22, contentTop + 58 - contentOffset, panelWidth - 44, 0xFFD0DCE6);
             drawWrapped(context, SITE_CONTENT[idx], left + 22, contentTop + 92 - contentOffset, panelWidth - 44, 0xFFB5D9C8);
@@ -630,14 +633,14 @@ public final class CyberArenaScreen extends Screen {
             for (int i = offset; i < Math.min(offset + SITES_PER_PAGE, sites.size()); i++) {
                 int idx = siteIndex(sites.get(i)), y = rowY + (i - offset) * 35;
                 context.fill(left + 14, y - 3, left + panelWidth - 14, y + 27, 0xFF172634);
-                context.drawTextWithShadow(textRenderer, Text.literal(sites.get(i) + " / " + RISKS[idx]), left + 22, y + 1, 0xFFBDEBFF);
+                context.drawTextWithShadow(textRenderer, Text.literal(SITE_BRANDS[idx] + " / " + translateRisk(RISKS[idx])), left + 22, y + 1, 0xFFBDEBFF);
                 context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, y + 14, 0xFF8295A8);
             }
             if (sites.isEmpty()) context.drawTextWithShadow(textRenderer, Text.literal("Пока пусто. Откройте сайт или измените запрос."), left + 18, rowY + 12, 0xFF8295A8);
         } else if (page == 1) {
             context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "FLEX > // ВТОРОЙ ИГРОВОЙ ЯЗЫК" : "NX > // ИГРОВАЯ ПСЕВДОКОНСОЛЬ"), left + 14, top + 78, 0xFF70D8FF);
-            String hints = voraSelected ? "LUMA — справка | KERI — поиск | NAVA — карта | MIRA — статус | TARA — анализ" : "HELP — справка | SEEK — поиск | NODR — карта | STAT — статус | NET — сеть";
-            drawWrapped(context, "NEXT COMMANDS: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
+            String hints = voraSelected ? "LUMA — помощь | KERI — поиск | NAVA — карта узлов | MIRA — статус | TARA — анализ" : "HELP — помощь | SEEK — поиск | NODR — карта узлов | STAT — статус | NET — сеть";
+            drawWrapped(context, "КОМАНДЫ: " + hints, left + 14, top + 239, panelWidth - 28, 0xFFD0DCE6);
             drawWrapped(context, voraSelected ? "FLEX — альтернативный игровой язык команд. Все операции выполняются только внутри мира Cyber Arena." : "NX — язык игровых команд. Введи HELP, чтобы получить полный список команд и описание каждой операции.", left + 14, top + 266, panelWidth - 28, 0xFF8295A8);
         } else if (page == 7) {
             context.drawTextWithShadow(textRenderer, Text.literal("NX // КОНСОЛЬ САЙТА: " + selectedSite), left + 14, top + 78, 0xFF70D8FF);
