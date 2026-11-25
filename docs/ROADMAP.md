@@ -33,7 +33,7 @@
 - [x] Show each fictional site's HTTPS-style domain and reserved TEST-NET simulation IP on its page
 - [x] Remove the visible site-service directory from browser pages; network discovery and analysis remain console commands
 - [x] Add mouse-wheel scrolling to the site content pane and keep navigation controls outside its scroll viewport
-- [ ] Finish responsive layout for very short screens and test every GUI scale in-game
+- [~] Compact responsive pass: reduce tabs, buttons, spacing and panel padding; in-game testing at short heights and GUI scales remains
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [x] Expand browser directory to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
@@ -169,7 +169,7 @@
 - [ ] Add a compact competition/leaderboard panel at the upper-left: player skins or faces, names, and earned points
 - [x] Browser pages are informational only; gameplay commands are kept in the separate NX/FLEX console
 - [x] Start adapting browser tabs and controls to available screen width
-- [ ] Finish full width-and-height responsive layout, including narrow windows and mobile-like GUI scales
+- [~] Compact minimalist workstation layout and adaptive widths implemented; full-height overflow handling, narrow-screen edge cases and in-game GUI-scale testing remain
 - [x] Terminal command suggestions show Russian hover translations for supported NX/FLEX commands and subcommands
 - [ ] Terminal autocomplete, command suggestions and contextual help
 - [ ] Show next-command hints while typing, including example arguments
