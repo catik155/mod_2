@@ -708,10 +708,111 @@ public final class CyberArenaScreen extends Screen {
                 row.append(i == completionCursor ? "> " : "").append(COMPLETION_MATCHES.get(i));
             }
             context.drawTextWithShadow(textRenderer, Text.literal(row.toString()), left + 14, suggestY + 13, 0xFFBDEBFF);
+            renderCommandHoverTooltip(context, mouseX, mouseY, left + 14, suggestY + 13);
         }
         context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "flex@arena:~>" : "nx@arena:~$"), left + 14, height - 23, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("TAB: доп.  ↑/↓: история  CTRL+R: поиск  ENTER: выполнить"), left + width - 320, height - 23, 0xFF8295A8);
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private String commandTranslation(String command) {
+        String nx = switch (command.toUpperCase(java.util.Locale.ROOT)) {
+            case "MANU" -> "Справка по командам";
+            case "STAT" -> "Показать состояние игрока и системы";
+            case "HELP" -> "Открыть справку терминала";
+            case "SEEK" -> "Поиск игровых узлов и сайтов";
+            case "NODR" -> "Сведения о ближайших узлах";
+            case "PORTA" -> "Список игровых портов и служб";
+            case "CRACK" -> "Запустить игровое испытание доступа";
+            case "FILES" -> "Показать виртуальные файлы";
+            case "READ" -> "Прочитать выбранный игровой файл";
+            case "WHO" -> "Сведения об игроках";
+            case "WHOIS" -> "Карточка виртуального узла";
+            case "PING" -> "Проверить отклик игрового узла";
+            case "MINE" -> "Запустить виртуальный сбор ресурсов";
+            case "SELR" -> "Выбрать игровой объект";
+            case "UPGR" -> "Открыть улучшения станции";
+            case "FLOW" -> "Управление автоматизацией";
+            case "SITE" -> "Открыть каталог игровых сайтов";
+            case "RAID" -> "Начать рейд-испытание";
+            case "DUEL" -> "Вызов на PvP-дуэль";
+            case "DEFEND" -> "Управление защитой станции";
+            case "COUNTER" -> "Контрмеры в игровом сценарии";
+            case "FARM" -> "Управление игровой фермой ресурсов";
+            case "VPN" -> "Настройки виртуального VPN";
+            case "IP" -> "Показать виртуальный адрес";
+            case "POLICE" -> "События игровой службы охраны";
+            case "NET" -> "Инструменты исследования виртуальной сети";
+            case "SABOTAGE" -> "Запустить игровое событие саботажа";
+            case "CONTRACTS" -> "Список контрактов и заданий";
+            case "AUTOM" -> "Состояние автоматизации";
+            case "FLEX" -> "Управление языком FLEX";
+            case "HOME" -> "Вернуться на главный экран станции";
+            case "DEFENSE" -> "Параметры обороны и защиты";
+            case "LOGS" -> "Журнал событий терминала";
+            case "BUY" -> "Купить игровое улучшение или услугу";
+            case "UPGRADE" -> "Улучшить выбранную игровую систему";
+            case "REPAIR" -> "Починить игровой объект";
+            case "STATUS" -> "Показать текущее состояние";
+            case "ON" -> "Включить режим";
+            case "OFF" -> "Выключить режим";
+            case "DISCOVER" -> "Обнаружить игровые узлы";
+            case "SCAN" -> "Проверить данные внутри симуляции";
+            case "ENUM" -> "Собрать сведения об игровом объекте";
+            case "EXPLOIT" -> "Запустить игровое испытание";
+            case "TYPE" -> "Выбрать тип защиты";
+            case "ROUTE" -> "Настроить игровой маршрут";
+            case "MOVE" -> "Переместить защитный ресурс";
+            case "EXEC" -> "Выполнить команду FLEX";
+            case "FIREWALL" -> "Улучшение: игровой экран защиты";
+            case "STEALTH" -> "Улучшение: скрытность в симуляции";
+            case "EXTRACT" -> "Улучшение: сбор игровых данных";
+            case "MINER" -> "Улучшение: добыча ресурсов";
+            case "CPU" -> "Улучшение: вычислительная мощность";
+            case "STORAGE" -> "Улучшение: хранилище";
+            case "BREAKER" -> "Улучшение: игровые испытания доступа";
+            case "GUARD" -> "Улучшение: охрана станции";
+            case "POWER" -> "Игровая энергосистема";
+            case "SUPPLIES" -> "Игровые запасы";
+            case "DATA" -> "Виртуальные данные";
+            case "ALARM" -> "События тревоги";
+            case "LOCK" -> "Игровая блокировка";
+            case "FALSECALL" -> "Событие ложного вызова";
+            case "RAIDERS" -> "Событие рейдеров";
+            default -> null;
+        };
+        if (nx != null) return nx;
+        return switch (command.toUpperCase(java.util.Locale.ROOT)) {
+            case "LUMA" -> "Справка по командам (FLEX)";
+            case "MIRA" -> "Состояние игрока и системы (FLEX)";
+            case "KERI" -> "Поиск игровых узлов (FLEX)";
+            case "NAVA" -> "Сведения о ближайших узлах (FLEX)";
+            case "DORA" -> "Игровые порты и службы (FLEX)";
+            case "TARA" -> "Игровое испытание доступа (FLEX)";
+            case "DARA" -> "Сбор виртуальных ресурсов (FLEX)";
+            case "SELI" -> "Выбор игрового объекта (FLEX)";
+            case "UPRA" -> "Улучшения станции (FLEX)";
+            case "RIVA" -> "Рейд-испытание (FLEX)";
+            case "FENA" -> "Автоматизация (FLEX)";
+            case "VESA" -> "Каталог игровых сайтов (FLEX)";
+            default -> null;
+        };
+    }
+
+    private void renderCommandHoverTooltip(DrawContext context, int mouseX, int mouseY, int rowX, int rowY) {
+        if (mouseY < rowY || mouseY > rowY + 10) return;
+        int x = rowX;
+        for (int i = 0; i < Math.min(8, COMPLETION_MATCHES.size()); i++) {
+            String command = COMPLETION_MATCHES.get(i);
+            String label = (i == completionCursor ? "> " : "") + command;
+            int labelWidth = textRenderer.getWidth(label);
+            if (mouseX >= x && mouseX <= x + labelWidth) {
+                String translation = commandTranslation(command);
+                if (translation != null) context.drawTooltip(textRenderer, Text.literal(command + " — " + translation), mouseX, mouseY);
+                return;
+            }
+            x += labelWidth + textRenderer.getWidth("   ");
+        }
     }
 
     private String virtualSiteIp(int index) { return "198.51.100." + (20 + Math.floorMod(index * 17 + 31, 200)); }
