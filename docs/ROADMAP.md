@@ -160,6 +160,7 @@
 - [x] Browser pages are informational only; gameplay commands are kept in the separate NX/FLEX console
 - [x] Start adapting browser tabs and controls to available screen width
 - [ ] Finish full width-and-height responsive layout, including narrow windows and mobile-like GUI scales
+- [x] Terminal command suggestions show Russian hover translations for supported NX/FLEX commands and subcommands
 - [ ] Terminal autocomplete, command suggestions and contextual help
 - [ ] Show next-command hints while typing, including example arguments
 - [ ] Separate editor/console/output/log panes and resizable layout
