@@ -4,9 +4,9 @@ A fictional multiplayer cyber-competition mod for Minecraft 1.21.1 (Fabric), bui
 
 ## Workstation
 
-Press **K** in-game to open the Cyber Arena workstation. It combines a fictional browser with themed .arena pages (market, recipes, media, travel, sports and more), plus a terminal that can switch between NX (legacy NEX aliases) and FLEX (legacy VORA aliases) command languages. Both languages show command hints and translate into the same safe game actions. The workstation sends NEX instructions to the server; the server validates and applies every game action.
+Press **K** in-game to open the Cyber Arena workstation. It combines a fictional browser with themed .arena pages (market, recipes, media, travel, sports and more), plus a terminal with NX/FLEX UI labels over the existing NEX/VORA command sets. Command hints translate into the same safe game actions; the server validates and applies every action.
 
-## NX quick reference
+## NEX command reference (NX terminal)
 
 The concise language reference, including aliases, instructions and FLOW examples, is in [docs/NEX_LANGUAGE.md](docs/NEX_LANGUAGE.md). The fictional directory contains 40 .arena sites, 15 nodes, simulated service slots and collectible file records. Player file inventory is persistent: READ collects, FINV lists, FSELL sells explicitly; files do not generate passive credits.
 
