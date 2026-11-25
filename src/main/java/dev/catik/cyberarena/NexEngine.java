@@ -241,6 +241,7 @@ public final class NexEngine {
             case "SELR" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).sellData(player);
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
+            case "PROGRESS", "CAMPAIGN" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).campaignStatus(player);
             case "CONTRACTS", "JOBS" -> "§bNEX JOB BOARD\n§fsite-audit (40c) §7| patch-rush (55c) §7| data-recovery (70c)";
             case "RUN" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).completeContract(player, arg);
             case "SITE" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).siteEvent(player, arg);
@@ -264,7 +265,8 @@ public final class NexEngine {
             + "§eСОРЕВНОВАНИЕ И АВТОМАТИЗАЦИЯ\n"
             + "§fRAID <игрок> §7— игровой сетевой рейд | DUEL <тактика> §7— тактика атакующего | DEFEND STATUS §7— состояние задачи\n"
             + "§fDEFEND TYPE/ROUTE/MOVE §7— решить консольное испытание (KERNEL/ROUTE/GRID) | DEFEND HELP §7— подсказка\n"
-            + "§fCONTRACTS §7— список заказов | RUN <номер> §7— выполнить заказ\n"
+            + "§fPROGRESS §7— кампания оператора: 5 начальных задач с автоматическими бонусами\n"
+            + "§fCONTRACTS §7— список заказов | RUN <номер> §7— выполнить заказ\n
             + "§fAUTOM STATUS §7— состояние модуля | FLOW <команда; команда> §7— сценарий до 6 шагов, требуется AUTOM | UPGR AUTOM §7— купить/улучшить модуль\n"
             + "§fFLEX STATUS/BUY §7— премиальный язык за 250 кредитов | FLEX EXEC <команда> §7— выполнить команду через купленный FLEX\n"
             + "§7При отключении питания рабочая станция, сеть, команды и весь майнинг останавливаются. Доступны только HELP, STAT и REPAIR.\n"
