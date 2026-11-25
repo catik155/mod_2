@@ -777,7 +777,7 @@ public final class CyberArenaScreen extends Screen {
 
 
     private void renderTerminal(DrawContext context, int mouseX, int mouseY, float delta) {
-        int left = Math.max(2, Math.min(8, this.width / 30)), top = Math.max(2, Math.min(8, this.height / 30)), width = Math.max(1, this.width - left * 2), height = Math.max(1, this.height - top * 2;
+        int left = Math.max(2, Math.min(8, this.width / 30)), top = Math.max(2, Math.min(8, this.height / 30)), width = Math.max(1, this.width - left * 2), height = Math.max(1, this.height - top * 2);
         context.fill(left, top, left + width, top + height, 0xF20A1119);
         context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
