@@ -181,15 +181,15 @@ public final class CyberArenaScreen extends Screen {
     @Override
     protected void init() {
         if (page == 1) { initTerminalFullScreen(); return; }
-        int panelWidth = Math.max(1, this.width - 16);
-        int panelHeight = Math.max(1, this.height - 16);
-        int left = 8;
-        int top = 8;
-        int tabGap = 3, tabWidth = Math.max(36, (panelWidth - 28 - tabGap * 3) / 4);
-        addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0)).dimensions(left + 12, top + 48, tabWidth, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1)).dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2)).dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШЕНИЯ"), b -> navigate(8)).dimensions(left + 14 + (tabWidth + tabGap) * 3, top + 48, tabWidth, 20).build());
+        int panelWidth = Math.max(1, this.width - 10);
+        int panelHeight = Math.max(1, this.height - 10);
+        int left = 5;
+        int top = 5;
+        int tabGap = 2, tabWidth = Math.max(30, (panelWidth - 20 - tabGap * 3) / 4);
+        addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0)).dimensions(left + 8, top + 36, tabWidth, 17).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1)).dimensions(left + 10 + tabWidth + tabGap, top + 36, tabWidth, 17).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2)).dimensions(left + 10 + (tabWidth + tabGap) * 2, top + 36, tabWidth, 17).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШЕНИЯ"), b -> navigate(8)).dimensions(left + 10 + (tabWidth + tabGap) * 3, top + 36, tabWidth, 17).build());
         if (page == 0 || page == 3 || page == 4 || page == 5 || page == 6) initBrowser(left, top, panelWidth);
         else if (page == 7) initSiteConsole(left, top, panelWidth);
         else if (page == 8) initUpgrades(left, top, panelWidth);
@@ -204,13 +204,13 @@ public final class CyberArenaScreen extends Screen {
             final int destination = pages[i];
             addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + tabGap), Math.max(4, Math.min(16, this.height / 25)), tabWidth, Math.max(16, Math.min(20, this.height / 18))).build());
         }
-        int inputWidth = Math.max(42, width - (width >= 380 ? 180 : 104));
-        input = new TextFieldWidget(textRenderer, left + 14, Math.max(24, this.height - 42), inputWidth, Math.max(16, Math.min(22, this.height / 22)), Text.literal("NX command"));
+        int inputWidth = Math.max(34, width - (width >= 380 ? 160 : 92));
+        input = new TextFieldWidget(textRenderer, left + 14, Math.max(20, this.height - 34), inputWidth, Math.max(14, Math.min(18, this.height / 26)), Text.literal("NX command"));
         input.setMaxLength(voraSelected ? 480 : 240);
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
         input.setChangedListener(this::refreshCompletions);
         addDrawableChild(input);
-        addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 82, Math.max(24, this.height - 42), Math.max(54, Math.min(72, width / 3)), Math.max(16, Math.min(22, this.height / 22))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 82, Math.max(20, this.height - 34), Math.max(42, Math.min(62, width / 3)), Math.max(14, Math.min(18, this.height / 26))).build());
         if (width >= 280) {
             addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "FLEX" : "NX"), b -> {
                 if (flexOwned) {
@@ -220,7 +220,7 @@ public final class CyberArenaScreen extends Screen {
                     appendOutput("§eFLEX заблокирован. Приобрети язык во вкладке УЛУЧШЕНИЯ за 250 кредитов.");
                     navigate(8);
                 }
-            }).dimensions(left + width - 154, Math.max(24, this.height - 42), Math.max(40, Math.min(56, width / 4)), Math.max(16, Math.min(22, this.height / 22)))
+            }).dimensions(left + width - 154, Math.max(20, this.height - 34), Math.max(34, Math.min(48, width / 4)), Math.max(14, Math.min(18, this.height / 26)))
                 .tooltip(Tooltip.of(Text.literal(flexOwned ? "Переключить язык терминала NX / FLEX" : "FLEX — премиальный язык. Купить в магазине улучшений за 250 кредитов."))).build());
         }
         input.setFocused(true);
@@ -362,11 +362,11 @@ public final class CyberArenaScreen extends Screen {
 
     private void initBrowser(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("КАТАЛОГ"), b -> navigate(0))
-            .dimensions(left + 14, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Вернуться к списку сайтов"))).build());
+            .dimensions(left + 8, top + 58, (panelWidth - 20) / 3, 16).tooltip(Tooltip.of(Text.literal("Вернуться к списку сайтов"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ЗАКЛАДКИ " + BOOKMARKS.size()), b -> navigate(4))
-            .dimensions(left + 22 + (panelWidth - 36) / 3, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Показать сайты, сохранённые в закладки"))).build());
+            .dimensions(left + 10 + (panelWidth - 20) / 3, top + 58, (panelWidth - 20) / 3, 16).tooltip(Tooltip.of(Text.literal("Показать сайты, сохранённые в закладки"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ИСТОРИЯ"), b -> navigate(5))
-            .dimensions(left + 30 + 2 * (panelWidth - 36) / 3, top + 76, (panelWidth - 36) / 3, 19).tooltip(Tooltip.of(Text.literal("Показать недавно открытые сайты"))).build());
+            .dimensions(left + 12 + 2 * (panelWidth - 20) / 3, top + 58, (panelWidth - 20) / 3, 16).tooltip(Tooltip.of(Text.literal("Показать недавно открытые сайты"))).build());
 
         if (page == 3) {
             initSitePage(left, top, panelWidth);
@@ -377,7 +377,7 @@ public final class CyberArenaScreen extends Screen {
             return;
         }
         if (page == 0) {
-            input = new TextFieldWidget(textRenderer, left + 14, top + 113, panelWidth - 128, 20, Text.literal("Поиск"));
+            input = new TextFieldWidget(textRenderer, left + 14, top + 88, panelWidth - 108, 16, Text.literal("Поиск"));
             input.setMaxLength(48);
             input.setPlaceholder(Text.literal("Поиск вымышленных сайтов .arena..."));
             input.setText(query);
@@ -385,17 +385,17 @@ public final class CyberArenaScreen extends Screen {
             addDrawableChild(ButtonWidget.builder(Text.literal("НАЙТИ"), b -> {
                 String q = input.getText().trim();
                 if (client != null) client.setScreen(new CyberArenaScreen(0, "", q));
-            }).dimensions(left + panelWidth - 106, top + 113, 92, 20).tooltip(Tooltip.of(Text.literal("Найти сайт по имени или описанию"))).build());
+            }).dimensions(left + panelWidth - 92, top + 88, 80, 16).tooltip(Tooltip.of(Text.literal("Найти сайт по имени или описанию"))).build());
         }
         List<String> sites = visibleSites();
         int pages = Math.max(1, (sites.size() + SITES_PER_PAGE - 1) / SITES_PER_PAGE);
         directoryPage = Math.max(0, Math.min(directoryPage, pages - 1));
-        int rowY = top + (page == 0 ? 146 : 111);
+        int rowY = top + (page == 0 ? 116 : 92);
         int offset = page == 0 ? directoryPage * SITES_PER_PAGE : 0;
         for (int i = offset; i < Math.min(offset + SITES_PER_PAGE, sites.size()); i++) {
             String site = sites.get(i);
             int idx = siteIndex(site);
-            int y = rowY + (i - offset) * 35;
+            int y = rowY + (i - offset) * 28;
             contextlessSiteRow(left, panelWidth, y, site, idx);
         }
         if (sites.isEmpty()) {
@@ -403,14 +403,14 @@ public final class CyberArenaScreen extends Screen {
                 .dimensions(left + 14, rowY + 4, 120, 20).build());
         }
         if (page == 0 && pages > 1) {
-            addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕД."), b -> { directoryPage = Math.max(0, directoryPage - 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + 14, top + 318, 72, 16).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕД. →"), b -> { directoryPage = Math.min(pages - 1, directoryPage + 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + panelWidth - 86, top + 318, 72, 16).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕД."), b -> { directoryPage = Math.max(0, directoryPage - 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + 8, top + 272, 64, 14).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕД. →"), b -> { directoryPage = Math.min(pages - 1, directoryPage + 1); if (client != null) client.setScreen(new CyberArenaScreen(0, "", query)); }).dimensions(left + panelWidth - 76, top + 272, 64, 14).build());
         }
     }
 
     private void contextlessSiteRow(int left, int panelWidth, int y, String site, int index) {
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР"), b -> openSite(site))
-            .dimensions(left + panelWidth - Math.min(104, panelWidth / 3), y, Math.min(104, panelWidth / 3), 20)
+            .dimensions(left + panelWidth - Math.min(104, panelWidth / 3), y, Math.min(92, panelWidth / 3), 16)
             .tooltip(Tooltip.of(Text.literal("Только открыть и просмотреть страницу"))).build());
     }
 
@@ -422,46 +422,46 @@ public final class CyberArenaScreen extends Screen {
 
     private void initSitePage(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> navigate(0))
-            .dimensions(left + 14, top + 78, 90, 20).build());
+            .dimensions(left + 8, top + 62, 74, 16).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
-        }).dimensions(left + 110, top + 78, 118, 20).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
+        }).dimensions(left + 86, top + 62, 106, 16).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
-        int navY = Math.max(top + 120, this.height - 66);
+        int navY = Math.max(top + 96, this.height - 50);
         addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕДЫДУЩИЙ САЙТ"), b -> openAdjacentSite(-1))
-            .dimensions(left + 14, navY, navHalf, 18)
+            .dimensions(left + 8, navY, navHalf, 16)
             .tooltip(Tooltip.of(Text.literal("Перейти к предыдущему сайту каталога"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕДУЮЩИЙ САЙТ →"), b -> openAdjacentSite(1))
-            .dimensions(left + 22 + navHalf, navY, navHalf, 18)
+            .dimensions(left + 10 + navHalf, navY, navHalf, 16)
             .tooltip(Tooltip.of(Text.literal("Перейти к следующему сайту каталога"))).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
-        }).dimensions(left + 14, this.height - 42, panelWidth - 28, 22)
+        }).dimensions(left + 8, this.height - 34, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Просмотреть открытые описания записей. Игровые действия выполняются в консоли."))).build());
     }
 
     private void initSiteConsole(int left, int top, int panelWidth) {
         addDrawableChild(ButtonWidget.builder(Text.literal("← К САЙТУ"), b -> openSite(selectedSite))
-            .dimensions(left + 14, top + 76, 105, 20)
+            .dimensions(left + 8, top + 58, 90, 16)
             .tooltip(Tooltip.of(Text.literal("Вернуться к странице сайта"))).build());
-        input = new TextFieldWidget(textRenderer, left + 14, top + 105, panelWidth - 28, 20, Text.literal("NX-команда сайта"));
+        input = new TextFieldWidget(textRenderer, left + 14, top + 82, panelWidth - 16, 16, Text.literal("NX-команда сайта"));
         input.setMaxLength(160);
         input.setPlaceholder(Text.literal("Команда NX — сайт добавится автоматически"));
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ВЫПОЛНИТЬ NX"), b -> submitSiteConsole())
-            .dimensions(left + 14, top + 134, (panelWidth - 36) / 2, 22)
+            .dimensions(left + 8, top + 110, (panelWidth - 20) / 2, 18)
             .tooltip(Tooltip.of(Text.literal("Выполнить команду с контекстом открытого сайта"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОФИЛЬ УЗЛА"), b -> runNex("WHO " + selectedSite))
-            .dimensions(left + 22 + (panelWidth - 36) / 2, top + 134, (panelWidth - 36) / 2, 22)
+            .dimensions(left + 10 + (panelWidth - 20) / 2, top + 110, (panelWidth - 20) / 2, 18)
             .tooltip(Tooltip.of(Text.literal("Получить сведения об игровом узле через консоль"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ИЗВЛЕЧЕНИЕ"), b -> runNex("CRACK " + selectedSite))
-            .dimensions(left + 14, top + 166, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 136, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Запустить игровое извлечение для текущего сайта"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ФАЙЛЫ САЙТА"), b -> { if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, "")); })
-            .dimensions(left + 14, top + 194, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 160, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Открыть игровые записи этого сайта"))).build());
     }
     private void submitSiteConsole() {
@@ -486,7 +486,7 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + 14, top + 78, 110, 20).build());
         for (int i = 0; i < FILE_NAMES[idx].length; i++) {
             final String file = FILE_NAMES[idx][i];
-            int y = top + 143 + i * 43;
+            int y = top + 118 + i * 32;
 
         }
     }
@@ -553,23 +553,23 @@ public final class CyberArenaScreen extends Screen {
         }
         String[] modules = {"FIREWALL", "AUTOM", "STEALTH", "EXTRACT", "MINER", "CPU", "STORAGE", "BREAKER", "GUARD"};
         String[] labels = {"ЗАЩИТА", "АВТОМАТИЗАЦИЯ", "СКРЫТНОСТЬ", "ИЗВЛЕЧЕНИЕ", "МАЙНИНГ", "ПРОЦЕССОР", "ХРАНИЛИЩЕ", "ЭЛЕКТРОЩИТОК", "ОХРАНА"};
-        int gap = 8, colWidth = (panelWidth - 36) / 2;
+        int gap = 4, colWidth = (panelWidth - 20) / 2;
         for (int i = 0; i < modules.length; i++) {
             final String module = modules[i];
             int col = i % 2, row = i / 2;
             addDrawableChild(ButtonWidget.builder(Text.literal("УЛУЧШИТЬ: " + labels[i]), b -> runNex("UPGR " + module))
-                .dimensions(left + 14 + col * (colWidth + gap), top + 110 + row * 29, colWidth, 24)
+                .dimensions(left + 8 + col * (colWidth + gap), top + 90 + row * 24, colWidth, 18)
                 .tooltip(Tooltip.of(Text.literal("Купить следующий уровень " + module + ". Стоимость зависит от текущего уровня; максимум 5."))).build());
         }
         ButtonWidget flexButton = ButtonWidget.builder(Text.literal(flexOwned ? "FLEX: ПРИОБРЕТЁН" : flexStatusKnown ? "КУПИТЬ FLEX — 250 КРЕДИТОВ" : "ПРОВЕРКА FLEX…"), b -> {
             runNex("FLEX BUY");
             if (client != null && client.getNetworkHandler() != null) client.getNetworkHandler().sendChatCommand("arena nex FLEX STATUS");
-        }).dimensions(left + 14 + colWidth + gap, top + 226, colWidth, 24)
+        }).dimensions(left + 8 + colWidth + gap, top + 204, colWidth, 18)
             .tooltip(Tooltip.of(Text.literal("Премиальный альтернативный язык. После покупки разблокируется оболочка FLEX и выполнение команд через неё."))).build();
         if (flexOwned || !flexStatusKnown) flexButton.active = false;
         addDrawableChild(flexButton);
         addDrawableChild(ButtonWidget.builder(Text.literal("МОЙ ПРОФИЛЬ И БАЛАНС"), b -> runNex("STAT"))
-            .dimensions(left + 14, top + 266, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 236, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Показать кредиты, очки репутации и уровни модулей"))).build());
     }
 
@@ -601,8 +601,8 @@ public final class CyberArenaScreen extends Screen {
         int panelHeight = Math.max(1, this.height - 16);
         int left = 8;
         int top = 8;
-        context.fill(left, top, left + panelWidth, top + panelHeight, 0xEE101923);
-        context.fill(left, top, left + panelWidth, top + 3, 0xFF29D6C5);
+        context.fill(left, top, left + panelWidth, top + panelHeight, 0xE9101923);
+        context.fill(left, top, left + panelWidth, top + 2, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // ИГРОВАЯ СТАНЦИЯ"), left + 14, top + 13, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНАЯ СЕТЬ • ТОЛЬКО ИГРОВАЯ СИМУЛЯЦИЯ"), left + 14, top + 29, 0xFFB8C8D8);
 
@@ -610,7 +610,7 @@ public final class CyberArenaScreen extends Screen {
             int idx = siteIndex(selectedSite);
             context.drawTextWithShadow(textRenderer, Text.literal("АРХИВ:// " + selectedSite + " / СПИСОК ЗАПИСЕЙ"), left + 14, top + 108, 0xFF70D8FF);
             for (int i = 0; i < FILE_NAMES[idx].length; i++) {
-                int y = top + 143 + i * 43;
+                int y = top + 118 + i * 32;
                 context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
                 context.drawTextWithShadow(textRenderer, Text.literal(FILE_NAMES[idx][i]), left + 22, y + 5, 0xFFBDEBFF);
                 context.drawTextWithShadow(textRenderer, Text.literal("ИГРОВАЯ ЗАПИСЬ / МЕТАДАННЫЕ"), left + 22, y + 16, 0xFF8295A8);
@@ -782,9 +782,9 @@ public final class CyberArenaScreen extends Screen {
         context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("СЕАНС: ИГРОВАЯ СИМУЛЯЦИЯ     УЗЕЛ: ARENA     СТАТУС: АКТИВЕН"), left + 12, top + 56, 0xFF8295A8);
-        int outputTop = top + 76, outputBottom = height - 62;
+        int outputTop = top + 62, outputBottom = height - 48;
         context.fill(left + 8, outputTop, left + width - 8, outputBottom, 0xFF0D1720);
-        int lineHeight = 12, maxLines = Math.max(1, (outputBottom - outputTop - 10) / lineHeight);
+        int lineHeight = 10, maxLines = Math.max(1, (outputBottom - outputTop - 8) / lineHeight);
         int start = Math.max(0, TERMINAL_OUTPUT.size() - maxLines - terminalScroll);
         int end = Math.min(TERMINAL_OUTPUT.size(), start + maxLines);
         int y = outputTop + 7;
@@ -795,7 +795,7 @@ public final class CyberArenaScreen extends Screen {
             y += lineHeight;
         }
         if (input != null && input.isFocused() && !input.getText().isBlank()) {
-            int suggestY = height - 57;
+            int suggestY = height - 44;
             context.fill(left + 8, suggestY - 3, left + width - 8, height - 34, 0xFF142431);
             String heading = COMPLETION_MATCHES.isEmpty() ? "НЕТ СОВПАДЕНИЙ" : "ВОЗМОЖНЫЕ ДОПОЛНЕНИЯ (" + COMPLETION_MATCHES.size() + ")";
             context.drawTextWithShadow(textRenderer, Text.literal(heading), left + 14, suggestY, 0xFF70D8FF);
@@ -807,7 +807,7 @@ public final class CyberArenaScreen extends Screen {
             context.drawTextWithShadow(textRenderer, Text.literal(row.toString()), left + 14, suggestY + 13, 0xFFBDEBFF);
             renderCommandHoverTooltip(context, mouseX, mouseY, left + 14, suggestY + 13);
         }
-        context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "flex@arena:~>" : "nx@arena:~$"), left + 14, height - 23, 0xFF55E6D2);
+        context.drawTextWithShadow(textRenderer, Text.literal(voraSelected ? "flex@arena:~>" : "nx@arena:~$"), left + 14, height - 18, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("TAB: доп.  ↑/↓: история  CTRL+R: поиск  ENTER: выполнить"), left + width - 320, height - 23, 0xFF8295A8);
         super.render(context, mouseX, mouseY, delta);
     }
