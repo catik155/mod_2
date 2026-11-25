@@ -713,6 +713,10 @@ public final class CyberArenaScreen extends Screen {
                 context.drawTextWithShadow(textRenderer, Text.literal("ПУБЛИЧНАЯ ИНФОРМАЦИЯ"), left + 22, contentTop + 184 - contentOffset, 0xFF70D8FF);
                 drawWrapped(context, "Это демонстрационный игровой ресурс. Его домен и IP существуют только внутри мира Cyber Arena. Все действия исследования выполняются через игровую консоль NX/FLEX.", left + 22, contentTop + 202 - contentOffset, panelWidth - 44, 0xFFB5C5D2);
             }
+            // Long, scrollable article feed with small decorative thumbnails.
+            for (int card = 0; card < 5; card++) {
+                drawMiniArticleCard(context, left + 18, contentTop + 238 + card * 92, panelWidth - 36, accent, card, contentOffset);
+            }
             context.disableScissor();
             context.drawTextWithShadow(textRenderer, Text.literal("ПРОКРУТКА: КОЛЁСИКО МЫШИ"), left + 14, top + panelHeight - 38, 0xFF8295A8);
         } else if (page == 0 || page == 4 || page == 5) {
@@ -925,6 +929,33 @@ public final class CyberArenaScreen extends Screen {
         };
     }
 
+    private void drawMiniArticleCard(DrawContext context, int x, int y, int width, int accent, int index, int contentOffset) {
+        int cardY = y - contentOffset;
+        context.fill(x, cardY, x + width, cardY + 82, 0xFF1B2B38);
+        // Tiny stylized site illustration, drawn from simple pixel blocks (no external assets).
+        int tx = x + 8, ty = cardY + 8;
+        context.fill(tx, ty, tx + 54, ty + 54, 0xFF10202B);
+        context.fill(tx + 7, ty + 7, tx + 47, ty + 47, accent);
+        context.fill(tx + 12, ty + 12, tx + 42, ty + 42, 0xFF172634);
+        int[][] pixels = {{14,14,10,8},{30,14,10,8},{14,28,10,8},{30,28,10,8},{22,20,10,10}};
+        int[] colors = {0xFF70D8FF,0xFFFFC86B,0xFF72E6B4,0xFFB58CFF,0xFFF0F5FA};
+        for (int p = 0; p < pixels.length; p++) {
+            int[] q = pixels[p];
+            context.fill(tx + q[0], ty + q[1], tx + q[0] + q[2], ty + q[1] + q[3], colors[(p + index) % colors.length]);
+        }
+        String[] headlines = {"ОБЗОР И СВОДКА", "КАТАЛОГ И ПОДРОБНОСТИ", "НОВЫЕ ЗАПИСИ", "СПРАВОЧНЫЙ РАЗДЕЛ"};
+        String[] blurbs = {
+            "Краткая энциклопедическая заметка о теме сайта, его разделах и игровых объектах.",
+            "Карточки, описания и общие сведения обновлены в демонстрационном каталоге.",
+            "Подборка интересных фактов, публикаций и заметок для наполнения виртуальной страницы.",
+            "Дополнительная справка, история и тематические материалы игрового мира."
+        };
+        int textX = tx + 64;
+        context.drawTextWithShadow(textRenderer, Text.literal(headlines[index % headlines.length]), textX, cardY + 8, accent);
+        drawWrapped(context, blurbs[index % blurbs.length], textX, cardY + 22, Math.max(70, width - 80), 0xFFD0DCE6);
+        context.drawTextWithShadow(textRenderer, Text.literal("КАРТОЧКА " + (index + 1) + " • ПУБЛИЧНЫЕ ДАННЫЕ"), textX, cardY + 64, 0xFF8295A8);
+    }
+
     private void drawWrapped(DrawContext context, String value, int x, int y, int width, int color) {
         String remaining = value;
         int lineY = y;
@@ -994,7 +1025,7 @@ public final class CyberArenaScreen extends Screen {
     }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (page == 1) { terminalScroll = Math.max(0, Math.min(TERMINAL_OUTPUT.size(), terminalScroll + (verticalAmount > 0 ? 4 : -4))); return true; }
-        if (page == 3 || page == 6) { browserScroll = Math.max(0, Math.min(40, browserScroll + (verticalAmount < 0 ? 3 : -3))); return true; }
+        if (page == 3 || page == 6) { browserScroll = Math.max(0, Math.min(90, browserScroll + (verticalAmount < 0 ? 3 : -3))); return true; }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
     @Override public boolean shouldPause() { return false; }
