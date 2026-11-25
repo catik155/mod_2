@@ -519,8 +519,7 @@ public final class CyberArenaScreen extends Screen {
                 filePageBySite.put(selectedSite, Math.max(0, filePageBySite.getOrDefault(selectedSite, 0) - 1));
                 if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
             }).dimensions(left + 8, navY, 64, 16).build());
-            addDrawableChild(ButtonWidget.builder(Text.literal((filePage + 1) + "/" + pageCount), b -> {})
-                .dimensions(left + panelWidth / 2 - 30, navY, 60, 16).build());
+
             addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕД. →"), b -> {
                 filePageBySite.put(selectedSite, Math.min(pageCount - 1, filePageBySite.getOrDefault(selectedSite, 0) + 1));
                 if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
@@ -650,6 +649,7 @@ public final class CyberArenaScreen extends Screen {
             int filePage = Math.max(0, Math.min(filePageBySite.getOrDefault(selectedSite, 0), pageCount - 1));
             int start = filePage * FILES_PER_PAGE;
             int end = Math.min(FILE_NAMES[idx].length, start + FILES_PER_PAGE);
+            context.drawTextWithShadow(textRenderer, Text.literal("СТРАНИЦА " + (filePage + 1) + "/" + pageCount), left + panelWidth / 2 - 34, top + 94, 0xFF90AFC1);
             for (int i = start; i < end; i++) {
                 int y = top + 118 + (i - start) * 32;
                 context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
