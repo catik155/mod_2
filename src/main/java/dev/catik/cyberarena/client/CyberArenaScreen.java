@@ -612,14 +612,30 @@ public final class CyberArenaScreen extends Screen {
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + contentHeight - contentOffset, 0xFF142431);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + 4 - contentOffset, accent);
             context.fill(left + 10, contentTop - contentOffset, left + 14, contentTop + contentHeight - contentOffset, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + SITE_BRANDS[idx]), left + 22, contentTop + 12 - contentOffset, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
-            drawWrapped(context, DESCRIPTIONS[idx], left + 22, contentTop + 58 - contentOffset, panelWidth - 44, 0xFFD0DCE6);
-            drawWrapped(context, SITE_CONTENT[idx], left + 22, contentTop + 92 - contentOffset, panelWidth - 44, 0xFFB5D9C8);
-            context.fill(left + 22, contentTop + 142 - contentOffset, left + panelWidth - 22, contentTop + 164 - contentOffset, 0xFF1B2D3A);
-            context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + translateRisk(RISKS[idx]) + "  •  СОСТОЯНИЕ: ДОСТУПЕН"), left + 30, contentTop + 149 - contentOffset, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal("ПУБЛИЧНАЯ ИНФОРМАЦИЯ"), left + 22, contentTop + 184 - contentOffset, 0xFF70D8FF);
-            drawWrapped(context, "Это демонстрационный игровой ресурс. Его домен и IP существуют только внутри мира Cyber Arena. Для исследования узлов, поиска слабых мест, атаки и настройки защиты используй консоль NX/FLEX.", left + 22, contentTop + 202 - contentOffset, panelWidth - 44, 0xFFB5C5D2);
+            if (idx == 1) {
+                // Distinct editorial layout for the fictional city news site.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF173B52);
+                context.drawTextWithShadow(textRenderer, Text.literal("ГОРОДСКАЯ ЛЕНТА  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFF76D7FF);
+                context.drawTextWithShadow(textRenderer, Text.literal("СВЕЖИЕ СОБЫТИЯ / ВЫПУСК 24"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                context.fill(left + 18, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 116 - contentOffset, 0xFF213545);
+                context.drawTextWithShadow(textRenderer, Text.literal("ГЛАВНОЕ"), left + 26, contentTop + 72 - contentOffset, 0xFFFFC86B);
+                drawWrapped(context, "В городских сетях обновили расписание сервисных работ — жители сообщают о стабильном соединении.", left + 26, contentTop + 86 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+                context.fill(left + 18, contentTop + 124 - contentOffset, left + panelWidth - 18, contentTop + 162 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("РЕГИОНЫ"), left + 26, contentTop + 130 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Северный район готовит фестиваль технологий. Волонтёры открыли регистрацию.", left + 26, contentTop + 144 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+                context.fill(left + 18, contentTop + 170 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("КОРОТКО"), left + 26, contentTop + 176 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Вечером ожидается запуск общественного транспорта по обновлённому маршруту.", left + 26, contentTop + 190 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+            } else {
+                context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + SITE_BRANDS[idx]), left + 22, contentTop + 12 - contentOffset, accent);
+                context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
+                drawWrapped(context, DESCRIPTIONS[idx], left + 22, contentTop + 58 - contentOffset, panelWidth - 44, 0xFFD0DCE6);
+                drawWrapped(context, SITE_CONTENT[idx], left + 22, contentTop + 92 - contentOffset, panelWidth - 44, 0xFFB5D9C8);
+                context.fill(left + 22, contentTop + 142 - contentOffset, left + panelWidth - 22, contentTop + 164 - contentOffset, 0xFF1B2D3A);
+                context.drawTextWithShadow(textRenderer, Text.literal("УРОВЕНЬ ЗАЩИТЫ: " + translateRisk(RISKS[idx]) + "  •  СОСТОЯНИЕ: ДОСТУПЕН"), left + 30, contentTop + 149 - contentOffset, accent);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПУБЛИЧНАЯ ИНФОРМАЦИЯ"), left + 22, contentTop + 184 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Это демонстрационный игровой ресурс. Его домен и IP существуют только внутри мира Cyber Arena. Все действия исследования выполняются через игровую консоль NX/FLEX.", left + 22, contentTop + 202 - contentOffset, panelWidth - 44, 0xFFB5C5D2);
+            }
             context.disableScissor();
             context.drawTextWithShadow(textRenderer, Text.literal("ПРОКРУТКА: КОЛЁСИКО МЫШИ"), left + 14, top + panelHeight - 38, 0xFF8295A8);
         } else if (page == 0 || page == 4 || page == 5) {
