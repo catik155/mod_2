@@ -483,10 +483,36 @@ public final class CyberArenaScreen extends Screen {
             .dimensions(left + 10 + navHalf, navY, navHalf, 16)
             .tooltip(Tooltip.of(Text.literal("Перейти к следующей странице в истории"))).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
+        int bottomY = this.height - 34;
+        int bottomHalf = Math.max(1, (panelWidth - 24) / 2);
+        addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПИСИ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
-        }).dimensions(left + 8, this.height - 34, panelWidth - 16, 18)
-            .tooltip(Tooltip.of(Text.literal("Просмотреть открытые описания записей. Игровые действия выполняются в консоли."))).build());
+        }).dimensions(left + 8, bottomY, bottomHalf, 18)
+            .tooltip(Tooltip.of(Text.literal("Открыть коллекцию игровых файлов этого сайта."))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ПО ТЕМЕ →"), b -> openRelatedSite())
+            .dimensions(left + 12 + bottomHalf, bottomY, bottomHalf, 18)
+            .tooltip(Tooltip.of(Text.literal("Открыть связанный тематический сайт."))).build());
+    }
+
+    private void openRelatedSite() {
+        String[][] groups = {
+            {"shop.arena", "auction.arena", "craft.arena", "housing.arena"},
+            {"news.arena", "media.arena", "archive2.arena", "archive3.arena"},
+            {"grid.arena", "power.arena", "energy.arena", "weather.arena", "weather2.arena"},
+            {"labs.arena", "uni.arena", "robot.arena", "code.arena"},
+            {"forum.arena", "social.arena", "jobs.arena"},
+            {"metro.arena", "transit.arena", "travel.arena", "port.arena", "docks.arena"},
+            {"clinic.arena", "farm.arena", "food.arena", "wildlife.arena", "museum.arena", "museum2.arena", "legal.arena", "sports.arena", "music.arena", "casino.arena", "security.arena", "vault.arena"}
+        };
+        for (String[] group : groups) {
+            for (int i = 0; i < group.length; i++) {
+                if (group[i].equals(selectedSite)) {
+                    openSite(group[(i + 1) % group.length]);
+                    return;
+                }
+            }
+        }
+        openSite("news.arena");
     }
 
     private void initSiteConsole(int left, int top, int panelWidth) {
