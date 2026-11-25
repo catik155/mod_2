@@ -983,23 +983,20 @@ public final class ArenaState extends PersistentState {
             int shards = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
             d.credits -= credits; a.credits += credits; d.dataShards -= shards; a.dataShards += shards + 1; a.reputation += 2;
             // Persistent virtual files are raid loot, but they never generate passive income.
-            List<String> victimFiles = d.completedContracts.stream().filter(v -> v.startsWith("vfile:")).toList();
+            List<String> victimFiles = d.completedContracts.stream().filter(v -> v.startsWith("vfile:"))
+                .filter(v -> {
+                    String[] fileParts = v.substring(6).split("\\|", 3);
+                    return fileParts.length >= 2 && a.completedContracts.stream()
+                        .noneMatch(owned -> owned.startsWith("vfile:" + fileParts[0] + "|" + fileParts[1] + "|"));
+                }).toList();
             String stolenFile = "";
             if (!victimFiles.isEmpty()) {
                 String candidate = victimFiles.get(ThreadLocalRandom.current().nextInt(victimFiles.size()));
                 String[] parts = candidate.substring(6).split("\\|", 3);
                 if (parts.length >= 3) {
-                    String victimPrefix = "vfile:" + parts[0] + "|" + parts[1] + "|";
-                    String ownedPrefix = "vfile:" + parts[0] + "|" + parts[1] + "|";
-                    boolean alreadyOwned = a.completedContracts.stream().anyMatch(v -> v.startsWith(ownedPrefix));
-                    if (!alreadyOwned) {
-                        d.completedContracts.remove(candidate);
-                        a.completedContracts.add(candidate);
-                        stolenFile = parts[1] + " (" + parts[0] + ")";
-                    } else {
-                        // If the attacker already has this file, leave it with the victim rather than duplicating it.
-                        stolenFile = "дубликат у атакующего — файл не перемещён";
-                    }
+                    d.completedContracts.remove(candidate);
+                    a.completedContracts.add(candidate);
+                    stolenFile = parts[1] + " (" + parts[0] + ")";
                 }
             }
             String fileText = stolenFile.isBlank() ? " §7| файлов для кражи нет" : " §7| файл: §f" + stolenFile;
