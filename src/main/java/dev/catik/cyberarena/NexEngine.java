@@ -242,7 +242,7 @@ public final class NexEngine {
             case "FLOW" -> flow(arg, player);
             case "SCAN" -> scan(arg, player);
             case "PROGRESS", "CAMPAIGN" -> player == null ? error("NO_OPERATOR", "Operator context required.") : ArenaState.get(player.getServer()).campaignStatus(player);
-            case "CONTRACTS", "JOBS" -> "§bNEX JOB BOARD\n§fsite-audit (40c) §7| patch-rush (55c) §7| data-recovery (70c)";
+            case "CONTRACTS", "JOBS" -> player == null ? "§bNEX JOB BOARD\n§fsite-audit — открыть 3 узла / 40 кр.\n§fpatch-rush — купить AUTOM / 55 кр.\n§fdata-recovery — сохранить 2 файла / 70 кр." : ArenaState.get(player.getServer()).contractBoard(player);
             case "RUN" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).completeContract(player, arg);
             case "SITE" -> player == null ? error("NO_OPERATOR", "Player context required.") : ArenaState.get(player.getServer()).siteEvent(player, arg);
             default -> error("UNKNOWN_OPCODE", "Unknown instruction '" + parts[0] + "'. Type MANU.");
