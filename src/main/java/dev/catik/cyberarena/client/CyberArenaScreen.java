@@ -90,6 +90,8 @@ public final class CyberArenaScreen extends Screen {
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
     private static final List<String> HISTORY = new ArrayList<>();
+    private static final List<String> browserHistory = new ArrayList<>();
+    private static int browserHistoryCursor = -1;
     private static final List<String> TERMINAL_OUTPUT = new ArrayList<>();
     private static final List<String> COMMAND_HISTORY = new ArrayList<>();
     private static final List<String> COMPLETION_MATCHES = new ArrayList<>();
@@ -126,10 +128,28 @@ public final class CyberArenaScreen extends Screen {
         if (client != null) client.setScreen(new CyberArenaScreen(nextPage, "", ""));
     }
     private void openSite(String site) {
+        if (browserHistoryCursor < browserHistory.size() - 1)
+            browserHistory.subList(browserHistoryCursor + 1, browserHistory.size()).clear();
+        if (browserHistory.isEmpty() || !browserHistory.get(browserHistory.size() - 1).equals(site)) {
+            browserHistory.add(site);
+            if (browserHistory.size() > 40) browserHistory.remove(0);
+        }
+        browserHistoryCursor = browserHistory.size() - 1;
         HISTORY.remove(site);
         HISTORY.add(0, site);
         while (HISTORY.size() > 12) HISTORY.remove(HISTORY.size() - 1);
-        if (client != null) client.setScreen(new CyberArenaScreen(3, site, ""));
+        showHistorySite();
+    }
+    private void showHistorySite() {
+        if (browserHistoryCursor >= 0 && browserHistoryCursor < browserHistory.size() && client != null)
+            client.setScreen(new CyberArenaScreen(3, browserHistory.get(browserHistoryCursor), ""));
+    }
+    private void moveBrowserHistory(int delta) {
+        int next = browserHistoryCursor + delta;
+        if (next >= 0 && next < browserHistory.size()) {
+            browserHistoryCursor = next;
+            showHistorySite();
+        }
     }
     private int siteIndex(String site) {
         for (int i = 0; i < SITES.length; i++) if (SITES[i].equals(site)) return i;
@@ -411,15 +431,13 @@ public final class CyberArenaScreen extends Screen {
             .tooltip(Tooltip.of(Text.literal("Только открыть и просмотреть страницу"))).build());
     }
 
-    private void openAdjacentSite(int direction) {
-        int current = siteIndex(selectedSite);
-        int next = Math.floorMod(current + direction, SITES.length);
-        openSite(SITES[next]);
-    }
+    private void openAdjacentSite(int direction) { moveBrowserHistory(direction); }
 
     private void initSitePage(int left, int top, int panelWidth) {
-        addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> navigate(0))
-            .dimensions(left + 8, top + 62, 74, 16).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("← ИСТОРИЯ"), b -> moveBrowserHistory(-1))
+            .dimensions(left + 8, top + 62, 74, 16).tooltip(Tooltip.of(Text.literal("Вернуться к предыдущей открытой странице"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("КАТАЛОГ"), b -> navigate(0))
+            .dimensions(left + 164, top + 62, 70, 16).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
@@ -427,12 +445,12 @@ public final class CyberArenaScreen extends Screen {
         }).dimensions(left + 86, top + 62, 106, 16).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
         int navY = Math.max(top + 96, this.height - 50);
-        addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕДЫДУЩИЙ САЙТ"), b -> openAdjacentSite(-1))
+        addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> openAdjacentSite(-1))
             .dimensions(left + 8, navY, navHalf, 16)
-            .tooltip(Tooltip.of(Text.literal("Перейти к предыдущему сайту каталога"))).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕДУЮЩИЙ САЙТ →"), b -> openAdjacentSite(1))
+            .tooltip(Tooltip.of(Text.literal("Перейти к предыдущей странице в истории"))).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("ВПЕРЁД →"), b -> openAdjacentSite(1))
             .dimensions(left + 10 + navHalf, navY, navHalf, 16)
-            .tooltip(Tooltip.of(Text.literal("Перейти к следующему сайту каталога"))).build());
+            .tooltip(Tooltip.of(Text.literal("Перейти к следующей странице в истории"))).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("ПРОСМОТР ЗАПИСЕЙ"), b -> {
             if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
