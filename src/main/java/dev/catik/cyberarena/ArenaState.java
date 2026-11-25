@@ -552,6 +552,51 @@ public final class ArenaState extends PersistentState {
         return true;
     }
 
+    public String collectVirtualFile(ServerPlayerEntity player, String site, String file) {
+        PlayerProfile p = profile(player);
+        String prefix = "vfile:" + site + "|" + file + "|";
+        if (p.completedContracts.stream().anyMatch(v -> v.startsWith(prefix))) return "\n§7Файл уже сохранён в коллекции. FINV — список, FSELL — продажа.";
+        int value = 20 + Math.floorMod((site + "|" + file).hashCode(), 65) + (file.endsWith(".enc") ? 35 : 0);
+        p.completedContracts.add(prefix + value);
+        markDirty();
+        return "\n§aФайл сохранён в коллекции §7| §eоценка " + value + " кредитов. Продай через FSELL.";
+    }
+
+    public String virtualFileInventory(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        List<String> files = p.completedContracts.stream().filter(v -> v.startsWith("vfile:")).sorted().toList();
+        if (files.isEmpty()) return "§eКоллекция файлов пуста. Читай FILES/READ на виртуальных сайтах.";
+        int total = 0;
+        StringBuilder out = new StringBuilder("§bКОЛЛЕКЦИЯ ВИРТУАЛЬНЫХ ФАЙЛОВ §7| ").append(files.size()).append(" шт.\n");
+        for (String entry : files) {
+            String[] parts = entry.substring(6).split("\\|", 3);
+            if (parts.length < 3) continue;
+            int value;
+            try { value = Integer.parseInt(parts[2]); } catch (NumberFormatException ignored) { value = 0; }
+            total += value;
+            out.append("§f").append(parts[0]).append("/").append(parts[1]).append(" §7— §6").append(value).append(" кр.\n");
+        }
+        return out.append("§eОбщая оценка: ").append(total).append(" кредитов §7| FSELL для продажи").toString();
+    }
+
+    public String sellVirtualFiles(ServerPlayerEntity player, String requested) {
+        PlayerProfile p = profile(player);
+        List<String> files = p.completedContracts.stream().filter(v -> v.startsWith("vfile:")).toList();
+        if (files.isEmpty()) return "§eКоллекция файлов пуста.";
+        String selector = requested == null ? "" : requested.trim().toLowerCase(java.util.Locale.ROOT);
+        List<String> selected = files.stream().filter(v -> selector.isBlank() || selector.equals("all") || v.substring(6).startsWith(selector + "|")).toList();
+        if (selected.isEmpty()) return "§cФайл не найден. Используй FSELL <site.arena>/<file> или FSELL ALL.";
+        int total = 0;
+        for (String entry : selected) {
+            String[] parts = entry.substring(6).split("\\|", 3);
+            if (parts.length >= 3) try { total += Integer.parseInt(parts[2]); } catch (NumberFormatException ignored) {}
+            p.completedContracts.remove(entry);
+        }
+        p.credits += total;
+        markDirty();
+        return "§aФАЙЛЫ ПРОДАНЫ §7| §f" + selected.size() + " шт. §6+" + total + " кредитов";
+    }
+
     public String completeContract(ServerPlayerEntity player, String contractId) {
         PlayerProfile p = profile(player);
         int reward = switch (contractId) {
