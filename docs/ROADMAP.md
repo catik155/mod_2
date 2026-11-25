@@ -44,7 +44,7 @@
 - [~] Add readable lore and file-type details to virtual records; unique content now expanded across many additional records, remaining entries still need bespoke lore
 - [~] Site actions yield credits/shards, persistent collectible files and breach rewards; collected files are stored as inventory only and earn no passive income, more site-specific loot still planned
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
-- [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
+- [~] Browser back/forward navigation now uses an actual browsing stack; internal site links and per-site pagination still pending, bookmarks remain session-local
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
 - [ ] More competition-focused content: PvP hacker battles, team rivalries, danger events and escalating arena pressure
 - [x] Keep investigation/search mechanics out; focus on hacker competition, attacks, defense, PvP and danger events
@@ -193,7 +193,7 @@ All nodes, sites, services, records, scripts, extraction, mining and attacks are
 
 ## Next implementation batch
 - [ ] Add hidden-site unlock conditions tied to campaign milestones, without exposing hidden domains in the public directory
-- [ ] Add site navigation (back/forward, bookmarks, and local page pagination) to the fictional browser
+- [~] Browser history stack with back/forward buttons implemented; bookmarks and local page pagination still need persistence/implementation
 - [ ] Replace remaining generic file read fallback with deterministic, per-file lore snippets for the remaining record types
 - [ ] Track source/provenance labels for collected files (earned, raid-looted) in inventory and keep this metadata persistent
 - [ ] Add overflow/scroll regression checks for workstation, browser, console and automation tabs at compact GUI sizes
