@@ -1,5 +1,7 @@
 # Cyber Arena roadmap
 
+**Статусы:** `[x]` — подтверждено реализацией; `[~]` — частично сделано; `[ ]` — не сделано.
+
 ## Inspiration and direction (research-informed)
 - [x] Research comparable fictional hacking/programming games: Hacknet, Uplink, Grey Hack, Bitburner, EXAPUNKS, Cyber Manhunt
 - [ ] Use Hacknet/Uplink inspiration for mission pacing, readable logs, alerts, contracts and story clues
@@ -19,9 +21,9 @@
 - [x] Browser has a dedicated top-right “NX консоль сайта” shortcut on each opened .arena page; it opens a site-context console without replacing the ordinary Console tab
 - [x] Keep the regular Console independent of the browser site context; the player can switch to it at any time
 - [x] Site-context NX console: selected site context is applied to targeted commands, has site-specific quick buttons, and a clear “current site” indicator
-- [x] Searchable, paginated fictional .arena directory (30 sites)
-- [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
-- [x] Fictional service panels and site record index (110 service entries, 90 records)
+- [x] Searchable, paginated fictional .arena directory (40 sites)
+- [x] 40 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
+- [x] Fictional service panels and site record index (site-specific service/file indexes (exact totals pending consistency tests))
 - [ ] Give every site a distinct layout module (header, navigation, cards, content sections, footer) rather than the same generic page
 - [x] Add dedicated layouts for City News, Marketplace, Bank, Infrastructure, Research Lab and Community Forum; remaining sites still need their own layouts
 - [x] Browser is view-only: no service scan, extraction, or hacking buttons on site pages; all gameplay actions go through NX/FLEX console
@@ -34,10 +36,10 @@
 - [ ] Finish responsive layout for very short screens and test every GUI scale in-game
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
-- [x] Expand browser directory from 30 to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
-- [ ] Sites contain lots of believable filler: short articles, encyclopedic-style info, catalogs, image-like mini illustrations, announcements and lore (not all tied to missions)
+- [x] Expand browser directory to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
+- [ ] Sites contain filler content: article cards, themed descriptions, catalogs and mini illustrations; richer unique content per site still needed
 - [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
-- [ ] Add valuable fictional data files that can be read in-game, have meaningful lore/game information, rarity and value, and can be sold for credits
+- [ ] Add collectible file inventory, rarity/value economy and selling individual files (readable descriptions exist, but this system is not implemented yet)
 - [ ] Site actions should yield site-themed loot/payloads, contract objectives and upgrade resources
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
