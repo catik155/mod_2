@@ -552,6 +552,13 @@ public final class ArenaState extends PersistentState {
         return true;
     }
 
+    private static String fileRarity(int value) {
+        if (value >= 100) return "§dЛЕГЕНДАРНЫЙ";
+        if (value >= 80) return "§6ЭПИЧЕСКИЙ";
+        if (value >= 55) return "§bРЕДКИЙ";
+        return "§7ОБЫЧНЫЙ";
+    }
+
     public String collectVirtualFile(ServerPlayerEntity player, String site, String file) {
         PlayerProfile p = profile(player);
         String prefix = "vfile:" + site + "|" + file + "|";
