@@ -181,11 +181,11 @@ public final class CyberArenaScreen extends Screen {
     @Override
     protected void init() {
         if (page == 1) { initTerminalFullScreen(); return; }
-        int panelWidth = Math.max(220, this.width - 16);
-        int panelHeight = Math.max(180, this.height - 16);
+        int panelWidth = Math.max(1, this.width - 16);
+        int panelHeight = Math.max(1, this.height - 16);
         int left = 8;
         int top = 8;
-        int tabGap = 5, tabWidth = (panelWidth - 28 - tabGap * 3) / 4;
+        int tabGap = 3, tabWidth = Math.max(36, (panelWidth - 28 - tabGap * 3) / 4);
         addDrawableChild(ButtonWidget.builder(Text.literal("БРАУЗЕР"), b -> navigate(0)).dimensions(left + 12, top + 48, tabWidth, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("КОНСОЛЬ"), b -> navigate(1)).dimensions(left + 14 + tabWidth + tabGap, top + 48, tabWidth, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("АВТОМАТИЗАЦИЯ"), b -> navigate(2)).dimensions(left + 14 + (tabWidth + tabGap) * 2, top + 48, tabWidth, 20).build());
@@ -197,21 +197,21 @@ public final class CyberArenaScreen extends Screen {
     }
 
     private void initTerminalFullScreen() {
-        int left = 8, width = this.width - 16, tabWidth = Math.max(70, (width - 36) / 4);
-        String[] labels = {"БРАУЗЕР", "NX / FLEX", "АВТОМАТИЗАЦИЯ", "УЛУЧШЕНИЯ"};
+        int left = Math.max(2, Math.min(8, this.width / 30)), width = Math.max(1, this.width - left * 2), tabGap = Math.max(2, Math.min(4, width / 100)), tabWidth = Math.max(38, (width - tabGap * 3) / 4);
+        String[] labels = width < 360 ? new String[]{"WEB", "NX", "AUTO", "UP"} : new String[]{"БРАУЗЕР", "NX / FLEX", "АВТОМАТИЗАЦИЯ", "УЛУЧШЕНИЯ"};
         int[] pages = {0, 1, 2, 8};
         for (int i = 0; i < labels.length; i++) {
             final int destination = pages[i];
-            addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + 4), 16, tabWidth, 20).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal(labels[i]), b -> navigate(destination)).dimensions(left + i * (tabWidth + tabGap), Math.max(4, Math.min(16, this.height / 25)), tabWidth, Math.max(16, Math.min(20, this.height / 18))).build());
         }
-        int inputWidth = width >= 300 ? width - 180 : width - 112;
-        input = new TextFieldWidget(textRenderer, left + 14, this.height - 42, inputWidth, 22, Text.literal("NX command"));
+        int inputWidth = Math.max(42, width - (width >= 380 ? 180 : 104));
+        input = new TextFieldWidget(textRenderer, left + 14, Math.max(24, this.height - 42), inputWidth, Math.max(16, Math.min(22, this.height / 22)), Text.literal("NX command"));
         input.setMaxLength(voraSelected ? 480 : 240);
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX> введи команду..." : "nx@arena:~$ введи команду..."));
         input.setChangedListener(this::refreshCompletions);
         addDrawableChild(input);
-        addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 90, this.height - 42, 76, 22).build());
-        if (width >= 300) {
+        addDrawableChild(ButtonWidget.builder(Text.literal("ВВОД ↵"), b -> submitTerminal()).dimensions(left + width - 82, Math.max(24, this.height - 42), Math.max(54, Math.min(72, width / 3)), Math.max(16, Math.min(22, this.height / 22))).build());
+        if (width >= 280) {
             addDrawableChild(ButtonWidget.builder(Text.literal(voraSelected ? "FLEX" : "NX"), b -> {
                 if (flexOwned) {
                     voraSelected = !voraSelected;
@@ -220,7 +220,7 @@ public final class CyberArenaScreen extends Screen {
                     appendOutput("§eFLEX заблокирован. Приобрети язык во вкладке УЛУЧШЕНИЯ за 250 кредитов.");
                     navigate(8);
                 }
-            }).dimensions(left + width - 158, this.height - 42, 60, 22)
+            }).dimensions(left + width - 154, Math.max(24, this.height - 42), Math.max(40, Math.min(56, width / 4)), Math.max(16, Math.min(22, this.height / 22)))
                 .tooltip(Tooltip.of(Text.literal(flexOwned ? "Переключить язык терминала NX / FLEX" : "FLEX — премиальный язык. Купить в магазине улучшений за 250 кредитов."))).build());
         }
         input.setFocused(true);
@@ -777,7 +777,7 @@ public final class CyberArenaScreen extends Screen {
 
 
     private void renderTerminal(DrawContext context, int mouseX, int mouseY, float delta) {
-        int left = 8, top = 8, width = this.width - 16, height = this.height - 16;
+        int left = Math.max(2, Math.min(8, this.width / 30)), top = Math.max(2, Math.min(8, this.height / 30)), width = Math.max(1, this.width - left * 2), height = Math.max(1, this.height - top * 2;
         context.fill(left, top, left + width, top + height, 0xF20A1119);
         context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
