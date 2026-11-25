@@ -5,8 +5,8 @@
 - [ ] Use Hacknet/Uplink inspiration for mission pacing, readable logs, alerts, contracts and story clues
 - [ ] Use Grey Hack/Bitburner inspiration for a deeper sandbox and custom scripting—adapted into safe, fully fictional Minecraft systems
 - [ ] Use EXAPUNKS inspiration for optional puzzle challenges that reward optimization and creativity
-- [ ] Use Cyber Manhunt inspiration for investigation missions, cross-site clues, NPC stories and data verification
-- [x] Keep only broad danger/pressure inspiration from Welcome to the Game III; no investigation, information-search gameplay or clue chains
+- [ ] Use broad inspiration for immersive, content-rich fictional websites, secret pages and valuable in-game files; do not add information-search/investigation gameplay
+- [x] Take only broad inspiration from Welcome to the Game III: many populated websites, hidden pages, secrets, danger/pressure and valuable fictional files; no investigative search gameplay
 - [ ] Keep all systems strictly simulated: no real network, real addresses, OS commands, real data, or actionable real intrusion tooling
 
 ## Core
@@ -35,12 +35,15 @@
 - [ ] Add a competition panel in the upper-left with online players, actual Minecraft skin heads, and server-authoritative reputation/points; never display fabricated scores
 - [ ] Add competition score synchronization for all online players and sort leaderboard by earned points
 - [x] Expand browser directory from 30 to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
-- [ ] Site actions should yield site-themed loot/payloads, clues, contract objectives and upgrade resources
+- [ ] Sites contain lots of believable filler: short articles, encyclopedic-style info, catalogs, image-like mini illustrations, announcements and lore (not all tied to missions)
+- [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
+- [ ] Add valuable fictional data files that can be read in-game, have meaningful lore/game information, rarity and value, and can be sold for credits
+- [ ] Site actions should yield site-themed loot/payloads, contract objectives and upgrade resources
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
 - [ ] More competition-focused content: PvP hacker battles, team rivalries, danger events and escalating arena pressure
-- [x] Keep investigation/search mechanics out of the design; focus on hacker competition, attacks, defense, PvP and danger events
+- [x] Keep investigation/search mechanics out; focus on hacker competition, attacks, defense, PvP and danger events
 - [ ] More varied content generation with deterministic seed and multiplayer consistency
 
 ## Terminal UI (Linux / GNU Readline inspired)
@@ -86,8 +89,9 @@
 
 ## Missions and site content
 - [ ] 50+ contract templates with different objective patterns and difficulty tiers
-- [ ] Site-specific recovery missions and protected payloads with story fragments
-- [ ] Recipe/crafting, travel, media, legal, sports, social and research themed mission chains
+- [ ] Future feature: dedicated Hacker Contracts website for hiring NPC hackers for jobs or accepting contracts from clients; not part of current scope
+- [ ] Site-specific missions and protected data payloads with optional story fragments
+- [ ] Recipe/crafting, travel, media, legal, sports, social and research themed site content (primarily filler; only some tied to missions)
 - [ ] NPC clients and organizations, reputation and rival responses
 - [ ] Dynamic contracts with risk/reward previews and cooldowns
 - [ ] Events: timed competitions, site refreshes, incidents, bonus objectives
