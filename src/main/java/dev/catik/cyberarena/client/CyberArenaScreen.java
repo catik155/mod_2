@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 
 /** Client-only fictional web browser and NEX workstation. */
 public final class CyberArenaScreen extends Screen {
@@ -89,6 +92,8 @@ public final class CyberArenaScreen extends Screen {
         {"relics.idx", "fragments.db", "chronology.map", "expeditions.log", "vault.enc"}
     };
     private static final Set<String> BOOKMARKS = new LinkedHashSet<>();
+    private static boolean bookmarksLoaded = false;
+    private static final Path BOOKMARK_FILE = Path.of("config", "cyberarena", "bookmarks.txt");
     private static final List<String> HISTORY = new ArrayList<>();
     private static final List<String> browserHistory = new ArrayList<>();
     private static int browserHistoryCursor = -1;
@@ -128,6 +133,28 @@ public final class CyberArenaScreen extends Screen {
 
     private void navigate(int nextPage) {
         if (client != null) client.setScreen(new CyberArenaScreen(nextPage, "", ""));
+    }
+    private static void loadBookmarks() {
+        if (bookmarksLoaded) return;
+        bookmarksLoaded = true;
+        try {
+            if (!Files.exists(BOOKMARK_FILE)) return;
+            for (String line : Files.readAllLines(BOOKMARK_FILE)) {
+                String site = line.trim();
+                if (java.util.Arrays.asList(SITES).contains(site)) BOOKMARKS.add(site);
+            }
+        } catch (IOException ignored) {
+            // Keep browser usable if local bookmark storage is unavailable.
+        }
+    }
+    private static void saveBookmarks() {
+        try {
+            Path parent = BOOKMARK_FILE.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            Files.write(BOOKMARK_FILE, BOOKMARKS);
+        } catch (IOException ignored) {
+            // Bookmarks remain available for this session if disk storage fails.
+        }
     }
     private void openSite(String site) {
         if (browserHistoryCursor < browserHistory.size() - 1)
@@ -443,6 +470,7 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
+            saveBookmarks();
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
         }).dimensions(left + 86, top + 62, 78, 16).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
