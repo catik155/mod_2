@@ -22,7 +22,7 @@
 - [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
 - [x] Fictional service panels and site record index (110 service entries, 90 records)
 - [ ] Give every site a distinct layout module (header, navigation, cards, content sections, footer) rather than the same generic page
-- [x] Add a dedicated editorial/news-card layout to the City News site; remaining sites still need their own layouts
+- [x] Add dedicated layouts for City News, Marketplace and Bank; remaining sites still need their own layouts
 - [x] Browser is view-only: no service scan, extraction, or hacking buttons on site pages; all gameplay actions go through NX/FLEX console
 - [x] Browser panel width and tab widths now adapt to available screen width; continue testing small resolutions and vertical overflow
 - [x] Expand the workstation/browser to a near-full-screen layout that uses the available display area
