@@ -715,7 +715,7 @@ public final class CyberArenaScreen extends Screen {
             int idx = siteIndex(selectedSite);
             int accent = siteAccent(idx);
             String category = siteCategory(idx);
-            int contentTop = top + 94;
+            int contentTop = top + 136;
             int contentBottom = top + panelHeight - 66;
             int contentHeight = Math.max(72, contentBottom - contentTop);
             int contentOffset = browserScroll * 8;
@@ -723,10 +723,10 @@ public final class CyberArenaScreen extends Screen {
             // Compact site status strip: only simulation-local site metadata, never real host status.
             int stripY = top + 110;
             int stripRight = left + panelWidth - 10;
-            context.fill(left + 10, stripY, stripRight, stripY + 22, 0xFF1B2D3B);
-            context.fill(left + 10, stripY, left + 13, stripY + 22, accent);
+            context.fill(left + 10, stripY, stripRight, stripY + 30, 0xFF1B2D3B);
+            context.fill(left + 10, stripY, left + 13, stripY + 30, accent);
             context.drawTextWithShadow(textRenderer, Text.literal("РИСК: " + translateRisk(RISKS[idx])), left + 18, stripY + 4, accent);
-            context.drawTextWithShadow(textRenderer, Text.literal("УЗЕЛ: ДОСТУПЕН  •  " + (BOOKMARKS.contains(selectedSite) ? "В ЗАКЛАДКАХ" : "НЕ СОХРАНЁН")), left + 120, stripY + 4, 0xFFB8C8D8);
+            context.drawTextWithShadow(textRenderer, Text.literal(BOOKMARKS.contains(selectedSite) ? "ЗАКЛАДКА СОХРАНЕНА" : "СТРАНИЦА НЕ СОХРАНЕНА"), left + 18, stripY + 13, 0xFFB8C8D8);
             context.enableScissor(left + 10, contentTop, left + panelWidth - 10, contentBottom);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + contentHeight - contentOffset, 0xFF142431);
             context.fill(left + 10, contentTop - contentOffset, left + panelWidth - 10, contentTop + 4 - contentOffset, accent);
