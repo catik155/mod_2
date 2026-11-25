@@ -153,8 +153,8 @@ public final class CyberArenaScreen extends Screen {
         static Builder builder(Text label, java.util.function.Consumer<ButtonWidget> action) { return new Builder(label, action); }
         @Override protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             boolean hovered = isHovered();
-            int fill = !active ? 0xFF17212B : hovered ? 0xFF213947 : 0xFF182B37;
-            int border = !active ? 0xFF43515B : hovered ? 0xFF55E6D2 : 0xFF287F88;
+            int fill = !active ? 0xFF141D26 : hovered ? 0xFF1C303A : 0xFF16242E;
+            int border = !active ? 0xFF34434D : hovered ? 0xFF55E6D2 : 0xFF263C46;
             context.fill(getX(), getY(), getX()+width, getY()+height, fill);
             context.fill(getX(), getY(), getX()+width, getY()+1, border);
             context.fill(getX(), getY()+height-1, getX()+width, getY()+height, border);
@@ -523,7 +523,7 @@ public final class CyberArenaScreen extends Screen {
             runNex("UPGR AUTOM");
             if (client != null && client.getNetworkHandler() != null)
                 client.getNetworkHandler().sendChatCommand("arena nex AUTOM STATUS");
-        }).dimensions(left + 14, top + 76, panelWidth - 28, 21)
+        }).dimensions(left + 8, top + 66, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Покупка или улучшение серверного модуля AUTOM. Первый уровень открывает сценарии и FLOW."))).build();
         if (automationLevel >= 5) purchase.active = false;
         addDrawableChild(purchase);
@@ -534,16 +534,16 @@ public final class CyberArenaScreen extends Screen {
         input.setPlaceholder(Text.literal(voraSelected ? "FLEX: до 12 игровых шагов через ;" : "SEEK vault; PORTA vault.arena; STAT"));
         addDrawableChild(input);
         addDrawableChild(ButtonWidget.builder(Text.literal("ЗАПУСТИТЬ СВОЙ СЦЕНАРИЙ"), b -> submit("arena nex FLOW "))
-            .dimensions(left + 14, top + 138, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 108, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal(voraSelected ? "FLEX: до 12 шагов и расширенный набор игровых команд." : "NX: до 6 разрешённых игровых команд."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: ОБЗОР СЕТИ"), b -> runNex("FLOW SEEK arena; NODR; STAT"))
-            .dimensions(left + 14, top + 174, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 144, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Поиск виртуальных сайтов, карта узлов и состояние профиля."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: РЕСУРСЫ"), b -> runNex("FLOW MINE; SELR; STAT"))
             .dimensions(left + 14, top + 202, panelWidth - 28, 22)
             .tooltip(Tooltip.of(Text.literal("Игровая добыча, обмен осколков и проверка баланса."))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("ГОТОВЫЙ: АУДИТ САЙТОВ"), b -> runNex("FLOW PORTA shop.arena; PORTA news.arena; PORTA grid.arena"))
-            .dimensions(left + 14, top + 230, panelWidth - 28, 22)
+            .dimensions(left + 8, top + 170, panelWidth - 16, 18)
             .tooltip(Tooltip.of(Text.literal("Проверяет виртуальные службы трёх сайтов."))).build());
     }
     private void initUpgrades(int left, int top, int panelWidth) {
@@ -597,14 +597,14 @@ public final class CyberArenaScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (page == 1) { renderTerminal(context, mouseX, mouseY, delta); return; }
         // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
-        int panelWidth = Math.max(1, this.width - 16);
-        int panelHeight = Math.max(1, this.height - 16);
-        int left = 8;
-        int top = 8;
+        int panelWidth = Math.max(1, this.width - 10);
+        int panelHeight = Math.max(1, this.height - 10);
+        int left = 5;
+        int top = 5;
         context.fill(left, top, left + panelWidth, top + panelHeight, 0xE9101923);
         context.fill(left, top, left + panelWidth, top + 2, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // ИГРОВАЯ СТАНЦИЯ"), left + 14, top + 13, 0xFF55E6D2);
-        context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНАЯ СЕТЬ • ТОЛЬКО ИГРОВАЯ СИМУЛЯЦИЯ"), left + 14, top + 29, 0xFFB8C8D8);
+        context.drawTextWithShadow(textRenderer, Text.literal("ВИРТУАЛЬНАЯ СЕТЬ • ТОЛЬКО ИГРОВАЯ СИМУЛЯЦИЯ"), left + 8, top + 24, 0xFFB8C8D8);
 
         if (page == 6) {
             int idx = siteIndex(selectedSite);
@@ -612,16 +612,16 @@ public final class CyberArenaScreen extends Screen {
             for (int i = 0; i < FILE_NAMES[idx].length; i++) {
                 int y = top + 118 + i * 32;
                 context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
-                context.drawTextWithShadow(textRenderer, Text.literal(FILE_NAMES[idx][i]), left + 22, y + 5, 0xFFBDEBFF);
-                context.drawTextWithShadow(textRenderer, Text.literal("ИГРОВАЯ ЗАПИСЬ / МЕТАДАННЫЕ"), left + 22, y + 16, 0xFF8295A8);
+                context.drawTextWithShadow(textRenderer, Text.literal(FILE_NAMES[idx][i]), left + 16, y + 3, 0xFFBDEBFF);
+                context.drawTextWithShadow(textRenderer, Text.literal("ИГРОВАЯ ЗАПИСЬ / МЕТАДАННЫЕ"), left + 16, y + 12, 0xFF8295A8);
             }
         } else if (page == 3) {
             int idx = siteIndex(selectedSite);
             int accent = siteAccent(idx);
             String category = siteCategory(idx);
-            int contentTop = top + 110;
-            int contentBottom = top + panelHeight - 90;
-            int contentHeight = Math.max(90, contentBottom - contentTop);
+            int contentTop = top + 94;
+            int contentBottom = top + panelHeight - 66;
+            int contentHeight = Math.max(72, contentBottom - contentTop);
             int contentOffset = browserScroll * 8;
             context.drawTextWithShadow(textRenderer, Text.literal("АДРЕС: https://" + selectedSite + "   •   IP: " + virtualSiteIp(idx)), left + 14, top + 96, 0xFFBDEBFF);
             context.enableScissor(left + 10, contentTop, left + panelWidth - 10, contentBottom);
@@ -630,9 +630,9 @@ public final class CyberArenaScreen extends Screen {
             context.fill(left + 10, contentTop - contentOffset, left + 14, contentTop + contentHeight - contentOffset, accent);
             if (idx == 1) {
                 // Distinct editorial layout for the fictional city news site.
-                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF173B52);
-                context.drawTextWithShadow(textRenderer, Text.literal("ГОРОДСКАЯ ЛЕНТА  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFF76D7FF);
-                context.drawTextWithShadow(textRenderer, Text.literal("СВЕЖИЕ СОБЫТИЯ / ВЫПУСК 24"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                context.fill(left + 12, contentTop + 10 - contentOffset, left + panelWidth - 12, contentTop + 42 - contentOffset, 0xFF173B52);
+                context.drawTextWithShadow(textRenderer, Text.literal("ГОРОДСКАЯ ЛЕНТА  •  " + SITE_BRANDS[idx]), left + 18, contentTop + 18 - contentOffset, 0xFF76D7FF);
+                context.drawTextWithShadow(textRenderer, Text.literal("СВЕЖИЕ СОБЫТИЯ / ВЫПУСК 24"), left + 18, contentTop + 50 - contentOffset, 0xFF94AFC1);
                 context.fill(left + 18, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 116 - contentOffset, 0xFF213545);
                 context.drawTextWithShadow(textRenderer, Text.literal("ГЛАВНОЕ"), left + 26, contentTop + 72 - contentOffset, 0xFFFFC86B);
                 drawWrapped(context, "В городских сетях обновили расписание сервисных работ — жители сообщают о стабильном соединении.", left + 26, contentTop + 86 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
@@ -647,7 +647,7 @@ public final class CyberArenaScreen extends Screen {
                 context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF3B2A19);
                 context.drawTextWithShadow(textRenderer, Text.literal("АРЕНА MARKET  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFFFFC86B);
                 context.drawTextWithShadow(textRenderer, Text.literal("ВИТРИНА / ОБНОВЛЕНИЕ 08"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
-                int tileW = Math.max(62, (panelWidth - 58) / 2);
+                int tileW = Math.max(50, (panelWidth - 44) / 2);
                 context.fill(left + 18, contentTop + 66 - contentOffset, left + 26 + tileW, contentTop + 112 - contentOffset, 0xFF30271E);
                 context.drawTextWithShadow(textRenderer, Text.literal("ИНСТРУМЕНТЫ"), left + 26, contentTop + 73 - contentOffset, 0xFFFFB84D);
                 drawWrapped(context, "Модули и детали станции", left + 26, contentTop + 88 - contentOffset, tileW - 14, 0xFFF0F5FA);
@@ -782,8 +782,8 @@ public final class CyberArenaScreen extends Screen {
         context.fill(left, top, left + width, top + 3, 0xFF29D6C5);
         context.drawTextWithShadow(textRenderer, Text.literal("CYBER ARENA // TERMINAL | " + (voraSelected ? "FLEX SHELL" : "NX SHELL")), left + 12, top + 42, 0xFF55E6D2);
         context.drawTextWithShadow(textRenderer, Text.literal("СЕАНС: ИГРОВАЯ СИМУЛЯЦИЯ     УЗЕЛ: ARENA     СТАТУС: АКТИВЕН"), left + 12, top + 56, 0xFF8295A8);
-        int outputTop = top + 62, outputBottom = height - 48;
-        context.fill(left + 8, outputTop, left + width - 8, outputBottom, 0xFF0D1720);
+        int outputTop = top + 54, outputBottom = height - 40;
+        context.fill(left + 5, outputTop, left + width - 5, outputBottom, 0xFF0D1720);
         int lineHeight = 10, maxLines = Math.max(1, (outputBottom - outputTop - 8) / lineHeight);
         int start = Math.max(0, TERMINAL_OUTPUT.size() - maxLines - terminalScroll);
         int end = Math.min(TERMINAL_OUTPUT.size(), start + maxLines);
@@ -791,7 +791,7 @@ public final class CyberArenaScreen extends Screen {
         for (int i = start; i < end; i++) {
             String line = TERMINAL_OUTPUT.get(i).replaceAll("§[0-9a-fk-or]", "");
             int color = line.contains("ERROR") || line.contains("ОШИБКА") ? 0xFFFF7777 : line.contains("УСПЕХ") ? 0xFF72E6B4 : 0xFFD0DCE6;
-            drawWrapped(context, line, left + 16, y, width - 34, color);
+            drawWrapped(context, line, left + 10, y, width - 20, color);
             y += lineHeight;
         }
         if (input != null && input.isFocused() && !input.getText().isBlank()) {
