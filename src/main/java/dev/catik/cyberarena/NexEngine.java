@@ -378,19 +378,22 @@ public final class NexEngine {
         List<String> entries = FILES.get(parts[0]);
         if (entries == null || !entries.contains(parts[1])) return error("NO_RECORD", "Record is not listed on this host.");
         String file = parts[1];
-        String description = switch (file) {
-            case "catalog.idx" -> "Public catalog index: 24 virtual product entries.";
-            case "offers.dat" -> "Public offers and rotating game contract hints.";
-            case "ledger.log" -> "Public simulated exchange activity.";
-            case "bulletins.txt" -> "Public bulletin archive and fictional network notices.";
-            case "dispatch.log" -> "Simulated message routing events.";
-            case "public.key" -> "Public verification fingerprint for the service.";
-            case "load.map" -> "Fictional district demand and supply values.";
-            case "relay.cfg" -> "Three simulated relay service endpoints.";
-            case "grid.log" -> "Virtual load-balancing events.";
-            case "records.enc", "ledger.bak", "patient.enc", "manifest.enc", "accounts.enc", "prototype.idx", "specimen.enc", "mission.enc", "orbit.map", "vault.enc" -> "Protected record manifest. Payload requires an appropriate in-game contract or progression unlock.";
-            default -> "Fictional public metadata record. No real personal data is stored.";
+        String topic = switch (parts[0]) {
+            case "shop.arena", "auction.arena", "craft.arena" -> "Экономика виртуального города: торговцы используют сезонные каталоги, а цены меняются после игровых событий. Участники рынка публикуют обзоры товаров, правила обмена и заметки о коллекциях.";
+            case "news.arena", "media.arena", "archive2.arena", "archive3.arena" -> "Медиаархив симуляции: редакторы собирают короткие сводки, хроники соревнований, исторические заметки и тематические подборки. Все события и имена принадлежат игровому миру.";
+            case "grid.arena", "power.arena", "energy.arena", "weather.arena", "weather2.arena" -> "Справочник инфраструктуры: виртуальные районы используют распределённые ресурсы, датчики и резервные схемы. Данные описывают игровые показатели и не относятся к реальным объектам.";
+            case "labs.arena", "uni.arena", "robot.arena", "code.arena" -> "Научная заметка игрового мира: команда описывает эксперимент, фиксирует результаты тестов и делится выводами. Прототипы, лаборатории и проекты вымышлены и существуют только в Cyber Arena.";
+            case "forum.arena", "social.arena", "jobs.arena" -> "Общественный раздел: участники обсуждают турниры, делятся советами новичкам, публикуют объявления и правила сообщества. Профили и сообщения — NPC-контент игровой симуляции.";
+            case "metro.arena", "transit.arena", "travel.arena", "port.arena", "docks.arena" -> "Транспортный справочник: маршруты, расписания и логистические заметки помогают ориентироваться в виртуальном городе. Указанные рейсы и грузы не отражают реальные перевозки.";
+            case "clinic.arena", "farm.arena", "food.arena", "wildlife.arena", "museum.arena", "museum2.arena", "housing.arena", "legal.arena", "sports.arena", "music.arena", "casino.arena", "security.arena", "vault.arena" -> "Тематическая публикация виртуального портала: справочные сведения, обзор коллекций и игровые заметки. Содержимое создано для атмосферы и не содержит настоящих персональных записей.";
+            default -> "Архивная публикация Cyber Arena: заметки об игровых событиях, каталогах, обновлениях и виртуальных объектах. Все сведения вымышлены.";
         };
+        String recordType = file.endsWith(".enc") ? "Файл помечен как защищённый игровой архив; доступ к ценным содержимым может открываться отдельными игровыми заданиями."
+            : file.endsWith(".log") ? "Журнал содержит декоративные записи об активности симуляции и временные отметки игрового мира."
+            : file.endsWith(".cfg") ? "Конфигурация описывает параметры вымышленной службы; значения применяются только в игровом сценарии."
+            : file.endsWith(".map") ? "Карта хранит схематичные игровые зоны, маршруты или связи между объектами."
+            : "Это обычный внутриигровой справочный файл с описанием раздела и тематическими заметками.";
+        String description = topic + "\n\n" + recordType + "\n\nСводка: " + file + " — часть коллекции сайта " + parts[0] + ". Чтение не запускает действий, не обращается к реальным устройствам и не содержит внешних данных.";
         return "§bNEX RECORD §7| §f" + parts[0] + "/" + file + "\n§f" + description;
     }
 
