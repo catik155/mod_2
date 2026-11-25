@@ -190,3 +190,10 @@
 
 ## Simulation boundary
 All nodes, sites, services, records, scripts, extraction, mining and attacks are fictional Minecraft game systems. NX/FLEX must not perform real network access, scan real targets, execute OS commands, read real files or manipulate external systems.
+
+## Next implementation batch
+- [ ] Add hidden-site unlock conditions tied to campaign milestones, without exposing hidden domains in the public directory
+- [ ] Add site navigation (back/forward, bookmarks, and local page pagination) to the fictional browser
+- [ ] Replace remaining generic file read fallback with deterministic, per-file lore snippets for the remaining record types
+- [ ] Track source/provenance labels for collected files (earned, raid-looted) in inventory and keep this metadata persistent
+- [ ] Add overflow/scroll regression checks for workstation, browser, console and automation tabs at compact GUI sizes
