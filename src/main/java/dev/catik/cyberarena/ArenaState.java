@@ -552,6 +552,43 @@ public final class ArenaState extends PersistentState {
         return true;
     }
 
+    private static final String[][] CAMPAIGN_STEPS = {
+        {"read", "Сохрани любой виртуальный файл через READ", "15"},
+        {"sell", "Продай файлы через FSELL", "20"},
+        {"mine", "Проведи игровой цикл добычи: MINE", "20"},
+        {"upgrade", "Купи любое улучшение: UPGR", "25"},
+        {"breach", "Успешно пройди испытание сайта: CRACK", "30"}
+    };
+
+    private String campaignStatus(ServerPlayerEntity player) {
+        PlayerProfile p = profile(player);
+        StringBuilder out = new StringBuilder("§bКАРЬЕРА ОПЕРАТОРА // ПЕРВЫЕ ШАГИ\n");
+        int done = 0;
+        for (String[] step : CAMPAIGN_STEPS) {
+            boolean complete = p.completedContracts.contains("milestone:" + step[0]);
+            if (complete) done++;
+            out.append(complete ? "§a✓ " : "§7○ ").append("§f").append(step[1])
+                .append(complete ? " §8(выполнено)" : " §6+" + step[2] + " кр.").append("\n");
+        }
+        return out.append("§eПрогресс: ").append(done).append("/").append(CAMPAIGN_STEPS.length)
+            .append(" §7| бонусы начисляются автоматически").toString();
+    }
+
+    private void completeMilestone(ServerPlayerEntity player, PlayerProfile p, String id) {
+        for (String[] step : CAMPAIGN_STEPS) {
+            if (!step[0].equals(id)) continue;
+            String marker = "milestone:" + id;
+            if (p.completedContracts.add(marker)) {
+                int reward = Integer.parseInt(step[2]);
+                p.credits += reward;
+                p.reputation += 1;
+                player.sendMessage(Text.literal("§6[КАРЬЕРА] §fЗадача выполнена: " + step[1] + " §7| §6+" + reward + " кредитов §d+1 репутация"), false);
+                markDirty();
+            }
+            return;
+        }
+    }
+
     private static String fileRarity(int value) {
         if (value >= 100) return "§dЛЕГЕНДАРНЫЙ";
         if (value >= 80) return "§6ЭПИЧЕСКИЙ";
@@ -566,6 +603,7 @@ public final class ArenaState extends PersistentState {
         int value = 20 + Math.floorMod((site + "|" + file).hashCode(), 65) + (file.endsWith(".enc") ? 35 : 0);
         p.completedContracts.add(prefix + value);
         markDirty();
+        completeMilestone(player, p, "read");
         return "\n§aФайл сохранён §7| " + fileRarity(value) + " §7| §e" + value + " кредитов. FINV — коллекция, FSELL — продажа.";
     }
 
@@ -601,6 +639,7 @@ public final class ArenaState extends PersistentState {
         }
         p.credits += total;
         markDirty();
+        completeMilestone(player, p, "sell");
         return "§aФАЙЛЫ ПРОДАНЫ §7| §f" + selected.size() + " шт. §6+" + total + " кредитов";
     }
 
@@ -984,6 +1023,7 @@ public final class ArenaState extends PersistentState {
         int credits = 12 + difficulty * 7;
         if (p.dataShards + shards > 10 + p.storage * 10) return "§cDATA VAULT FULL. Sell shards with SELR or upgrade STORAGE.";
         p.dataShards += shards; p.credits += credits; p.reputation += difficulty; p.completedContracts.add("breach:" + site); markDirty();
+        completeMilestone(player, p, "breach");
         return "§aDATA EXTRACTED | §f" + site + " §b+" + shards + " shards §6+" + credits + " credits §d+" + difficulty + " reputation";
     }
 
@@ -994,6 +1034,7 @@ public final class ArenaState extends PersistentState {
         if (p.dataShards >= capacity) return "§cDATA VAULT FULL. Sell shards or upgrade STORAGE.";
         p.lastMineTick = now; int made = Math.min(capacity - p.dataShards, 2 + p.miningRig * 2 + p.cpu);
         p.dataShards += made; p.credits += made * (2 + p.miningRig); markDirty();
+        completeMilestone(player, p, "mine");
         return "§aMINING CYCLE §b+" + made + " shards §6+" + (made * (2 + p.miningRig)) + " credits";
     }
 
@@ -1038,6 +1079,7 @@ public final class ArenaState extends PersistentState {
         }
         refreshHomeDisplays(player, p);
         markDirty();
+        completeMilestone(player, p, "upgrade");
         return "§aMODULE INSTALLED §f" + type.toUpperCase() + " §eLEVEL " + (level + 1) + "/5 §6-" + cost + " credits";
     }
 
