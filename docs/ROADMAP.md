@@ -1,5 +1,11 @@
 # Cyber Arena roadmap
 
+## Progress snapshot (2026-11-25)
+- Checklist totals: 167 tracked items; 80 complete, 10 partial, 77 open.
+- Strict completion rate: 48% (completed only).
+- Weighted progress: 51% (partial items counted as half).
+- This is a roadmap estimate, not a playable-feature coverage or QA percentage.
+
 **Статусы:** `[x]` — подтверждено реализацией; `[~]` — частично сделано; `[ ]` — не сделано.
 
 ## Inspiration and direction (research-informed)
