@@ -60,7 +60,7 @@
 - [ ] Syntax highlighting and inline diagnostics without executing a command
 
 ## NX (formerly NEX) language — planned full programming language
-- [x] Existing command vocabulary and command manual (current baseline)
+- [~] Existing command vocabulary and command manual; newly added FINV/FSELL commands are in code and awaiting CI verification
 - [x] FLOW routine: up to six whitelisted instructions; server validates actions
 - [ ] Canonical language name NX; keep NEX as a compatibility alias during migration
 - [ ] Lexer/parser with clear error line, column, token and suggestions
