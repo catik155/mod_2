@@ -40,8 +40,9 @@
 - [~] Sites contain filler content: article cards, themed descriptions, catalogs and mini illustrations; file lore now expanded across many site/file combinations, but full unique article bodies and layouts still needed
 - [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
 - [x] Add persistent collectible file inventory, value calculation, and sale of files by site/name or ALL (CI-confirmed)
+- [x] Successful PvP raid can transfer one unique stored virtual file from defender to attacker; file transfer is persistent and does not pay passive credits
 - [~] Add readable lore and file-type details to virtual records; unique content expanded for selected sites, broad coverage still in progress
-- [~] Site actions yield credits/shards, persistent collectible files and breach rewards; campaign objectives/reward hooks are now implemented, more site-specific loot still planned
+- [~] Site actions yield credits/shards, persistent collectible files and breach rewards; collected files are stored as inventory only and earn no passive income, more site-specific loot still planned
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
