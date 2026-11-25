@@ -658,6 +658,51 @@ public final class CyberArenaScreen extends Screen {
                 context.fill(left + 18, contentTop + 172 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF213545);
                 context.drawTextWithShadow(textRenderer, Text.literal("ПОСЛЕДНИЕ ОПОВЕЩЕНИЯ"), left + 26, contentTop + 180 - contentOffset, 0xFF72E6B4);
                 drawWrapped(context, "Плановые проверки и уведомления о работе игрового финансового сервиса.", left + 26, contentTop + 192 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+            } else if (idx == 4) {
+                // Research notebook layout: staged experiments, field notes and lab notices.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF35233D);
+                context.drawTextWithShadow(textRenderer, Text.literal("НАУЧНЫЙ ЦЕНТР  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFFB58CFF);
+                context.drawTextWithShadow(textRenderer, Text.literal("ЖУРНАЛ ИССЛЕДОВАНИЙ / СЕССИЯ 12"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                context.fill(left + 18, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 112 - contentOffset, 0xFF272337);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПРОЕКТ «СИГМА»"), left + 26, contentTop + 73 - contentOffset, 0xFFB58CFF);
+                drawWrapped(context, "Прототип стабилизатора завершил тестовый цикл. Результаты внесены в лабораторный журнал.", left + 26, contentTop + 88 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+                context.fill(left + 18, contentTop + 122 - contentOffset, left + panelWidth - 18, contentTop + 164 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПОЛЕВЫЕ ЗАМЕТКИ"), left + 26, contentTop + 130 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Экспедиционная группа просит сверить номера образцов перед следующей поставкой.", left + 26, contentTop + 144 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+                context.fill(left + 18, contentTop + 172 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF213545);
+                context.drawTextWithShadow(textRenderer, Text.literal("ОБЪЯВЛЕНИЯ"), left + 26, contentTop + 180 - contentOffset, 0xFFB58CFF);
+                drawWrapped(context, "Архивные записи доступны сотрудникам. Новые исследования появятся после планового обновления.", left + 26, contentTop + 192 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+            } else if (idx == 5) {
+                // Community forum: topic cards, pinned notice and moderation summary.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF183447);
+                context.drawTextWithShadow(textRenderer, Text.literal("ОБЩИЙ ФОРУМ  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFF70D8FF);
+                context.drawTextWithShadow(textRenderer, Text.literal("ОБСУЖДЕНИЯ / 3 АКТИВНЫЕ ТЕМЫ"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                context.fill(left + 18, contentTop + 66 - contentOffset, left + panelWidth - 18, contentTop + 112 - contentOffset, 0xFF1E2F3C);
+                context.drawTextWithShadow(textRenderer, Text.literal("ЗАКРЕПЛЕНО: ПРАВИЛА"), left + 26, contentTop + 73 - contentOffset, 0xFFFFC86B);
+                drawWrapped(context, "Уважайте участников, отмечайте игровые слухи и проверяйте источники перед публикацией.", left + 26, contentTop + 88 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+                context.fill(left + 18, contentTop + 122 - contentOffset, left + panelWidth - 18, contentTop + 164 - contentOffset, 0xFF182B39);
+                context.drawTextWithShadow(textRenderer, Text.literal("ТЕМА: ГОРОДСКИЕ СИГНАЛЫ"), left + 26, contentTop + 130 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Игроки обсуждают странные отключения и собирают наблюдения в общий список.", left + 26, contentTop + 144 - contentOffset, panelWidth - 58, 0xFFD0DCE6);
+                context.fill(left + 18, contentTop + 172 - contentOffset, left + panelWidth - 18, contentTop + 208 - contentOffset, 0xFF213545);
+                context.drawTextWithShadow(textRenderer, Text.literal("ПОСЛЕДНИЙ ОТВЕТ"), left + 26, contentTop + 180 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Модератор просит добавлять время и название района к новым заметкам.", left + 26, contentTop + 192 - contentOffset, panelWidth - 58, 0xFFF0F5FA);
+            } else if (idx == 2) {
+                // Infrastructure status dashboard: simulated city network health, not real network telemetry.
+                context.fill(left + 18, contentTop + 10 - contentOffset, left + panelWidth - 18, contentTop + 42 - contentOffset, 0xFF17382E);
+                context.drawTextWithShadow(textRenderer, Text.literal("ЭНЕРГОКАРТА  •  " + SITE_BRANDS[idx]), left + 26, contentTop + 18 - contentOffset, 0xFF62E6B5);
+                context.drawTextWithShadow(textRenderer, Text.literal("СИМУЛЯЦИЯ ГОРОДСКИХ СЛУЖБ"), left + 24, contentTop + 50 - contentOffset, 0xFF94AFC1);
+                String[] zones = {"СЕВЕРНЫЙ УЗЕЛ", "ЦЕНТРАЛЬНЫЙ РАЙОН", "ЮЖНАЯ ЛИНИЯ"};
+                int[] levels = {76, 54, 88};
+                for (int z = 0; z < zones.length; z++) {
+                    int zy = contentTop + 66 + z * 46 - contentOffset;
+                    context.fill(left + 18, zy, left + panelWidth - 18, zy + 38, 0xFF182B39);
+                    context.drawTextWithShadow(textRenderer, Text.literal(zones[z]), left + 26, zy + 6, 0xFFD0DCE6);
+                    int barLeft = left + 26, barTop = zy + 22, barWidth = panelWidth - 54;
+                    context.fill(barLeft, barTop, barLeft + barWidth, barTop + 5, 0xFF334650);
+                    context.fill(barLeft, barTop, barLeft + barWidth * levels[z] / 100, barTop + 5, 0xFF62E6B5);
+                }
+                context.drawTextWithShadow(textRenderer, Text.literal("ПОКАЗАТЕЛИ УЧЕБНОЙ СИМУЛЯЦИИ"), left + 22, contentTop + 210 - contentOffset, 0xFF70D8FF);
+                drawWrapped(context, "Сводка демонстрационная: не подключается к реальным сетям или инфраструктуре.", left + 22, contentTop + 224 - contentOffset, panelWidth - 44, 0xFFB5C5D2);
             } else {
                 context.drawTextWithShadow(textRenderer, Text.literal(category + "  //  " + SITE_BRANDS[idx]), left + 22, contentTop + 12 - contentOffset, accent);
                 context.drawTextWithShadow(textRenderer, Text.literal(TITLES[idx]), left + 22, contentTop + 36 - contentOffset, 0xFFF0F6FA);
