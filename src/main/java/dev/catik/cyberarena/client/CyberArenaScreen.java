@@ -437,12 +437,12 @@ public final class CyberArenaScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("← ИСТОРИЯ"), b -> moveBrowserHistory(-1))
             .dimensions(left + 8, top + 62, 74, 16).tooltip(Tooltip.of(Text.literal("Вернуться к предыдущей открытой странице"))).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("КАТАЛОГ"), b -> navigate(0))
-            .dimensions(left + 164, top + 62, 70, 16).build());
+            .dimensions(left + 170, top + 62, 66, 16).build());
         addDrawableChild(ButtonWidget.builder(Text.literal(BOOKMARKS.contains(selectedSite) ? "УБРАТЬ ЗАКЛАДКУ" : "В ЗАКЛАДКИ"), b -> {
             if (BOOKMARKS.contains(selectedSite)) BOOKMARKS.remove(selectedSite);
             else BOOKMARKS.add(selectedSite);
             if (client != null) client.setScreen(new CyberArenaScreen(3, selectedSite, ""));
-        }).dimensions(left + 86, top + 62, 106, 16).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
+        }).dimensions(left + 86, top + 62, 78, 16).tooltip(Tooltip.of(Text.literal("Сохранить страницу в закладках"))).build());
         int navHalf = (panelWidth - 36) / 2;
         int navY = Math.max(top + 96, this.height - 50);
         addDrawableChild(ButtonWidget.builder(Text.literal("← НАЗАД"), b -> openAdjacentSite(-1))
