@@ -597,8 +597,8 @@ public final class CyberArenaScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (page == 1) { renderTerminal(context, mouseX, mouseY, delta); return; }
         // Keep the world visible behind the custom workstation; do not use vanilla dim overlay.
-        int panelWidth = Math.max(220, this.width - 16);
-        int panelHeight = Math.max(180, this.height - 16);
+        int panelWidth = Math.max(1, this.width - 16);
+        int panelHeight = Math.max(1, this.height - 16);
         int left = 8;
         int top = 8;
         context.fill(left, top, left + panelWidth, top + panelHeight, 0xEE101923);
