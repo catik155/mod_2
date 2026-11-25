@@ -98,6 +98,8 @@ public final class CyberArenaScreen extends Screen {
     private static int historyCursor = -1;
     private static int completionCursor = 0;
     private static int directoryPage = 0;
+    private static final java.util.Map<String, Integer> filePageBySite = new java.util.HashMap<>();
+    private static final int FILES_PER_PAGE = 3;
     private static boolean voraSelected = false;
     private static boolean automationStatusKnown = false;
     private static boolean automationStatusRequested = false;
@@ -499,10 +501,30 @@ public final class CyberArenaScreen extends Screen {
         int idx = siteIndex(selectedSite);
         addDrawableChild(ButtonWidget.builder(Text.literal("← САЙТ"), b -> openSite(selectedSite))
             .dimensions(left + 14, top + 78, 110, 20).build());
-        for (int i = 0; i < FILE_NAMES[idx].length; i++) {
+        int pageCount = Math.max(1, (FILE_NAMES[idx].length + FILES_PER_PAGE - 1) / FILES_PER_PAGE);
+        int filePage = Math.max(0, Math.min(filePageBySite.getOrDefault(selectedSite, 0), pageCount - 1));
+        filePageBySite.put(selectedSite, filePage);
+        int start = filePage * FILES_PER_PAGE;
+        int end = Math.min(FILE_NAMES[idx].length, start + FILES_PER_PAGE);
+        for (int i = start; i < end; i++) {
             final String file = FILE_NAMES[idx][i];
-            int y = top + 118 + i * 32;
-
+            int y = top + 118 + (i - start) * 32;
+            addDrawableChild(ButtonWidget.builder(Text.literal("READ"), b -> runNex("READ " + selectedSite + " " + file))
+                .dimensions(left + panelWidth - 74, y - 4, 58, 20)
+                .tooltip(Tooltip.of(Text.literal("Прочитать и добавить запись в коллекцию"))).build());
+        }
+        if (pageCount > 1) {
+            int navY = this.height - 50;
+            addDrawableChild(ButtonWidget.builder(Text.literal("← ПРЕД."), b -> {
+                filePageBySite.put(selectedSite, Math.max(0, filePageBySite.getOrDefault(selectedSite, 0) - 1));
+                if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
+            }).dimensions(left + 8, navY, 64, 16).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal((filePage + 1) + "/" + pageCount), b -> {})
+                .dimensions(left + panelWidth / 2 - 30, navY, 60, 16).build());
+            addDrawableChild(ButtonWidget.builder(Text.literal("СЛЕД. →"), b -> {
+                filePageBySite.put(selectedSite, Math.min(pageCount - 1, filePageBySite.getOrDefault(selectedSite, 0) + 1));
+                if (client != null) client.setScreen(new CyberArenaScreen(6, selectedSite, ""));
+            }).dimensions(left + panelWidth - 72, navY, 64, 16).build());
         }
     }
 
@@ -624,8 +646,12 @@ public final class CyberArenaScreen extends Screen {
         if (page == 6) {
             int idx = siteIndex(selectedSite);
             context.drawTextWithShadow(textRenderer, Text.literal("АРХИВ:// " + selectedSite + " / СПИСОК ЗАПИСЕЙ"), left + 14, top + 108, 0xFF70D8FF);
-            for (int i = 0; i < FILE_NAMES[idx].length; i++) {
-                int y = top + 118 + i * 32;
+            int pageCount = Math.max(1, (FILE_NAMES[idx].length + FILES_PER_PAGE - 1) / FILES_PER_PAGE);
+            int filePage = Math.max(0, Math.min(filePageBySite.getOrDefault(selectedSite, 0), pageCount - 1));
+            int start = filePage * FILES_PER_PAGE;
+            int end = Math.min(FILE_NAMES[idx].length, start + FILES_PER_PAGE);
+            for (int i = start; i < end; i++) {
+                int y = top + 118 + (i - start) * 32;
                 context.fill(left + 14, y - 4, left + panelWidth - 14, y + 26, 0xFF172634);
                 context.drawTextWithShadow(textRenderer, Text.literal(FILE_NAMES[idx][i]), left + 16, y + 3, 0xFFBDEBFF);
                 context.drawTextWithShadow(textRenderer, Text.literal("ИГРОВАЯ ЗАПИСЬ / МЕТАДАННЫЕ"), left + 16, y + 12, 0xFF8295A8);
