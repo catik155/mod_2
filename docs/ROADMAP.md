@@ -39,7 +39,8 @@
 - [x] Expand browser directory to 40 fictional sites with dedicated titles, descriptions, content sections, file records and service ports
 - [~] Sites contain filler content: article cards, themed descriptions, catalogs and mini illustrations; file lore now expanded across many site/file combinations, but full unique article bodies and layouts still needed
 - [ ] Add secret/hidden fictional sites that do not appear in the public directory; unlock/access them through in-game discoveries, special routes or game events
-- [x] Add persistent collectible file inventory, value calculation, and sale of files by site/name or ALL (CI-confirmed)\n- [~] Add readable lore and file-type details to virtual records; unique content expanded for selected sites, broad coverage still in progress
+- [x] Add persistent collectible file inventory, value calculation, and sale of files by site/name or ALL (CI-confirmed)
+- [~] Add readable lore and file-type details to virtual records; unique content expanded for selected sites, broad coverage still in progress
 - [ ] Site actions should yield site-themed loot/payloads, contract objectives and upgrade resources
 - [x] Site pages support mouse-wheel scrolling and a long article feed with decorative mini-illustrations; keep improving wheel limits and viewport behavior
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
