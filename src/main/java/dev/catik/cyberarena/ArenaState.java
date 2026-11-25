@@ -982,7 +982,28 @@ public final class ArenaState extends PersistentState {
             int credits = Math.min(d.credits, Math.max(1, d.credits / 4));
             int shards = Math.min(d.dataShards, Math.max(1, d.dataShards / 4));
             d.credits -= credits; a.credits += credits; d.dataShards -= shards; a.dataShards += shards + 1; a.reputation += 2;
-            return "§6ДОБЫЧА РЕЙДА §7| +" + credits + " кредитов, +" + (shards + 1) + " фрагментов данных.";
+            // Persistent virtual files are raid loot, but they never generate passive income.
+            List<String> victimFiles = d.completedContracts.stream().filter(v -> v.startsWith("vfile:")).toList();
+            String stolenFile = "";
+            if (!victimFiles.isEmpty()) {
+                String candidate = victimFiles.get(ThreadLocalRandom.current().nextInt(victimFiles.size()));
+                String[] parts = candidate.substring(6).split("\\|", 3);
+                if (parts.length >= 3) {
+                    String victimPrefix = "vfile:" + parts[0] + "|" + parts[1] + "|";
+                    String ownedPrefix = "vfile:" + parts[0] + "|" + parts[1] + "|";
+                    boolean alreadyOwned = a.completedContracts.stream().anyMatch(v -> v.startsWith(ownedPrefix));
+                    if (!alreadyOwned) {
+                        d.completedContracts.remove(candidate);
+                        a.completedContracts.add(candidate);
+                        stolenFile = parts[1] + " (" + parts[0] + ")";
+                    } else {
+                        // If the attacker already has this file, leave it with the victim rather than duplicating it.
+                        stolenFile = "дубликат у атакующего — файл не перемещён";
+                    }
+                }
+            }
+            String fileText = stolenFile.isBlank() ? " §7| файлов для кражи нет" : " §7| файл: §f" + stolenFile;
+            return "§6ДОБЫЧА РЕЙДА §7| +" + credits + " кредитов, +" + (shards + 1) + " фрагментов данных." + fileText;
         }
         return switch (action.toLowerCase()) {
             case "station" -> {
