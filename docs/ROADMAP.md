@@ -6,6 +6,7 @@
 - [ ] Use Grey Hack/Bitburner inspiration for a deeper sandbox and custom scripting—adapted into safe, fully fictional Minecraft systems
 - [ ] Use EXAPUNKS inspiration for optional puzzle challenges that reward optimization and creativity
 - [ ] Use Cyber Manhunt inspiration for investigation missions, cross-site clues, NPC stories and data verification
+- [x] Review Welcome to the Game III as inspiration for investigation tension, clue verification, false leads and time pressure; keep mechanics abstracted and wholly fictional, without copying its systems wholesale
 - [ ] Keep all systems strictly simulated: no real network, real addresses, OS commands, real data, or actionable real intrusion tooling
 
 ## Core
@@ -22,7 +23,7 @@
 - [x] 30 themed landing-page snippets: markets, recipes, news, routes, sports, archives, social NPC groups and more
 - [x] Fictional service panels and site record index (110 service entries, 90 records)
 - [ ] Give every site a distinct layout module (header, navigation, cards, content sections, footer) rather than the same generic page
-- [x] Add dedicated layouts for City News, Marketplace and Bank; remaining sites still need their own layouts
+- [x] Add dedicated layouts for City News, Marketplace, Bank, Infrastructure, Research Lab and Community Forum; remaining sites still need their own layouts
 - [x] Browser is view-only: no service scan, extraction, or hacking buttons on site pages; all gameplay actions go through NX/FLEX console
 - [x] Browser panel width and tab widths now adapt to available screen width; continue testing small resolutions and vertical overflow
 - [x] Expand the workstation/browser to a near-full-screen layout that uses the available display area
@@ -38,6 +39,7 @@
 - [ ] Browser page navigation links, pagination inside sites, back/forward and saved bookmarks
 - [ ] Add a visual status strip: site risk, player alert, discovered/locked content and contract relevance
 - [ ] Site-to-site clue chains and recurring NPC/organizations
+- [ ] Investigation-inspired gameplay loop: gather clues, cross-check sources, manage rising fictional alert pressure and timed objectives; adapt only broad mechanics from Welcome to the Game III while preserving Cyber Arena's multiplayer arena/economy identity
 - [ ] More varied content generation with deterministic seed and multiplayer consistency
 
 ## Terminal UI (Linux / GNU Readline inspired)
